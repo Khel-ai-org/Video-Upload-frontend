@@ -256,10 +256,7 @@ function goBack() {
        innings:innings.value
       };
 
-    //   if (Object.values(payload).some(v => !v)) {
-    //     alert("All fields are required");
-    //     return;
-    //   }
+    
 
       await fetch(`${API_BASE_URL}/matches`, {
         method: "POST",
@@ -269,7 +266,7 @@ function goBack() {
         },
         body: JSON.stringify({
             "name": `${teamA.value} vs ${teamB.value}`,
-            "inings": innings.value === 'first' ? '1' : innings.value === 'second' ? '2' : null ,
+            "inings": innings.value === 'First' ? '1' : innings.value === 'Second' ? '2' : null ,
             "date" : matchDate.value,
             "tournament_id": JSON.parse(localStorage.getItem("selectedTournament")).id
 

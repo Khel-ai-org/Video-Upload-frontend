@@ -396,6 +396,31 @@
 
 
 
+.video-select-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+#selectVideosBtn , #selectFoldersBtn {
+  padding: 6px 12px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+#selectedCount  , #selectedFolderCount{
+  font-size: 13px;
+  color: #444;
+}
+
+
+
+
+
+
+
+
 
   </style>
 </head>
@@ -419,7 +444,24 @@
     <div class="card">
       <h3>Upload Video</h3>
 
-      <input type="file" id="videoInput" accept="video/*" />
+      <!-- <input type="file" id="videoInput" accept="video/*" /> -->
+       <!-- <button id="selectVideosBtn">Select Videos</button>
+<div id="selectedCount"></div> -->
+<!-- <div class="video-select-container">
+  <button id="selectVideosBtn" class="primary-btn">
+    📁 Select Video
+  </button>
+
+  <div id="selectedCount" class="selected-count">
+    No videos selected
+  </div>
+</div> -->
+<div class="video-select-row">
+  <button id="selectVideosBtn">Select Video
+
+  </button>
+  <span id="selectedCount">No video selected</span>
+</div>
 
 
       <button id="button-submit" onclick="uploadVideo('1')">Upload</button>
@@ -436,7 +478,13 @@
     <div class="card">
       <h3>Upload Folder</h3>
 
-      <input type="file" id="folderInput" webkitdirectory directory />
+      <!-- <input type="file" id="folderInput" webkitdirectory directory /> -->
+       <div class="video-select-row">
+  <button id="selectFoldersBtn">Select Folder
+
+  </button>
+  <span id="selectedFolderCount">No videos selected</span>
+</div>
 
 
       <button id="button-submit-folder" onclick="uploadVideo('2')">Upload</button>
@@ -499,6 +547,8 @@
      let fileTree = null;
 let currentFolder = null;
 let history = [];
+let videofile = [];
+let folderfile = [];
 
 
    function formatTime(isoTime) {
@@ -576,6 +626,38 @@ closeBtn.addEventListener("click", () => {
 function goBack() {
   window.location.href = 'matches.html';
 } 
+
+document.getElementById('selectVideosBtn').onclick = async () => {
+  const paths = await window.electron.selectVideos('single');
+console.log(paths);
+videofile= paths;
+  document.getElementById('selectedCount').innerText =
+    `${paths.length} video(s) selected`;
+
+  // const files = paths.map(p => ({
+  //   path: p,
+  //   name: p.split('/').pop(),
+  //   status: 'queued'
+  // }));
+
+  // console.log(files);
+};
+document.getElementById('selectFoldersBtn').onclick = async () => {
+  const paths = await window.electron.selectVideos('multi');
+console.log(paths);
+folderfile= paths;
+  document.getElementById('selectedFolderCount').innerText =
+    `${paths.length} video(s) selected`;
+
+  // const files = paths.map(p => ({
+  //   path: p,
+  //   name: p.split('/').pop(),
+  //   status: 'queued'
+  // }));
+
+  // console.log(files);
+};
+
 
 const UploadState = {
   IDLE: "idle",
@@ -664,8 +746,8 @@ function renderSessions(data) {
   
       
   const session_Id = localStorage.getItem("session-id");
-   const files =  document.getElementById("videoInput").files;
-      const filed =  document.getElementById("folderInput").files;
+  //  const files =  document.getElementById("videoInput").files;
+      // const filed =  document.getElementById("folderInput").files;
       // console.log(files , filed , files.length);
   // console.log(session_Id);
   
@@ -701,11 +783,17 @@ function onUploadFinished(status, error = null) {
   switch (status) {
     case "completed":
       alert("✅ Upload fully completed");
-      document.getElementById("videoInput").value = "";
-      document.getElementById("folderInput").value = "";
+      videofile = [];
+      folderfile = [];
+      document.getElementById('selectedCount').innerText = 'No video selected';
+      document.getElementById('selectedFolderCount').innerText = 'No videos selected';
+      // document.getElementById("videoInput").value = "";
+      // document.getElementById("folderInput").value = "";
       break;
 
     case "paused":
+      
+     
       // console.log("⏸ Upload paused");
 
       // show resume button
@@ -714,16 +802,24 @@ function onUploadFinished(status, error = null) {
       break;
 
     case "cancelled":
+       videofile = [];
+      folderfile = [];
       alert("❌ Upload cancelled");
-       document.getElementById("videoInput").value = "";
-      document.getElementById("folderInput").value = "";
+      document.getElementById('selectedCount').innerText = 'No video selected';
+      document.getElementById('selectedFolderCount').innerText = 'No videos selected';
+      //  document.getElementById("videoInput").value = "";
+      // document.getElementById("folderInput").value = "";
       break;
 
     case "error":
+       videofile = [];
+      folderfile = [];
       alert("💥 Upload failed");
+      document.getElementById('selectedCount').innerText = 'No video selected';
+      document.getElementById('selectedFolderCount').innerText = 'No videos selected';
       // console.error(error);
-       document.getElementById("videoInput").value = "";
-      document.getElementById("folderInput").value = "";
+      //  document.getElementById("videoInput").value = "";
+      // document.getElementById("folderInput").value = "";
       break;
   }
 
@@ -737,6 +833,7 @@ function pauseUpload() {
 
 
  async function resumeupload(a) {
+  console.log('resuime');
     if(a ==1) {
      document.getElementById("loader").style.display = "block";
       document.getElementById("pause1").classList.remove("hidden");
@@ -748,8 +845,8 @@ function pauseUpload() {
   }
   
 try {
-   const files =  document.getElementById("videoInput").files;
-      const filed =  document.getElementById("folderInput").files;
+  //  const files =  document.getElementById("videoInput").files;
+      // const filed =  document.getElementById("folderInput").files;
   const session_Id = localStorage.getItem("session-id");
       const response = await fetch(`${API_BASE_URL}/dashboard/sessions/${session_Id}/files`, {
         method: "GET",
@@ -759,15 +856,17 @@ try {
         },
        
       })
+      
       // console.log(response);
 
       const datas = await response.json();
-      console.log(datas , filed);
+      console.log(datas );
+
 
       // resumeVideo(datas , files.length == 0 ? files : filed);
       resumeVideo(datas , a );
     } catch(err) {
-      // console.log(err);
+      console.log(err);
     }
 
  }
@@ -1165,9 +1264,11 @@ async function playVideo(s3Key) {
       console.log(data);
      
       console.log(file);
+      
+const buffer = await window.electron.readFile(file.path); //
       const res = await fetch(data.url, {
         method: "PUT",
-        body: file,
+        body: buffer,
         headers: {
           "Content-Type": file.type
         },
@@ -1286,43 +1387,56 @@ async function playVideo(s3Key) {
 
     async function UploadToMultiS3(data, fileId, parts, file , signal) {
       console.log(data, fileId, parts, file);
-      console.log(file);
+      console.log(file , CHUNK_SIZE );
       const uploadPromises = [];
       const etags = [];
       for (let partNumber = 1; partNumber <= parts; partNumber++) {
         const start = (partNumber - 1) * CHUNK_SIZE* 1024 * 1024;
         const end = Math.min(start + CHUNK_SIZE * 1024 * 1024, file.size);
-        const chunk = file.slice(start, end);
-        console.log(chunk);
+        // const chunk = file.slice(start, end);
+        // console.log(chunk);
         console.log(start, end);
         // const urlObj = presignedUrls.find(u => u.partNumber === partNumber);
         // if (!urlObj) {
         //   throw new Error(`No URL found for partNumber ${partNumber}`);
         // }
 
-        const uploadPromise = fetch(data[partNumber - 1].url, {
-          method: 'PUT',
-          body: chunk,
-          headers: {
-            "Content-Type": file.type
-          },
-          signal: signal
-        }).then(response => {
-          if (!response.ok) {
-            throw new Error(`Failed to upload part ${partNumber}`);
-          }
-          console.log(`Uploaded part ${partNumber} (${chunk.size} bytes)`);
+        // const uploadPromise = fetch(data[partNumber - 1].url, {
+        //   method: 'PUT',
+        //   body: chunk,
+        //   headers: {
+        //     "Content-Type": file.type
+        //   },
+        //   signal: signal
+        // }).then(response => {
+        //   if (!response.ok) {
+        //     throw new Error(`Failed to upload part ${partNumber}`);
+        //   }
+        //   console.log(`Uploaded part ${partNumber} (${chunk.size} bytes)`);
 
-          const etag = response.headers.get("ETag");
+        //   const etag = response.headers.get("ETag");
 
-          if (!etag) {
-            throw new Error(`No ETag returned for part ${partNumber}`);
-          }
+        //   if (!etag) {
+        //     throw new Error(`No ETag returned for part ${partNumber}`);
+        //   }
 
-          // Save partNumber and ETag
-          etags.push({ PartNumber: partNumber, ETag: etag, chunkSize: end - start });
-        });
-
+        //   // Save partNumber and ETag
+        //   etags.push({ PartNumber: partNumber, ETag: etag, chunkSize: end - start });
+        // });
+       const uploadPromise = window.electron.uploadChunk({
+      presignedUrl: data[partNumber - 1].url,
+      filePath: file.path,
+      start,
+      end,
+      partNumber,
+      type: file.type
+    }).then(etag => {
+      etags.push({
+        PartNumber: partNumber,
+        ETag: etag,
+        chunkSize: end - start
+      });
+    });
 
 
 
@@ -1343,6 +1457,7 @@ async function playVideo(s3Key) {
         // Here you can trigger the "complete multipart upload" step if needed
       } catch (error) {
         console.error("Upload failed:", error);
+        uploadState = UploadState.ERROR;
         // Handle retry or error reporting here
       }
 
@@ -1456,6 +1571,47 @@ async function playVideo(s3Key) {
   });
 }
 
+async function retryUpload() {
+       const session_Id = localStorage.getItem("session-id");
+       const token = localStorage.getItem("token") || "";
+   console.log(session_Id , token);
+  //     const response = await fetch(`${API_BASE_URL}/dashboard/sessions/${session_Id}/files`, {
+  //       method: "GET",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+  //       },
+       
+  //     })
+  //     // console.log(response);
+
+  //     const datas = await response.json();
+  //     console.log(datas );
+  //     const videos = datas.filter(video => video.status == completed);
+  //  consokle.log(videos);
+
+  //  const input = document.getElementById("folderInput");
+      // const videoInput = document.getElementById("videoInput"); 
+        const file =   folderfile.length !=0 ? folderfile : videofile;
+      // const files = convertFilesForIPC(filterValidVideos(Array.from(file)));
+      if(file.length == 0 ) return; 
+   window.electron.notifyQuit(file , session_Id , token , JSON.parse(localStorage.getItem("selectedMatch")).id );
+   
+}
+
+function convertFilesForIPC(files) {
+  return files.map(file => ([
+    file.lastModified,                 // ✅ Electron file path
+    file.lastModifiedDate,                 // ✅ string
+    file.name,                 // ✅ number
+    file.size, 
+    file.type,                // ✅ string
+    file.webkitRelativePath   // ✅ string                  // ✅ string
+  ]));
+}
+
+ window.addEventListener("beforeunload", onAppExit);
+
     async function uploadVideo(a) {
 
   //     document.querySelectorAll('#controls1, #pause1, #resume1')
@@ -1464,10 +1620,13 @@ async function playVideo(s3Key) {
      if (uploadState === UploadState.UPLOADING) return;
       
       try {
-        console.log(uploadState);
-        const input = document.getElementById("folderInput");
-      const videoInput = document.getElementById("videoInput");
-      const file =  input.files.length !=0 ? input.files : videoInput.files;
+        // console.log(uploadState );
+        // const input = document.getElementById("folderInput");
+      // const videoInput = document.getElementById("videoInput");
+//  console.log(input.files , videoInput.files);
+console.log(folderfile , videofile , folderfile?.length);
+      const file =  folderfile?.length !=0 ? folderfile : videofile;
+      console.log(file);
       if (file.length ==0) {
         alert("Please select a video first");
         return;
@@ -1482,27 +1641,23 @@ async function playVideo(s3Key) {
       uploadState = UploadState.UPLOADING;
        const detail = JSON.parse(localStorage.getItem("selectedMatch"));
        console.log(detail, JSON.parse(localStorage.getItem("selectedMatch")));
-      console.log(file , document.getElementById("folderInput") , document.getElementById("videoInput") );
+      console.log(file  );
        
       if(a == 1)  { 
         console.log('ggggg');
         document.getElementById("loader").style.display = "block";
       document.getElementById("button-submit").style.display = 'none';
-      // document.getElementById("controls1").style.display = "block";
-      // document.getElementById("pause1").style.display = "block";
+      
       document.getElementById("controls1").classList.remove("hidden");
-// document.getElementById("pause1").classList.remove("hidden");
-// document.getElementById("resume1").classList.add("hidden");
+
 
     } else {
-      // document.getElementById("loader").style.display = "none";
+     
      document.getElementById("loaders").style.display = "block";
      document.getElementById("button-submit-folder").style.display = 'none';
-      // document.getElementById("controls2").style.display = "block";
-      // document.getElementById("pause2").style.display = "block";
+      
         document.getElementById("controls2").classList.remove("hidden");
-      // document.getElementById("pause2").classList.remove("hidden");
-// document.getElementById("resume2").classList.add("hidden");
+      
     }
       
       
@@ -1560,7 +1715,7 @@ async function playVideo(s3Key) {
         sessionId: sessionKey,
         relativePath: file.name,
         size: file.size,
-        s3Key: input.files.length !== 0
+        s3Key: folderfile.length !== 0
           ? `matches/${detail.id}/${file.webkitRelativePath}`
           : `matches/${detail.id}/${file.name}`
       }]
@@ -1577,18 +1732,20 @@ async function playVideo(s3Key) {
     multipart(data.files[0].fileId, file, signal)
   );
 }
-
+ console.log('ffffffff');
   await Promise.all(uploadPromises);
- 
+   console.log('ffffffff');
+  // retryUpload();
   console.log('gggggg');
   if (uploadState === UploadState.UPLOADING) {
-    document.getElementById("videoInput").value = "";
-      document.getElementById("folderInput").value = "";
+    // document.getElementById("videoInput").value = "";
+      // document.getElementById("folderInput").value = "";
   uploadState = UploadState.COMPLETED;
 
   onUploadFinished("completed");
 }
 if (uploadState === UploadState.CANCELLED) {
+   console.log('gggggggggg');
   onUploadFinished("cancelled");
   return;
 }
@@ -1596,7 +1753,10 @@ if (uploadState === UploadState.PAUSED) {
   onUploadFinished("paused");
   return;
 }
-      
+if(uploadState === UploadState.ERROR) {
+  onUploadFinished("error", 'error');
+  retryUpload();
+}
       // alert('File uploaded');
 
     //    document.getElementById("loader").style.display = "none";
@@ -1629,13 +1789,35 @@ if (uploadState === UploadState.PAUSED) {
   } catch(err) {
       console.log(err);
   if (err.name === "AbortError") {
+     console.log('gggggggggg');
       if (uploadState === UploadState.PAUSED) {
+         console.log('gggggggggg');
         onUploadFinished("paused");
       } else if (uploadState === UploadState.CANCELLED) {
+        console.log('gggggggggg');
         onUploadFinished("cancelled");
       }
     } else {
+       console.log('gggggggggg');
+          
+      if(a == 1)  { 
+        console.log('ggggg');
+        document.getElementById("loader").style.display = "none";
+      document.getElementById("button-submit").style.display = 'block';
+      
+      document.getElementById("controls1").classList.add("hidden");
+
+
+    } else {
+     
+     document.getElementById("loaders").style.display = "none";
+     document.getElementById("button-submit-folder").style.display = 'block';
+      
+        document.getElementById("controls2").classList.add("hidden");
+      
+    }
       uploadState = UploadState.ERROR;
+      retryUpload();
       onUploadFinished("error", err);
     }
   
@@ -1657,30 +1839,54 @@ if (uploadState === UploadState.PAUSED) {
     return order === "asc" ? timeA - timeB : timeB - timeA;
   });
 }
+  function onAppExit() {
+    // ✅ synchronous only
+    
+    console.log("App / page is exiting");
+    retryUpload();
+      // window.electron.notifyQuit();
+    // alert('back back');
+
+    // save lightweight state
+    // localStorage.setItem(
+    //   "upload_state",
+    //   JSON.stringify({
+    //     queue: uploadQueue,
+    //     ts: Date.now()
+    //   })
+    // );
+
+    // notify main process
+    // if (window.electron?.notifyQuit) {
+    //   window.electron.notifyQuit();
+    // }
+  }
+
 
 
     async function resumeVideo(datas , a ) {
+      console.log(datas , a);
   //     document.querySelectorAll('#controls1, #pause1, #resume1')
   // .forEach(el => el.style.display = '');
       //  if (uploadState === UploadState.UPLOADING) return;
 
        try {
-      const input = document.getElementById("folderInput");
-      const videoInput = document.getElementById("videoInput");
+      // const input = document.getElementById("folderInput");
+      // const videoInput = document.getElementById("videoInput");
       uploadAbortController = new AbortController();
       const signal = uploadAbortController.signal;
       uploadState = UploadState.UPLOADING;
-      const file =  input.files.length !=0 ? input.files : videoInput.files;
+      const file =  folderfile.length !=0 ? folderfile : videofile;
        const detail = JSON.parse(localStorage.getItem("selectedMatch"));
        console.log(detail, JSON.parse(localStorage.getItem("selectedMatch")));
-      console.log(file , document.getElementById("folderInput") , document.getElementById("videoInput") );
+      console.log(file );
         if (file.length ==0) {
         alert("Please select a video first");
         return;
       }
 
-      if(input.files.length !=0)  { 
-        console.log('ggggg');
+      // if(input.files.length !=0)  { 
+        // console.log('ggggg');
         // document.getElementById("loader").style.display = "block";
       // document.getElementById("button-submit").style.display = 'none';
       // document.getElementById("controls1").style.display = "block";
@@ -1689,7 +1895,7 @@ if (uploadState === UploadState.PAUSED) {
 // document.getElementById("pause1").classList.remove("hidden");
 // document.getElementById("resume1").classList.add("hidden");
 
-    } else {
+    // } else {
     //  document.getElementById("loaders").style.display = "block";
     //  document.getElementById("button-submit-folder").style.display = 'none';
       // document.getElementById("controls2").style.display = "block";
@@ -1697,7 +1903,7 @@ if (uploadState === UploadState.PAUSED) {
         // document.getElementById("controls2").classList.remove("hidden");
       // document.getElementById("pause2").classList.remove("hidden");
 // document.getElementById("resume2").classList.add("hidden");
-    }
+    // }
       
       
 
@@ -1779,8 +1985,8 @@ if (uploadState === UploadState.PAUSED) {
   await Promise.all(uploadPromises);
 
   if (uploadState === UploadState.UPLOADING) {
-    document.getElementById("videoInput").value = "";
-      document.getElementById("folderInput").value = "";
+    // document.getElementById("videoInput").value = "";
+      // document.getElementById("folderInput").value = "";
   uploadState = UploadState.COMPLETED;
 
   onUploadFinished("completed");
@@ -1818,6 +2024,21 @@ if(a ==1 ) {
         onUploadFinished("cancelled");
       }
     } else {
+      if(a ==1 ) {
+      console.log('sv');
+     document.getElementById("loader").style.display = "none";
+      document.getElementById("button-submit").style.display = 'block';
+      // document.getElementById("controls1").style.display = "block";
+      // document.getElementById("pause1").style.display = "block";
+      document.getElementById("controls1").classList.add("hidden");
+    } else {
+      console.log('jhhhh');
+       document.getElementById("loaders").style.display = "none";
+      document.getElementById("button-submit-folder").style.display = 'block';
+      // document.getElementById("controls1").style.display = "block";
+      // document.getElementById("pause1").style.display = "block";
+      document.getElementById("controls2").classList.add("hidden");
+    }
       uploadState = UploadState.ERROR;
       onUploadFinished("error", err);
     }

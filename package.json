@@ -18,7 +18,9 @@
   },
   "license": "MIT",
   "dependencies": {
-    "electron-squirrel-startup": "^1.0.1"
+    "axios": "^1.13.2",
+    "electron-squirrel-startup": "^1.0.1",
+    "electron-store": "^11.0.2"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.10.2",
