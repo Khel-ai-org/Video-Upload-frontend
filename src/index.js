@@ -198,6 +198,11 @@ async function startUpload() {
   console.error("Error during upload resumption:", error);  
 }
 }
+
+
+
+
+
 async function MultiSignedUrl(id, fileId, parts, file , signal , token) {
       const arr = Array.from({ length: parts }, (_, i) => i + 1);
       const res = await axios.post(`${API_BASE_URL}/upload/batch-sign`, 
