@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
-  <p id="fileTypeIndicator" style="display:none;"></p>
+  <!-- <p id="fileTypeIndicator" style="display:none;"></p> -->
 
   <style>
     /* body {
@@ -531,6 +531,7 @@ font-size: 14px;
 line-height: 100%;
 letter-spacing: 0%;
 text-align: left;
+cursor: pointer;
 
 /* text-align: center; */
 color: #1F2022;
@@ -562,6 +563,31 @@ color: #458DF9;
   overflow-x: hidden;  
 }
 
+ .hidden {
+  display: none !important;
+}
+
+
+#video-wrapper {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  cursor: grab;
+  z-index: 1000;
+}
+
+#video-wrapper:active {
+  cursor: grabbing;
+}
+
+#videoPlayer {
+  width: 640px;
+  max-width: 90vw;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  background: black;
+}
 
 
 
@@ -851,8 +877,8 @@ align-self: stretch; background: #E5F0FF;">
      <div style="display: flex; flex-direction: row; gap:20px; justify-content: center; align-items: center;">
        <img src="./assets/default_image.jpeg" style="width: 48px; height: 48px; border-radius: 24px;"/>
        <div style="display: flex; flex-direction: column; gap:8px;">
-        <span class="name">Manish Kumar</span>
-        <span class="email">manishkr@khel.ai</span>
+        <span class="name">User</span>
+        <span class="email"></span>
 
        </div>
        <svg class="menu-toggle" xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" fill="none">
@@ -863,7 +889,7 @@ align-self: stretch; background: #E5F0FF;">
     <div class="dropdown-item logout">Logout</div>
   </div>
      <span class="right-title">
-      Uplaoding Speed
+      Uploading Speed
      </span>
      <div class="speed-gauge">
            <svg width="100%" height="140" viewBox="0 0 260 140">
@@ -884,18 +910,19 @@ align-self: stretch; background: #E5F0FF;">
       stroke-width="20"
       stroke-linecap="round"
       stroke-dasharray="346"
-      stroke-dashoffset="120"
+      
+      stroke-dashoffset="346" 
       class="progress-arc"
     />
 
     <!-- Needle -->
-    <g class="needle">
-      <circle cx="130" cy="120" r="6" fill="#4C8DFF"/>
-      <line x1="130" y1="120" x2="130" y2="40"
-            stroke="#4C8DFF"
-            stroke-width="4"
-            stroke-linecap="round"/>
-    </g>
+    <g class="needle" transform="rotate(-90 130 120)">
+  <circle cx="130" cy="120" r="6" fill="#4C8DFF"/>
+  <line x1="130" y1="120" x2="130" y2="40"
+        stroke="#4C8DFF"
+        stroke-width="4"
+        stroke-linecap="round"/>
+</g>
   </svg>
      </div>
     
@@ -945,6 +972,21 @@ border: 1px solid #E5F0FF;">
      </div>
    </div>
 </div>
+<div id="video-wrapper" class="hidden">
+   <button id="closeVideoBtn" style="
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0,0,0,0.6);
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    border-radius: 4px;
+    z-index: 1100;
+  ">×</button>
+  <video id="videoPlayer" controls preload="auto"></video>
+</div>
 
     
 
@@ -961,7 +1003,11 @@ let currentFolder = null;
 let history = [];
 let videofile = [];
 let folderfile = [];
-
+const MAX_PARALLEL_UPLOADS = 6;
+let activeUploads = 0;
+const uploadQueue = [];
+const username = localStorage.getItem('name');
+const email = localStorage.getItem('email');
 let originalTree = null;
 let currentTree = null;
 
@@ -988,6 +1034,26 @@ const folderSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="18
     hour12: true
   });
 }
+
+
+function acquireUploadSlot() {
+  if (activeUploads < MAX_PARALLEL_UPLOADS) {
+    activeUploads++;
+    return Promise.resolve();
+  }
+
+  return new Promise(resolve => uploadQueue.push(resolve));
+}
+
+function releaseUploadSlot() {
+  activeUploads--;
+
+  if (uploadQueue.length > 0) {
+    activeUploads++;
+    uploadQueue.shift()();
+  }
+}
+
 
    function formatSize(bytes) {
   if (!bytes || bytes == 0) return "0 MB";
@@ -1062,6 +1128,14 @@ document.addEventListener("click", () => {
   dropdown.classList.remove("show");
 });
 
+window.addEventListener('DOMContentLoaded', () => {
+  document.querySelector('.name').textContent =
+   username || '—';
+
+  document.querySelector('.email').textContent =
+    email || '';
+});
+
 // Logout action
 document.querySelector(".logout").onclick = () => {
   dropdown.classList.remove("show");
@@ -1075,6 +1149,39 @@ document.querySelector(".logout").onclick = () => {
   //   null
   // );
 };
+const wrapper = document.getElementById("video-wrapper");
+
+let isDragging = false;
+let offsetX = 0;
+let offsetY = 0;
+
+wrapper.addEventListener("mousedown", (e) => {
+  isDragging = true;
+  offsetX = e.clientX - wrapper.offsetLeft;
+  offsetY = e.clientY - wrapper.offsetTop;
+});
+
+document.addEventListener("mousemove", (e) => {
+  if (!isDragging) return;
+
+  wrapper.style.left = `${e.clientX - offsetX}px`;
+  wrapper.style.top = `${e.clientY - offsetY}px`;
+  wrapper.style.transform = "none"; // important
+});
+
+document.addEventListener("mouseup", () => {
+  isDragging = false;
+});
+
+const closeBtn = document.getElementById("closeVideoBtn");
+
+closeBtn.addEventListener("click", () => {
+  const video = document.getElementById("videoPlayer");
+  video.pause();
+  video.currentTime = 0;  // optional: reset video to start
+  wrapper.classList.add("hidden");
+  video.src = ""; // clear src to stop loading/playing
+});
 
     
   function showPage(page) {
@@ -1087,6 +1194,30 @@ document.querySelector(".logout").onclick = () => {
     dashboardLoad();
   }
 }
+
+async function playVideo(s3Key) {
+  const res = await fetch(`${API_BASE_URL}/matches/files/video-url`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" ,
+       "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+    },
+    body: JSON.stringify({ s3Key })
+  });
+
+  const { videoUrl } = await res.json();
+
+  const video = document.getElementById("videoPlayer");
+  video.src = videoUrl;
+  video.load();
+  video.play();
+  video.addEventListener("playing", () => {
+  wrapper.classList.remove("hidden");
+}, { once: true });
+
+  // document.getElementById("videoModal").style.display = "flex";
+}
+
+
 function toggleUploadSection() {
   const icon = document.getElementById("expand-arrow");
 
@@ -1235,10 +1366,11 @@ function renderFileManager(tree) {
     filesWrapper.className = 'files';
 
     files.forEach(file => {
+      console.log(file);
       const fileRow = document.createElement('div');
       fileRow.className = 'row file';
       fileRow.innerHTML = `
-        <span> ${file.relativePath}</span>
+        <span > ${file.relativePath}</span>
         <span>${(file.size / 1024 / 1024).toFixed(1)} MB</span>
         <span style="color: #458DF9 font-family: Plus Jakarta Sans;
 font-weight: 700;
@@ -1854,6 +1986,7 @@ function renderTree(node, container, indent = 0) {
 const state = uploadFileState.files[file.id];
 const percent = state ? state.percent : 0;
 const status = state ? state.status : "Uploading";
+console.log(file);
   // wrapper.innerHTML = `
   //   <div class="row file" style="padding-left:${24 + indent}px">
   //     <span style="display:flex;align-items:center;gap:8px;">
@@ -1873,10 +2006,10 @@ const status = state ? state.status : "Uploading";
   //   </div>
   // `;
   wrapper.innerHTML = `
-  <div class="row file" style="padding-left:${24 + indent}px">
+  <div class="row file" data-s3key="${encodeURIComponent(file.s3Key)} style="padding-left:${24 + indent}px">
     <span style="display:flex;align-items:center;gap:8px;">
       ${fileSVG}
-      <span class="filename">${file.relativePath}</span>
+      <span   class="filename">${file.relativePath}</span>
     </span>
 
     <span
@@ -1900,6 +2033,8 @@ const status = state ? state.status : "Uploading";
 `;
 
   container.appendChild(wrapper);
+   const filenameSpan = wrapper.querySelector('.filename');
+  filenameSpan.addEventListener('click', () => playVideo(file.s3Key));
 });
 
 }
@@ -1927,27 +2062,27 @@ function getStatusColor(status) {
   }
 }
 
-async function playVideo(s3Key) {
-  const res = await fetch(`${API_BASE_URL}/matches/files/video-url`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" ,
-       "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
-    },
-    body: JSON.stringify({ s3Key })
-  });
+// async function playVideo(s3Key) {
+//   const res = await fetch(`${API_BASE_URL}/matches/files/video-url`, {
+//     method: "POST",
+//     headers: { "Content-Type": "application/json" ,
+//        "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+//     },
+//     body: JSON.stringify({ s3Key })
+//   });
 
-  const { videoUrl } = await res.json();
+//   const { videoUrl } = await res.json();
 
-  const video = document.getElementById("videoPlayer");
-  video.src = videoUrl;
-  video.load();
-  video.play();
-  video.addEventListener("playing", () => {
-  wrapper.classList.remove("hidden");
-}, { once: true });
+//   const video = document.getElementById("videoPlayer");
+//   video.src = videoUrl;
+//   video.load();
+//   video.play();
+//   video.addEventListener("playing", () => {
+//   wrapper.classList.remove("hidden");
+// }, { once: true });
 
-  // document.getElementById("videoModal").style.display = "flex";
-}
+//   // document.getElementById("videoModal").style.display = "flex";
+// }
 
 // renderFolders(tree, document.getElementById("folders"));
 
@@ -1983,6 +2118,11 @@ async function playVideo(s3Key) {
     content.appendChild(div);
   }
 }
+
+
+
+
+
 
 
 
@@ -2072,9 +2212,14 @@ async function playVideo(s3Key) {
 
 
 
+
+
+
 function UploadToS3(data, fileId, file, signal) {
+  console.log('called');
   return new Promise(async (resolve, reject) => {
     console.log(file , fileId , data);
+    // await acquireUploadSlot();
     const buffer = await window.electron.readFile(file.path);
     const xhr = new XMLHttpRequest();
     if (signal) {
@@ -2130,6 +2275,7 @@ uploadFileState.lastTime = now;
          const state = uploadFileState.files[fileId];
          if (!state.completed) {
       state.completed = true;
+      //  releaseUploadSlot();
       uploadFileState.completedFiles++;
       document.getElementById('completed-files').textContent = `${uploadFileState.completedFiles} Completed  |  `;
       // updateCompletedUI();
@@ -2151,6 +2297,7 @@ status.style.fontWeight = "700";
 status.style.fontSize = "14px";
 status.style.lineHeight = "1";           // 100%
     }
+    //  releaseUploadSlot();
          console.log(error);
           reject(new Error("Upload failed"));
       }
@@ -2169,6 +2316,7 @@ status.style.lineHeight = "1";           // 100%
       status.style.fontSize = "14px";
       status.style.lineHeight = "1";
     }
+    //  releaseUploadSlot();
   }
   reject(new Error("Network error during upload"));
 };
@@ -2177,10 +2325,13 @@ status.style.lineHeight = "1";           // 100%
 }
 
 
-// function updateFileUI(fileId, percent) {
-//   const el = document.getElementById(`progress-${fileId}`);
-//   if (el) el.style.width = percent + "%";
-// }
+function updateFileUI(fileId, percent) {
+  const el = document.getElementById(`progress-${fileId}`);
+  if (el) el.style.width = percent + "%";
+}
+
+
+
 function updateFileUI(fileId, percent) {
   const wrapper = document.querySelector(`[data-fileid="${fileId}"]`);
   if (!wrapper) return;
@@ -2254,8 +2405,9 @@ status.style.lineHeight = "1";           // 100%
 
 
     async function SingleSignedUrl(id, fileId , file , signal) {
-
+    try {
       const res = await fetch(`${API_BASE_URL}/upload/sign`, {
+      
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -2273,6 +2425,10 @@ status.style.lineHeight = "1";           // 100%
       console.log("Server response:", data);
      await  UploadToS3(data, fileId , file , signal);
      return true;
+    } catch (err) {
+      console.log(err);
+    }
+     
     }
 
 
@@ -2425,6 +2581,7 @@ status.style.lineHeight = "1";           // 100%
 
 
 
+   
 
     async function uploadSession(size , detail , signal) {
       //  console.log(file);
@@ -2573,6 +2730,32 @@ function convertFilesForIPC(files) {
   ]));
 }
 
+function createLimiter(limit) {
+  let active = 0;
+  const queue = [];
+
+  const next = () => {
+    if (active >= limit || queue.length === 0) return;
+    active++;
+
+    const { fn, resolve, reject } = queue.shift();
+    fn()
+      .then(resolve)
+      .catch(reject)
+      .finally(() => {
+        active--;
+        next();
+      });
+  };
+
+  return (fn) =>
+    new Promise((resolve, reject) => {
+      queue.push({ fn, resolve, reject });
+      next();
+    });
+}
+
+
 
 function filterTree(node, query) {
   const q = query.toLowerCase();
@@ -2610,18 +2793,12 @@ function filterTree(node, query) {
 
     async function uploadVideo(a) {
       console.log('upload video called');
-      // e.stopPropagation();
-    
-  //     document.querySelectorAll('#controls1, #pause1, #resume1')
-  // .forEach(el => el.style.display = '');
+     
   
      if (uploadState === UploadState.UPLOADING) return;
       
       try {
-        // console.log(uploadState );
-        // const input = document.getElementById("folderInput");
-      // const videoInput = document.getElementById("videoInput");
-//  console.log(input.files , videoInput.files);
+       
 console.log(folderfile , videofile , folderfile?.length);
       const file =  folderfile?.length !=0 ? folderfile : videofile;
       console.log(file);
@@ -2629,12 +2806,11 @@ console.log(folderfile , videofile , folderfile?.length);
 
       if (file.length ==0) {
         alert("Please select a video first");
-        // window.electron.alert("Please select a video first");
-
+       
         return;
       }
       
-      // file = filterValidVideos(file);
+    
       console.log(file);
       
       
@@ -2646,18 +2822,12 @@ console.log(folderfile , videofile , folderfile?.length);
       console.log(file);
 
        showLoader(a);
-      //  filesListManager()
-      
-      //  document.getElementById("total-folders").textContent = `${folder_count} Folders &nbsp&nbsp|&nbsp&nbsp`;
-      //  document.getElementById("total-files").textContent =  `${file.length} Files`;
+     
        document.getElementById("selected-files").textContent = `${file.length} Selected`;
       if(a == 1)  {
         console.log('ggggg');
         
-        // const icon = document.querySelector(".upload-video-icon");
-        // console.log(icon);
-        // document.getElementById("loader").style.display = "block";
-        //  icon.classList.add("uploading");
+       
          
       document.getElementById("button-submit").style.display = 'none';
       
@@ -2694,32 +2864,80 @@ console.log(folderfile , videofile , folderfile?.length);
       console.log(localStorage.getItem("session-id"));
 
     
-  // const uploadPromises = files.map(async (file) => {
-  //   const res = await fetch(`${API_BASE_URL}/upload/files`, {
-  //     method: "POST",
-  //     headers: { "Content-Type": "application/json" ,
-  //       "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
-  //     },
-  //     body: JSON.stringify({
-  //       files: [{
-  //         sessionId: sessionKey,
-  //         relativePath: file.name,
-  //         size: file.size,
-  //         s3Key: input.files.length !== 0
-  //           ? `matches/${detail.id}/${file.webkitRelativePath}`
-  //           : `matches/${detail.id}/${file.name}`
-  //       }]
-  //     }) ,
-  //     signal
-       
-  //   });
-  //    if (!res.ok) throw new Error("Upload failed");
+  
+    //  const uploadPromises = [];
+//   for (const file of files) {
+//   const res = await fetch(`${API_BASE_URL}/upload/files`, {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//       "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+//     },
+//     body: JSON.stringify({
+//       files: [{
+//         sessionId: sessionKey,
+//         relativePath: file.name,
+//         size: file.size,
+//         s3Key: folderfile.length !== 0
+//           ? `matches/${detail.id}/${file.webkitRelativePath}`
+//           : `matches/${detail.id}/${file.name}`
+//       }]
+//     }),
+//     signal
+//   });
 
-  //   const data = await res.json();
-  //   return multipart(data.files[0].fileId, file , signal); // must return promise
-  // });
-     const uploadPromises = [];
-  for (const file of files) {
+//   if (!res.ok) throw new Error("Upload failed");
+
+//   const data = await res.json();
+
+//   // Start upload immediately (parallel)
+//   uploadPromises.push(
+//     multipart(data.files[0].fileId, file, signal)
+//   );
+// }
+//   const FILE_CONCURRENCY = 6;
+// const limitFile = createLimiter(FILE_CONCURRENCY);
+// for (const file of files) {
+//   // ✅ safe for Electron
+
+
+//   uploadPromises.push(
+//     limitFile(async () => {
+//       const res = await fetch(`${API_BASE_URL}/upload/files`, {
+//         method: "POST",
+//         headers: {
+//           "Content-Type": "application/json",
+//           "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+//         },
+//         body: JSON.stringify({
+//           files: [{
+//             sessionId: sessionKey,
+//             relativePath: file.name,
+//             size: file.size,
+//             s3Key: folderfile.length !== 0
+//               ? `matches/${detail.id}/${file.webkitRelativePath}`
+//               : `matches/${detail.id}/${file.name}`
+//           }]
+//         }),
+//         signal
+//       });
+
+//       if (!res.ok) throw new Error("Upload failed");
+
+//       const data = await res.json();
+
+//       // 👇 your existing multipart logic
+//       return multipart(data.files[0].fileId, file, signal);
+//     })
+//   );
+// }
+
+
+// dashboardLoad();
+//  console.log('ffffffff');
+const fileTasks = [];
+
+for (const file of files) {
   const res = await fetch(`${API_BASE_URL}/upload/files`, {
     method: "POST",
     headers: {
@@ -2743,13 +2961,30 @@ console.log(folderfile , videofile , folderfile?.length);
 
   const data = await res.json();
 
-  // Start upload immediately (parallel)
-  uploadPromises.push(
-    multipart(data.files[0].fileId, file, signal)
-  );
+  fileTasks.push({
+    file,
+    fileId: data.files[0].fileId
+  });
 }
- console.log('ffffffff');
- dashboardLoad();
+await dashboardLoad(); 
+
+
+const FILE_CONCURRENCY = 6;
+const limitFile = createLimiter(FILE_CONCURRENCY);
+
+//  uploadPromises = fileTasks.map(({ file, fileId , signal }) =>
+//   limitFile(() => multipart(fileId, file, signal))
+// );
+// uploadPromises.push(fileTasks.map(({ file, fileId }) =>
+//   limitFile(() => multipart(fileId, file, signal))
+// ));
+const uploadPromises = fileTasks.map(({ file, fileId }) =>
+  limitFile(() => multipart(fileId, file, signal))
+);
+
+
+
+
   await Promise.all(uploadPromises);
   stopLoader(a);
    console.log('ffffffff');
@@ -2773,32 +3008,14 @@ if (uploadState === UploadState.PAUSED) {
 }
 if(uploadState === UploadState.ERROR) {
   onUploadFinished("error", 'error');
-  retryUpload();
+ // retryUpload();
 }
-      // alert('File uploaded');
-
-    //    document.getElementById("loader").style.display = "none";
-    //   document.getElementById("loaders").style.display = "none";
-    //   if(!document.getElementById("resume1").classList.contains("hidden")) {
-    //     console.log('vbb');
-    //     // document.getElementById("button-submit").style.display = "block";
-        
-    //   } 
-    //  if(!document.getElementById("resume2").classList.contains("hidden")) {
-    //   // document.getElementById("button-submit-folder").style.display = "block";
-         
-    //   } 
+     
   console.log(a);
-  // document.getElementById("total-folders").textContent = '0 Folders &nbsp&nbsp|&nbsp&nbsp';
-      //  document.getElementById("total-files").textContent =  '0 Files';
-      //  document.getElementById("selected-files").textContent = `0 Files`;
+ 
     if(a ==1 ) {
       console.log('sv');
-    //  document.getElementById("loader").style.display = "none";
-      // document.getElementById("button-submit").style.display = 'block';
-      // document.getElementById("controls1").style.display = "block";
-      // document.getElementById("pause1").style.display = "block";
-      // document.getElementById("controls1").classList.add("hidden");
+    
         document.getElementById("button-submit").style.display = 'flex';
       
       document.getElementById("videocontainer").style.display = 'none';
@@ -2852,7 +3069,7 @@ if(uploadState === UploadState.ERROR) {
       
     }
       uploadState = UploadState.ERROR;
-      retryUpload();
+      //retryUpload();
       onUploadFinished("error", err);
     }
   
@@ -2930,7 +3147,7 @@ if(uploadState === UploadState.ERROR) {
     // ✅ synchronous only
     
     console.log("App / page is exiting");
-    retryUpload();
+   // retryUpload();
       // window.electron.notifyQuit();
     // alert('back back');
 
@@ -3012,64 +3229,114 @@ if(uploadState === UploadState.ERROR) {
       datas = sortByCreatedAt(datas);
       console.log(datas , files);
     
-  const uploadPromises = datas.map(async (file , index) => {
+  //   const uploadPromises = datas.map(async (file , index) => {
 
-    if(file.status == "completed") {
+  //   if(file.status == "completed") {
+  //     return true;
+  //   }
+
+  //   currentFileIndex +=1;
+    
+  //   console.log(index , file , datas);
+  //   // const res = await fetch(`${API_BASE_URL}/upload/files`, {
+  //   //   method: "POST",
+  //   //   headers: { "Content-Type": "application/json" ,
+  //   //     "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+  //   //   },
+  //   //   body: JSON.stringify({
+  //   //     files: [{
+  //   //       sessionId: sessionKey,
+  //   //       relativePath: files[index].name,
+  //   //       size: files[index].size,
+  //   //       s3Key: input.files.length !== 0
+  //   //         ? `uploads/${files[index].webkitRelativePath}`
+  //   //         : `uploads/${files[index].name}`
+  //   //     }]
+  //   //   }) ,
+  //   //   signal
+       
+  //   // });
+  //   //  if (!res.ok) throw new Error("Upload failed");
+
+  //   // const data = await res.json();
+  //   // return multipart(data.files[0].fileId, files[index] , signal); // must return promise
+  //  console.log(file);
+  //     const res = await fetch(`${API_BASE_URL}/upload/init`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+  //       },
+  //       body: JSON.stringify({
+  //         fileId: file.id,
+  //          type: files[index].type
+  //       }),
+  //       signal: signal
+  //     })
+  //     console.log(res);
+  //     const data = await res.json();
+
+  //      console.log("Server response:", data);
+  //     if (data.totalParts == 1) {
+  //     return  await  SingleSignedUrl(data.uploadId, file.id , files[index] , signal);
+  //     } else {
+  //     return  await  MultiSignedUrl(data.uploadId, file.id, data.totalParts, files[index] , signal);
+  //     }
+  //     // return true; 
+  
+  // });
+
+  // await Promise.all(uploadPromises);
+  const FILE_CONCURRENCY = 6;
+const limitFile = createLimiter(FILE_CONCURRENCY);
+
+  const uploadPromises = datas.map((file, index) =>
+  limitFile(async () => {
+
+    if (file.status === "completed") {
       return true;
     }
 
-    currentFileIndex +=1;
-    
-    console.log(index , file , datas);
-    // const res = await fetch(`${API_BASE_URL}/upload/files`, {
-    //   method: "POST",
-    //   headers: { "Content-Type": "application/json" ,
-    //     "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
-    //   },
-    //   body: JSON.stringify({
-    //     files: [{
-    //       sessionId: sessionKey,
-    //       relativePath: files[index].name,
-    //       size: files[index].size,
-    //       s3Key: input.files.length !== 0
-    //         ? `uploads/${files[index].webkitRelativePath}`
-    //         : `uploads/${files[index].name}`
-    //     }]
-    //   }) ,
-    //   signal
-       
-    // });
-    //  if (!res.ok) throw new Error("Upload failed");
+    const res = await fetch(`${API_BASE_URL}/upload/init`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+      },
+      body: JSON.stringify({
+        fileId: file.id,
+        type: files[index].type
+      }),
+      signal
+    });
 
-    // const data = await res.json();
-    // return multipart(data.files[0].fileId, files[index] , signal); // must return promise
-   console.log(file);
-      const res = await fetch(`${API_BASE_URL}/upload/init`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
-        },
-        body: JSON.stringify({
-          fileId: file.id,
-           type: files[index].type
-        }),
-        signal: signal
-      })
-      console.log(res);
-      const data = await res.json();
+    if (!res.ok) {
+      throw new Error("Resume init failed");
+    }
 
-       console.log("Server response:", data);
-      if (data.totalParts == 1) {
-      return  await  SingleSignedUrl(data.uploadId, file.id , files[index] , signal);
-      } else {
-      return  await  MultiSignedUrl(data.uploadId, file.id, data.totalParts, files[index] , signal);
-      }
-      // return true; 
-  
-  });
+    const data = await res.json();
 
-  await Promise.all(uploadPromises);
+    if (data.totalParts === 1) {
+      return SingleSignedUrl(
+        data.uploadId,
+        file.id,
+        files[index],
+        signal
+      );
+    } else {
+      return MultiSignedUrl(
+        data.uploadId,
+        file.id,
+        data.totalParts,
+        files[index],
+        signal
+      );
+    }
+  })
+);
+await Promise.all(uploadPromises);
+
+
   stopLoader(a);
 
   if (uploadState === UploadState.UPLOADING) {

@@ -236,13 +236,15 @@ Email: ${authForm.email.value}`);
           password: authForm.password.value
         })
       });
-
+      
       const data = await res.json();
+      localStorage.setItem('name' , nameInput.value);
+      localStorage.setItem('email' , authForm.email.value);
       alert("Registered successfully");
       switchMode(); // auto go to login
     }
 
-    if (mode === "login") {
+    if (mode === "login")  {
       const res = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -251,10 +253,16 @@ Email: ${authForm.email.value}`);
           password: authForm.password.value
         })
       });
+//       if(localStorage.getItem('name') != null) {
+//  localStorage.setItem('name' , nameInput.value);
+//       }
+      
+      localStorage.setItem('email' , authForm.email.value);
 
       const data = await res.json();
       if (data.token) {
         localStorage.setItem("token", data.token);
+        
         window.location.href = "tournament.html";
       } else {
            alert("Invalid Credentials");

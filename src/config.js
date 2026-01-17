@@ -1,2 +1,4 @@
-API_BASE_URL = 'http://localhost:5701'
+API_BASE_URL = 'https://video-storage.crik.ai';
 CHUNK_SIZE = 500
+
+
