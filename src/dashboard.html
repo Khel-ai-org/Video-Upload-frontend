@@ -348,6 +348,25 @@ line-height: normal;
   position: relative;
   animation: uploadBounce 1s ease-in-out infinite;
 }
+#viewMatchBtn {
+  padding: 6px 14px;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  background-color: #458DF9;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+#viewMatchBtn.active {
+  /* background-color: #1f2937;     dark slate */
+
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(31, 41, 55, 0.35);
+  transform: translateY(-2px);
+}
 
 .uploading::after {
   content: '';
@@ -551,6 +570,15 @@ color: #458DF9;
 #expand-arrow {
   transition: transform 0.25s ease;
 }
+#match_videos {
+  display:none;
+  margin-top: 5vh;
+  flex-direction: column;
+  gap:20px;
+  flex: 1;               /* take remaining height */
+  overflow-y: auto;    
+  overflow-x: hidden;
+}
 
 #expand-arrow.rotated {
   transform: rotate(180deg);
@@ -627,11 +655,11 @@ color: #458DF9;
     </span>
        </div>
        </div>
-       <div class="search-container">
+       <!-- <div class="search-container">
   <img src="./assets/search-icon.svg"/>
   
   <input type="text" id="searchInput" class="search-input" placeholder="Type to search..." style="border: none; outline: none; flex: 1; font-size: 16px;"/>
-</div>
+</div> -->
       
      </div>
 
@@ -832,9 +860,58 @@ color: #458DF9;
 
 
 
+    
+      <!-- <div style="display: flex; flex-direction: row; justify-content: space-between;">
+        <span class="section-title">Uploaded files</span>
+           <button
+    id="retryAllBtn"
+    style="
+      display: none;
+      padding: 6px 14px;
+      background-color: #E5533D;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    "
+  >
+    Retry All
+  </button>
+      </div> -->
+      
+<div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
+  <span class="section-title">Uploaded files</span>
+
+  <div style="display: flex; gap: 8px;">
+    <button
+      id="viewMatchBtn"
+     
+    >
+      View Match
+    </button>
+
+    <button
+      id="retryAllBtn"
+      style="
+        display: none;
+        padding: 6px 14px;
+        background-color: #E5533D;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+      "
+    >
+      Retry All
+    </button>
+  </div>
+</div>
 
 
-      <span class="section-title">Uploaded files</span>
+
+
      <!-- <div>
  <div class="fm">
   <div class="fm-header">
@@ -871,7 +948,30 @@ align-self: stretch; background: #E5F0FF;">
   <!-- Folders will be injected here -->
   <div id="fileBody"></div>
 
+
+  
+   
+
+
 </div>
+
+<div id ="match_videos">
+
+
+    <div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
+  <span class="section-title">View Match Uploaded files</span>
+
+  
+</div>
+    <div class="row header">
+    <span class="head-title">Name</span>
+    <span class="head-title">File Size</span>
+    <span class="head-title">Status</span>
+  </div>
+
+  <!-- Folders will be injected here -->
+  <div id="fileMatchBody"></div>
+  </div>
    </div>
    <div class="right-panel">
      <div style="display: flex; flex-direction: row; gap:20px; justify-content: center; align-items: center;">
@@ -1004,6 +1104,8 @@ let history = [];
 let videofile = [];
 let folderfile = [];
 const MAX_PARALLEL_UPLOADS = 6;
+let isMatchViewOpen = false;
+let matchDataLoaded = false;
 let activeUploads = 0;
 const uploadQueue = [];
 const username = localStorage.getItem('name');
@@ -1195,6 +1297,112 @@ closeBtn.addEventListener("click", () => {
   }
 }
 
+// async function playVideo(s3Key) {
+//   const res = await fetch(`${API_BASE_URL}/matches/files/video-url`, {
+//     method: "POST",
+//     headers: { "Content-Type": "application/json" ,
+//        "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+//     },
+//     body: JSON.stringify({ s3Key })
+//   });
+
+//   const { videoUrl } = await res.json();
+
+//   const video = document.getElementById("videoPlayer");
+//   video.src = videoUrl;
+//   video.load();
+//   video.play();
+//   video.addEventListener("playing", () => {
+//   wrapper.classList.remove("hidden");
+// }, { once: true });
+
+//   // document.getElementById("videoModal").style.display = "flex";
+// }
+
+// async function playVideo(s3Key) {
+//   const res = await fetch(`${API_BASE_URL}/matches/files/video-url`, {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//       "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+//     },
+//     body: JSON.stringify({ s3Key })
+//   });
+
+//   const { videoUrl, localPath } = await res.json();
+//   // 👆 localPath = absolute file path (needed for VLC)
+
+//   const video = document.getElementById("videoPlayer");
+
+//   video.src = videoUrl;
+//   video.load();
+
+//   try {
+//     await video.play(); // ✅ try HTML playback first
+
+//     video.addEventListener(
+//       "playing",
+//       () => {
+//         wrapper.classList.remove("hidden");
+//       },
+//       { once: true }
+//     );
+
+//   } catch (err) {
+//     console.warn("HTML video failed, opening in VLC", err);
+
+//     // 🔥 Electron-only fallback
+//     if (window.electron?.openInVLC && localPath) {
+//       window.electron.openInVLC(localPath);
+//     } else {
+//       alert("This video cannot be played");
+//     }
+//   }
+// }
+
+
+// async function playVideo(s3Key) {
+//   console.group("▶ playVideo()");
+//   console.log("s3Key:", s3Key);
+
+//   const res = await fetch(`${API_BASE_URL}/matches/files/video-url`, {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//       "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+//     },
+//     body: JSON.stringify({ s3Key })
+//   });
+
+//   const { videoUrl } = await res.json();
+//   console.log("videoUrl:", videoUrl);
+
+//   const video = document.getElementById("videoPlayer");
+//   video.src = videoUrl;
+//   video.load();
+
+//   // ❌ HTML decode failure → VLC
+//   video.onerror = () => {
+//     console.warn("HTML video failed → VLC");
+//     window.electron?.openInVLC(videoUrl);
+//   };
+
+//   // ✅ HTML success
+//   video.onplaying = () => {
+//     console.log("HTML video playing");
+//     if (typeof wrapper !== "undefined") {
+//       wrapper.classList.remove("hidden");
+//     }
+//   };
+
+//   video.play().catch(() => {
+//     // ignore autoplay / gesture issues
+//   });
+
+//   console.groupEnd();
+// }
+
+
 async function playVideo(s3Key) {
   const res = await fetch(`${API_BASE_URL}/matches/files/video-url`, {
     method: "POST",
@@ -1260,20 +1468,82 @@ document.getElementById('expand-arrow').addEventListener('click' , toggleUploadS
 
 const searchInput = document.getElementById("searchInput");
 
-searchInput.addEventListener("input", (e) => {
-  const query = e.target.value.trim();
+// searchInput.addEventListener("input", (e) => {
+//   const query = e.target.value.trim();
 
-  // treeContainer.innerHTML = "";
-   const container = document.getElementById('fileBody');
-   container.innerHTML = '';
+//   // treeContainer.innerHTML = "";
+//    const container = document.getElementById('fileBody');
+//    container.innerHTML = '';
 
-  if (!query) {
-    renderTree(originalTree, container);
-  } else {
-    const filteredTree = filterTree(originalTree, query);
-    renderTree(filteredTree, container);
+//   if (!query) {
+//     renderTree(originalTree, container);
+//   } else {
+//     const filteredTree = filterTree(originalTree, query);
+//     renderTree(filteredTree, container);
+//   }
+// });
+
+ 
+
+
+document.getElementById('viewMatchBtn').onclick = async () => {
+  const matchSection = document.getElementById('match_videos');
+  const btn = document.getElementById('viewMatchBtn');
+
+  // 🔁 TOGGLE OFF
+  if (isMatchViewOpen) {
+    matchSection.style.display = 'none';
+    btn.classList.remove('active');
+    isMatchViewOpen = false;
+    return;
   }
-});
+
+  // 🔁 TOGGLE ON
+  matchSection.style.display = 'flex';
+  btn.classList.add('active');
+  isMatchViewOpen = true;
+
+  // ⛔ Already loaded → don’t fetch again
+  if (matchDataLoaded) return;
+
+  const matchID = JSON.parse(localStorage.getItem('selectedMatch'));
+  if (!matchID) return;
+  //  const detail = JSON.parse(localStorage.getItem("match"));
+
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/matches/${matchID.id}/sync-view`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+        }
+      }
+    );
+
+    const datas = await response.json();
+
+    // const completedata = datas.folders.root.filter(
+    //   item => item.status === 'completed'
+    // );
+    const completeData = Object.values(datas.folders)
+  .flat()
+  .filter(item => item.status === "completed");
+
+    const tree = buildFileTree(completeData);
+  console.log(tree);
+    const body = document.getElementById('fileMatchBody');
+    body.innerHTML = '';
+    renderMatchTree(tree, body);
+
+    matchDataLoaded = true;
+
+  } catch (err) {
+    console.error("Failed to load match files", err);
+  }
+};
 
 
 
@@ -1455,6 +1725,92 @@ function renderSessions(data) {
 
 
 
+
+
+function renderMatchTree(node, container, indent = 0) {
+  // 1️⃣ Render folders
+   
+
+  Object.entries(node.folders || {}).forEach(([folderName, folderNode]) => {
+    const folderRow = document.createElement('div');
+    folderRow.className = 'row folder';
+    folderRow.style.paddingLeft = `${24 + indent}px`;
+
+    folderRow.innerHTML = `
+      <span style="display:flex;align-items:center;gap:8px;">
+        ${folderSVG}
+        <span class="filename">${folderName}</span>
+      </span>
+
+      <span style="font-size:14px;color:#1F2022;">
+        —
+      </span>
+
+      <span class="status"  >
+        Completed
+      </span>
+    `;
+
+    const children = document.createElement('div');
+    children.style.display = 'none';
+
+    folderRow.onclick = () => {
+      children.style.display =
+        children.style.display === 'none' ? 'block' : 'none';
+    };
+
+    container.appendChild(folderRow);
+    container.appendChild(children);
+
+    renderMatchTree(folderNode, children, indent + 24);
+  });
+
+  // 2️⃣ Render files
+  (node.files || []).forEach(file => {
+    const fileRow = document.createElement('div');
+    fileRow.className = 'row file';
+    fileRow.style.paddingLeft = `${24 + indent}px`;
+
+    fileRow.innerHTML = `
+      <span style="display:flex;align-items:center;gap:8px;">
+        ${fileSVG}
+        <span class="filename">${file.file || file.relativePath}</span>
+      </span>
+
+      <span  style="
+    float: right;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 1;
+    letter-spacing: 0;
+    color: #1F2022;
+  ">
+        ${(file.size / 1024 / 1024).toFixed(1)} MB
+      </span>
+
+      <span class="status" style="color:#16a34a;font-weight:500;">
+        Completed
+      </span>
+    `;
+
+    container.appendChild(fileRow);
+
+
+
+     const filenameSpan = fileRow.querySelector('.filename');
+
+  filenameSpan.addEventListener('click', (e) => {
+    e.stopPropagation(); // prevents folder toggle
+    playVideo(file.s3Key); // or file.s3_key / file.path based on backend
+  });
+
+  });
+}
+
+
+
+
 function updateSpeedGauge(speedBytesPerSec) {
   const arc = document.querySelector(".progress-arc");
   const needle = document.querySelector(".needle");
@@ -1612,8 +1968,8 @@ function onUploadFinished(status, error = null) {
       break;
 
     case "error":
-       videofile = [];
-      folderfile = [];
+      //  videofile = [];
+      // folderfile = [];
       alert("💥 Upload failed");
       // document.getElementById('selectedCount').innerText = 'No video selected';
       // document.getElementById('selectedFolderCount').innerText = 'No videos selected';
@@ -1696,6 +2052,7 @@ try {
     // document.getElementById("total-folders").textContent = '0 Folders &nbsp&nbsp|&nbsp&nbsp';
       //  document.getElementById("total-files").textContent =  '0 Files';
        document.getElementById("selected-files").textContent = `0 Selected`;
+        document.getElementById("completed-files").textContent = `0 Completed`;
      if(a ==1 ) {
       // console.log('sv');
     //  document.getElementById("loader").style.display = "none";
@@ -2297,6 +2654,7 @@ status.style.fontWeight = "700";
 status.style.fontSize = "14px";
 status.style.lineHeight = "1";           // 100%
     }
+    uploadState = UploadState.ERROR;
     //  releaseUploadSlot();
          console.log(error);
           reject(new Error("Upload failed"));
@@ -2305,7 +2663,10 @@ status.style.lineHeight = "1";           // 100%
 
     // xhr.onerror = reject;
     xhr.onerror = () => {
+   
   const wrapper = document.querySelector(`[data-fileid="${fileId}"]`);
+   console.log('hhhhhh' , wrapper); 
+  //  uploadState = UploadState.ERROR;
   if (wrapper) {
     const status = wrapper.querySelector(".status");
     if (status) {
@@ -2317,6 +2678,7 @@ status.style.lineHeight = "1";           // 100%
       status.style.lineHeight = "1";
     }
     //  releaseUploadSlot();
+     uploadState = UploadState.ERROR;
   }
   reject(new Error("Network error during upload"));
 };
@@ -2467,7 +2829,11 @@ status.style.lineHeight = "1";           // 100%
 
     }
 
-
+document.getElementById("retryAllBtn").addEventListener("click", () => {
+    document.getElementById("button-submit-folder").style.display = 'none';
+    document.getElementById("foldercontainer").style.display = 'flex';
+  resumeupload("2");
+});
 
 
 
@@ -2824,6 +3190,7 @@ console.log(folderfile , videofile , folderfile?.length);
        showLoader(a);
      
        document.getElementById("selected-files").textContent = `${file.length} Selected`;
+        document.getElementById("completed-files").textContent = `0 Completed`;
       if(a == 1)  {
         console.log('ggggg');
         
@@ -2936,7 +3303,7 @@ console.log(folderfile , videofile , folderfile?.length);
 // dashboardLoad();
 //  console.log('ffffffff');
 const fileTasks = [];
-
+console.log(files);
 for (const file of files) {
   const res = await fetch(`${API_BASE_URL}/upload/files`, {
     method: "POST",
@@ -3008,7 +3375,7 @@ if (uploadState === UploadState.PAUSED) {
 }
 if(uploadState === UploadState.ERROR) {
   onUploadFinished("error", 'error');
- // retryUpload();
+//  retryUpload();
 }
      
   console.log(a);
@@ -3030,6 +3397,7 @@ if(uploadState === UploadState.ERROR) {
     }
   } catch(err) {
       console.log(err);
+      stopLoader(a);
   if (err.name === "AbortError") {
      console.log('gggggggggg');
       if (uploadState === UploadState.PAUSED) {
