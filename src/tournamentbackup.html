@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tournaments – Crik.ai</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Roboto+Condensed:wght@600&family=Public+Sans:wght@400&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --color-text-primary: #1f2022;
+      --color-text-secondary: #83878d;
+      --color-border: #e5f0ff;
+      --color-bg-page: #f5f7fa;
+      --color-bg-card: #ffffff;
+      --color-bg-badge: #f2f4f6;
+      --color-btn-primary: #4b70c3;
+      --color-btn-hover: #3a5aaa;
+      --color-logo: #022775;
+      --color-logo-ai: #00cdff;
+      --font-jakarta: 'Plus Jakarta Sans', sans-serif;
+      --font-public: 'Public Sans', sans-serif;
+      --font-roboto-condensed: 'Roboto Condensed', sans-serif;
+    }
+
+    body {
+      font-family: var(--font-jakarta);
+      background: var(--color-bg-page);
+      color: var(--color-text-primary);
+      min-height: 100vh;
+    }
+
+    /* ── TOP NAV ── */
+    .top-nav {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 68px;
+      background: #fff;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      padding: 0 40px;
+      gap: 5px;
+      z-index: 1000;
+    }
+
+    /* Back arrow */
+    .back-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--color-text-primary);
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .back-btn:hover { background: #f3f4f6; }
+    .back-btn svg { display: block; }
+
+    /* Logo */
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+      text-decoration: none;
+    }
+    .logo-icon {
+      width: 34px;
+      height: 40px;
+      flex-shrink: 0;
+    }
+    /* Cricket-style "C" logo using CSS */
+    .logo-icon-svg { width: 34px; height: 40px; }
+    .logo-text {
+      font-family: var(--font-roboto-condensed);
+      font-weight: 600;
+      font-size: 24px;
+      line-height: 1;
+      color: var(--color-logo);
+    }
+    .logo-text span { color: var(--color-logo-ai); }
+
+    /* Search */
+    .search-bar {
+      flex: 1;
+      margin: 0 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #fff;
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 10px 16px;
+      height: 48px;
+    }
+    .search-bar svg { flex-shrink: 0; color: var(--color-text-secondary); }
+    .search-bar input {
+      border: none;
+      outline: none;
+      font-family: var(--font-public);
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      background: transparent;
+      width: 100%;
+    }
+    .search-bar input::placeholder { color: var(--color-text-secondary); }
+
+    /* Profile */
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    .profile-avatar {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #d1d5db;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 600; font-size: 18px; color: #fff;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .profile-info { display: flex; flex-direction: column; gap: 4px; }
+    .profile-name {
+      font-size: 16px; font-weight: 600;
+      color: var(--color-text-primary);
+      white-space: nowrap;
+      line-height: 1;
+    }
+    .profile-email {
+      font-size: 14px; font-weight: 400;
+      color: var(--color-text-secondary);
+      white-space: nowrap;
+      line-height: 1;
+    }
+    .profile-chevron { color: var(--color-text-secondary); flex-shrink: 0; }
+
+    /* ── PAGE BODY ── */
+    .page-body {
+      margin-top: 68px;
+      padding: 32px 40px 40px;
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .page-title {
+      font-size: 24px;
+      font-weight: 600;
+      line-height: 30px;
+      color: var(--color-text-primary);
+    }
+
+    /* Create button */
+    .create-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--color-btn-primary);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      height: 42px;
+      padding: 0 20px;
+      font-family: var(--font-jakarta);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .create-btn:hover { background: var(--color-btn-hover); }
+    .create-btn svg { flex-shrink: 0; }
+
+    /* ── TOURNAMENT GRID ── */
+    .tournament-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 354px);
+      gap: 24px;
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: 15px;
+      padding: 8px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      cursor: pointer;
+      transition: box-shadow 0.18s, transform 0.18s;
+      width: 354px;
+    }
+    .card:hover {
+      box-shadow: 0 4px 20px rgba(75, 112, 195, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .card-top {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .card-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 239px;
+    }
+
+    .card-name {
+      font-size: 20px;
+      font-weight: 600;
+      line-height: 24px;
+      color: var(--color-text-primary);
+    }
+
+    .card-location {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-location svg { flex-shrink: 0; color: var(--color-text-secondary); }
+    .card-location-text {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-text-secondary);
+    }
+
+    /* Stadium image */
+    .card-image {
+      width: 100%;
+      aspect-ratio: 322 / 91;
+      border-radius: 10px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .card-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 40%;
+      display: block;
+    }
+    /* Fallback gradient */
+    .card-image-fallback {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #0a3d62 0%, #1e8449 50%, #27ae60 100%);
+    }
+
+    /* Category badge */
+    .card-badge {
+      background: var(--color-bg-badge);
+      border-radius: 8px;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      height: 32px;
+    }
+    .card-badge-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      text-transform: capitalize;
+      letter-spacing: 0.6px;
+      line-height: 16px;
+    }
+    .card-badge-value {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--color-text-secondary);
+      text-transform: capitalize;
+      letter-spacing: 0.6px;
+      line-height: 16px;
+    }
+
+    /* ── EMPTY / ERROR ── */
+    .empty-state {
+      grid-column: 1 / -1;
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      padding: 40px 0;
+    }
+
+    /* ── MODAL ── */
+    /* .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: #fff;
+      border-radius: 16px;
+      width: 440px;
+      padding: 28px 28px 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    }
+    .modal-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin-bottom: 20px;
+    }
+    .modal-input {
+      width: 100%;
+      padding: 10px 14px;
+      margin-bottom: 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-family: var(--font-jakarta);
+      font-size: 14px;
+      color: var(--color-text-primary);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .modal-input:focus { border-color: var(--color-btn-primary); }
+    .modal-input::placeholder { color: #b0b7c3; }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .modal-cancel {
+      padding: 9px 18px;
+      background: #f3f4f6;
+      color: var(--color-text-secondary);
+      border: none;
+      border-radius: 8px;
+      font-family: var(--font-jakarta);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .modal-cancel:hover { background: #e5e7eb; }
+    .modal-save {
+      padding: 9px 22px;
+      background: var(--color-btn-primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: var(--font-jakarta);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .modal-save:hover { background: var(--color-btn-hover); } */
+
+
+
+        /* ── MODAL ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: #fff;
+  border: 1px solid #dfe9ff;
+  border-radius: 16px;
+  width: 615px;
+  padding: 31px 45px 40px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+.modal-close {
+  position: absolute;
+  top: 16px; right: 16px;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: #f3f4f6;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: #6b7280;
+}
+.modal-close:hover { background: #e5e7eb; }
+.modal-icon-wrap {
+  width: 68px; height: 68px;
+  border-radius: 34px;
+  background: #dfe9ff;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 8px;
+}
+.modal-icon-wrap img { width: 30px; height: 30px; object-fit: cover; }
+.modal-heading {
+  font-size: 32px; font-weight: 600;
+  color: #000; text-align: center;
+  line-height: normal; margin-bottom: 4px;
+}
+.modal-subheading {
+  font-size: 15px; font-weight: 400;
+  color: #6b7280; text-align: center;
+  line-height: 24px; margin-bottom: 32px;
+}
+.modal-fields {
+  display: flex; flex-direction: column;
+  gap: 24px; width: 525px; margin-bottom: 32px;
+}
+.modal-label {
+  font-size: 20px; font-weight: 600;
+  color: #1e1e1e; line-height: 1.6;
+}
+.modal-input {
+  width: 100%; height: 48px;
+  padding: 0 16px;
+  background: #f5f5f5;
+  border: none; border-radius: 10px;
+  font-family: var(--font-jakarta);
+  font-size: 13px; color: var(--color-text-primary);
+  outline: none;
+}
+.modal-input::placeholder { color: #83878d; }
+.modal-input:focus { background: #eff3ff; }
+.modal-submit {
+  width: 525px; height: 56px;
+  background: #4b70c3; color: #fff;
+  border: none; border-radius: 15px;
+  font-family: var(--font-jakarta);
+  font-size: 20px; font-weight: 600;
+  cursor: pointer;
+}
+.modal-submit:hover { background: #3a5aaa; }
+    /* Responsive fallback */
+    @media (max-width: 1200px) {
+      .tournament-grid { grid-template-columns: repeat(2, 1fr); }
+      .card { width: 100%; }
+    }
+    @media (max-width: 760px) {
+      .tournament-grid { grid-template-columns: 1fr; }
+      .card { width: 100%; }
+      .page-body { padding: 24px 16px; }
+      .top-nav { padding: 0 16px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- TOP NAV -->
+  <nav class="top-nav">
+    <!-- Back -->
+    <button class="back-btn" onclick="goBack()" aria-label="Go back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+    </button>
+
+    <!-- Logo -->
+    <a class="logo-wrap" href="index.html">
+      <!-- Inline SVG cricket-ball/C logo approximation -->
+      <!-- <svg class="logo-icon-svg" viewBox="0 0 34 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="17" cy="20" rx="16" ry="19" fill="#022775"/>
+        <ellipse cx="17" cy="20" rx="10" ry="13" fill="#00cdff"/>
+        <ellipse cx="17" cy="20" rx="6" ry="9" fill="#022775"/>
+        <path d="M5 10 Q17 2 29 10" stroke="#f5c518" stroke-width="2" fill="none"/>
+        <path d="M5 30 Q17 38 29 30" stroke="#f5c518" stroke-width="2" fill="none"/>
+      </svg> -->
+      <img src="./assets/logo.svg"/>
+      <span class="logo-text">Crik.<span>ai</span></span>
+    </a>
+
+    <!-- Search -->
+    <div class="search-bar">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" placeholder="Type anything to search" />
+    </div>
+
+    <!-- Profile -->
+    <div class="profile">
+      <!-- <div class="profile-avatar">
+        <span id="profileInitials">TP</span>
+      </div> -->
+      <img src="./assets/default_image.jpeg" style="width: 48px; height: 48px; border-radius: 24px;"/>
+      <div class="profile-info">
+        <span class="profile-name" id="profileName">Tushar Pal</span>
+        <span class="profile-email" id="profileEmail">tusharpal@khel.ai</span>
+      </div>
+      <svg class="profile-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="6 9 12 15 18 9"/>
+      </svg>
+    </div>
+  </nav>
+
+  <!-- PAGE BODY -->
+  <main class="page-body">
+    <!-- Header row -->
+    <div class="page-header">
+      <h1 class="page-title">Tournaments</h1>
+      <button class="create-btn" id="createBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+        </svg>
+        Create Tournament
+      </button>
+    </div>
+
+    <!-- Grid -->
+    <div class="tournament-grid" id="tournamentGrid">
+      <p class="empty-state">Loading tournaments…</p>
+    </div>
+  </main>
+
+  <!-- CREATE MODAL -->
+  <!-- <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <p class="modal-title">Create Tournament</p>
+      <input class="modal-input" type="text" id="name" placeholder="Tournament Name" />
+      <input class="modal-input" type="text" id="location" placeholder="Location" />
+      <input class="modal-input" type="text" id="category" placeholder="Category" />
+      <div class="modal-actions">
+        <button class="modal-cancel" id="cancelBtn">Cancel</button>
+        <button class="modal-save" id="saveBtn">Save</button>
+      </div>
+    </div>
+  </div> -->
+
+   <div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <button class="modal-close" id="cancelBtn" aria-label="Close">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+    <div class="modal-icon-wrap">
+      <img src="https://www.figma.com/api/mcp/asset/6d5e23b7-f258-412c-b4ec-2b23f5e9692f" alt="cricket bats" />
+    </div>
+    <p class="modal-heading">Create Tournament</p>
+    <p class="modal-subheading">Enter the details below to Start Tournament</p>
+    <div class="modal-fields">
+      <div class="modal-field">
+        <label class="modal-label" for="name">Tournament Name</label>
+        <input class="modal-input" type="text" id="name" placeholder="Enter Tournament Name" />
+      </div>
+      <div class="modal-field">
+        <label class="modal-label" for="location">Location</label>
+        <input class="modal-input" type="text" id="location" placeholder="Enter Location" />
+      </div>
+      <div class="modal-field">
+        <label class="modal-label" for="category">Category</label>
+        <input class="modal-input" type="text" id="category" placeholder="Enter Category of Tournament" />
+      </div>
+    </div>
+    <button class="modal-submit" id="saveBtn">Start a Tournament</button>
+  </div>
+</div>
+  <script src="config.js"></script>
+  <script>
+    // ── STADIUM FALLBACK IMAGE (Unsplash cricket/stadium) ──
+    const STADIUM_IMG = "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=700&q=80";
+     const username = localStorage.getItem('name');
+    const email = localStorage.getItem('email');
+    // ── PIN ICON SVG ──
+    const PIN_SVG = `<svg width="13" height="17" viewBox="0 0 24 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 2C7.58 2 4 5.58 4 10c0 5.25 8 16 8 16s8-10.75 8-16c0-4.42-3.58-8-8-8z" stroke="#83878d" stroke-width="2" fill="none"/>
+      <circle cx="12" cy="10" r="3" stroke="#83878d" stroke-width="2" fill="none"/>
+    </svg>`;
+
+    // ── CARD BUILDER ──
+    function buildCard(t, index) {
+      const name     = t.name     || "Unnamed Tournament";
+      const location = t.location || "N/A";
+      const category = t.category || "N/A";
+      const imgSrc   = t.image    || STADIUM_IMG;
+
+      return `
+        <div class="card" data-index="${index}">
+          <div class="card-top">
+            <div class="card-meta">
+              <p class="card-name">${escapeHtml(name)}</p>
+              <div class="card-location">
+                ${PIN_SVG}
+                <span class="card-location-text">${escapeHtml(location)}</span>
+              </div>
+            </div>
+            <div class="card-image">
+              <img src="${escapeHtml(imgSrc)}"
+                   alt="${escapeHtml(name)} stadium"
+                   onerror="this.parentElement.innerHTML='<div class=card-image-fallback></div>'" />
+            </div>
+          </div>
+          <div class="card-badge">
+            <span class="card-badge-label">Category –</span>
+            <span class="card-badge-value">${escapeHtml(category)}</span>
+          </div>
+        </div>`;
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+
+    // ── LOAD TOURNAMENTS ──
+    const grid = document.getElementById("tournamentGrid");
+
+    async function loadTournaments() {
+      try {
+        const res = await fetch(`${API_BASE_URL}/tournaments`, {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+          }
+        });
+        const data = await res.json();
+
+        if (!data.length) {
+          grid.innerHTML = `<p class="empty-state">No tournaments available.</p>`;
+          return;
+        }
+
+        grid.innerHTML = data.map((t, i) => buildCard(t, i)).join("");
+        document.getElementById("profileName").textContent = username || "User";
+        document.getElementById("profileEmail").textContent = email || "";
+        grid.querySelectorAll(".card").forEach(card => {
+          card.addEventListener("click", () => {
+            const t = data[parseInt(card.dataset.index)];
+            openTournament(t);
+          });
+        });
+      } catch {
+        grid.innerHTML = `<p class="empty-state">Failed to load tournaments.</p>`;
+      }
+    }
+
+    function openTournament(tournament) {
+      localStorage.setItem("selectedTournament", JSON.stringify(tournament));
+      window.location.href = "matches.html";
+    }
+
+    function goBack() {
+      window.location.href = "index.html";
+    }
+
+    // ── MODAL ──
+    const overlay   = document.getElementById("modalOverlay");
+    const createBtn = document.getElementById("createBtn");
+    const cancelBtn = document.getElementById("cancelBtn");
+    const saveBtn   = document.getElementById("saveBtn");
+
+    createBtn.addEventListener("click", () => overlay.classList.add("open"));
+    cancelBtn.addEventListener("click", closeModal);
+    overlay.addEventListener("click", e => { if (e.target === overlay) closeModal(); });
+
+    function closeModal() {
+      overlay.classList.remove("open");
+      ["name","location","category"].forEach(id => {
+        document.getElementById(id).value = "";
+      });
+    }
+
+    saveBtn.addEventListener("click", async () => {
+      const name     = document.getElementById("name").value.trim();
+      const location = document.getElementById("location").value.trim();
+      const category = document.getElementById("category").value.trim();
+
+      if (!name || !location || !category) {
+        alert("All fields are required");
+        return;
+      }
+
+      try {
+        await fetch(`${API_BASE_URL}/tournaments`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+          },
+          body: JSON.stringify({ name, location, category })
+        });
+        closeModal();
+        loadTournaments();
+      } catch {
+        alert("Failed to create tournament");
+      }
+    });
+
+    loadTournaments();
+  </script>
+</body>
+</html>

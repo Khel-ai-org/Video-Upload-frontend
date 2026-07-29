@@ -2,277 +2,219 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Login / Register</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Khel.ai | Authentication</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f0f2f5;
-      display: flex;
-      height: 100vh;
-      justify-content: center;
-      align-items: center;
-      margin: 0;
+    body { font-family: 'Inter', sans-serif; }
+    .auth-card {
+      box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.08);
+      border: 1px solid #E5E7EB;
     }
-    .container {
-      background: white;
-      padding: 2rem 3rem;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      width: 320px;
-    }
-    h2 {
-      text-align: center;
-      margin-bottom: 1rem;
-    }
-    form {
-      display: flex;
-      flex-direction: column;
-    }
-    input {
-      padding: 0.75rem;
-      margin-bottom: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 1rem;
-    }
-    .btn-switch {
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
-      margin-top: 1rem;
-    }
-    button {
-      padding: 0.5rem 1.5rem;
-      font-size: 1rem;
-      border: none;
-      border-radius: 20px;
-      cursor: pointer;
-      background: #007bff;
-      color: white;
-      transition: background 0.3s;
-    }
-    button:hover {
-      background: #0056b3;
-    }
-    button.active {
-      background: #0056b3;
-      font-weight: bold;
-    }
-    .switch-text {
-  text-align: center;
-  margin-top: 1rem;
-  font-size: 0.95rem;
-  color: #555;
-}
-
-.switch-text span {
-  color: #007bff;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.switch-text span:hover {
-  text-decoration: underline;
-}
+    input::placeholder { color: #9CA3AF; font-size: 0.95rem; }
+    /* Error text styling */
+    .error-msg { color: #DC2626; font-size: 0.75rem; margin-top: 0.25rem; display: none; }
   </style>
 </head>
-<body>
+<body class="bg-[#F8FAFC] min-h-screen flex items-center justify-center p-4">
 
-  <div class="container">
-    <h2 id="formTitle">Login</h2>
+  <div class="auth-card bg-white rounded-3xl p-6 w-full max-w-[400px]">
+    <div class="flex flex-col items-center mb-8">
+      <div class="w-14 h-14 bg-[#F1F5F9] rounded-full flex items-center justify-center mb-4">
+        <img src="assets/Logo.png" alt="Khel Logo" class="rounded-full w-10 h-10" />
+      </div>
+      <h1 id="formTitle" class="text-xl font-semibold text-gray-900 text-center">
+        Log In to Khel Association
+      </h1>
+    </div>
 
-    <form id="authForm">
-      <!-- Name field only for Register -->
-      <input type="text" id="name" name="name" placeholder="Name" style="display:none;" />
+    <form id="authForm" class="space-y-4">
+      <div id="nameGroup" class="hidden">
+        <label class="block text-md font-semibold text-gray-800 mb-2">Name</label>
+        <input type="text" id="name" name="name" placeholder="Enter Your Name" 
+          class="w-full bg-[#F3F4F6] border-none rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-xs" />
+        <p id="nameError" class="error-msg">Name is required</p>
+      </div>
 
-      <input type="email" id="email" name="email" placeholder="Email" required />
-      <input type="password" id="password" name="password" placeholder="Password" required />
+      <div>
+        <label id="emailLabel" class="block text-md font-semibold text-gray-800 mb-2">Email</label>
+        <input type="email" id="email" name="email" placeholder="Enter Your Email Address" required 
+          class="w-full bg-[#F3F4F6] border-none rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-xs" />
+        <p id="emailError" class="error-msg">Valid email is required</p>
+      </div>
 
-      <button type="submit" id="submitBtn">Login</button>
+      <div id="assocGroup" class="hidden">
+        <label class="block text-md font-semibold text-gray-800 mb-2">Association Email</label>
+        <input type="email" id="assocEmail" name="assocEmail" placeholder="Enter Association Email" 
+          class="w-full bg-[#F3F4F6] border-none rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+        <p id="assocError" class="error-msg">Valid association email is required</p>
+      </div>
+
+      <div>
+        <label class="block text-md font-semibold text-gray-800 mb-2">Password</label>
+        <div class="relative">
+          <input type="password" id="password" name="password" placeholder="Enter Your Password" required 
+            class="w-full bg-[#F3F4F6] border-none rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all pr-12 text-xs" />
+          <button type="button" id="togglePassword" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+            <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          </button>
+        </div>
+        <p id="passError" class="error-msg">Min 8 chars, 1 uppercase, 1 number, 1 special char</p>
+      </div>
+
+      <div id="forgotPasswordGroup" class="flex justify-end mt-1">
+        <button type="button" onclick="window.location.href='forgot-password.html'" 
+          class="text-sm text-[#4F75C9] font-semibold hover:underline">Forgot Password?</button>
+      </div>
+
+      <button type="submit" id="submitBtn" 
+        class="w-full bg-[#4F75C9] text-white font-semibold text-xl py-3 rounded-2xl hover:bg-[#3E5FA8] transition-colors shadow-md mt-4">
+        Log in
+      </button>
     </form>
 
-    <!-- <div class="btn-switch">
-      <button type="button" id="loginBtn" class="active">Login</button>
-      <button type="button" id="registerBtn">Register</button>
-    </div> -->
-    <p class="switch-text" id="switchText">
-  Don’t have an account?
-  <span id="switchLink">Register</span>
-</p>
+    <p class="text-center mt-6 text-gray-800 text-sm">
+      <span id="footerPrefix">Don’t Have an account?</span>
+      <button id="switchLink" class="text-[#4F75C9] font-bold hover:underline">Register</button>
+    </p>
   </div>
 
-  <!-- <script>
-    const registerBtn = document.getElementById('registerBtn');
-    const loginBtn = document.getElementById('loginBtn');
+  <script src="config.js"></script>
+  <script>
     const formTitle = document.getElementById('formTitle');
     const authForm = document.getElementById('authForm');
-    const nameInput = document.getElementById('name');
+    const nameGroup = document.getElementById('nameGroup');
+    const assocGroup = document.getElementById('assocGroup');
+    const emailLabel = document.getElementById('emailLabel');
+    const passwordInput = document.getElementById('password');
     const submitBtn = document.getElementById('submitBtn');
+    const switchLink = document.getElementById('switchLink');
+    const footerPrefix = document.getElementById('footerPrefix');
+    const eyeIcon = document.getElementById("eyeIcon");
+    const forgotPasswordGroup = document.getElementById('forgotPasswordGroup');
 
-    registerBtn.addEventListener('click', () => {
-      formTitle.textContent = 'Register';
-      submitBtn.textContent = 'Register';
-      nameInput.style.display = 'block';
-      nameInput.required = true;
+    // Error elements
+    const nameError = document.getElementById('nameError');
+    const emailError = document.getElementById('emailError');
+    const assocError = document.getElementById('assocError');
+    const passError = document.getElementById('passError');
 
-      registerBtn.classList.add('active');
-      loginBtn.classList.remove('active');
+    let mode = "login";
+
+    // Helper: Reset errors
+    function resetErrors() {
+      [nameError, emailError, assocError, passError].forEach(el => el.style.display = 'none');
+    }
+
+    // Toggle Password Visibility
+    document.getElementById('togglePassword').addEventListener('click', () => {
+      const isPassword = passwordInput.type === "password";
+      passwordInput.type = isPassword ? "text" : "password";
+      eyeIcon.innerHTML = isPassword 
+        ? `<path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a21.77 21.77 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 5c7 0 11 7 11 7a21.86 21.86 0 0 1-2.16 3.19M1 1l22 22"></path>`
+        : `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>`;
     });
-    
 
-    loginBtn.addEventListener('click',  () => {
-      formTitle.textContent = 'Login';
-      submitBtn.textContent = 'Login';
-      nameInput.style.display = 'none';
-      nameInput.required = false;
-
-      loginBtn.classList.add('active');
-      registerBtn.classList.remove('active');
+    // Switch between Login and Register
+    switchLink.addEventListener('click', () => {
+      resetErrors();
+      if (mode === "login") {
+        mode = "register";
+        formTitle.textContent = "Register with Khel Association";
+        submitBtn.textContent = "Register";
+        emailLabel.textContent = "Your Email";
+        nameGroup.classList.remove('hidden');
+        assocGroup.classList.remove('hidden');
+        forgotPasswordGroup.classList.add('hidden');
+        footerPrefix.textContent = "Already Have an account? ";
+        switchLink.textContent = "Log in";
+      } else {
+        mode = "login";
+        formTitle.textContent = "Log In to Khel Association";
+        submitBtn.textContent = "Log in";
+        emailLabel.textContent = "Email";
+        nameGroup.classList.add('hidden');
+        assocGroup.classList.add('hidden');
+        forgotPasswordGroup.classList.remove('hidden');
+        footerPrefix.textContent = "Don’t Have an account? ";
+        switchLink.textContent = "Register";
+      }
     });
 
-     authForm.addEventListener('submit', async (e) => {
+    // Validation Logic
+    function validateForm(payload) {
+      let isValid = true;
+      resetErrors();
+
+      // Email Regex
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      // Password: 8+ chars, 1 upper, 1 num, 1 special
+      const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+      if (mode === "register") {
+        if (!payload.name) { nameError.style.display = 'block'; isValid = false; }
+        if (!emailRegex.test(payload.email)) { emailError.style.display = 'block'; isValid = false; }
+        if (!emailRegex.test(payload.associationEmail)) { assocError.style.display = 'block'; isValid = false; }
+        if (!passRegex.test(payload.password)) { passError.style.display = 'block'; isValid = false; }
+      } else {
+        // Simple login validation
+        if (!payload.email || !emailRegex.test(payload.email)) { emailError.style.display = 'block'; isValid = false; }
+        if (!payload.password) { passError.style.display = 'block'; isValid = false; }
+      }
+
+      return isValid;
+    }
+
+    // Handle Form Submission
+    authForm.addEventListener("submit", async (e) => {
       e.preventDefault();
+      
+      const payload = {
+        email: authForm.email.value,
+        password: authForm.password.value
+      };
 
-      if (submitBtn.textContent === 'Register') {
-
-       const register = await fetch(`${API_BASE_URL}/auth/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          "name":authForm.name.value,
-    "email":authForm.email.value,
-    "password":authForm.password.value
-        })
-      })
-      console.log(register);
-      const data = await register.json();
-      console.log(data);
-
-
-        alert(`Registering user:
-Name: ${nameInput.value}
-Email: ${authForm.email.value}`);
+      if (mode === "register") {
+        payload.name = document.getElementById('name').value;
+        payload.associationEmail = document.getElementById('assocEmail').value;
       } else {
-        alert(`Logging in user:
-Email: ${authForm.email.value}`);
+        payload.userType = "operator";
       }
 
+      // Check validation
+      if (!validateForm(payload)) return;
 
-      // authForm.reset();
-      if (submitBtn.textContent === 'Login') {
-
-        const login = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-    "email":authForm.email.value,
-    "password":authForm.password.value
-        })
-      })
-      console.log(login);
-      const data = await login.json();
-      console.log(data);
-      if(data.token) {
-        window.location.href = 'tournament.html'
-        console.log('hhhh');
-         localStorage.setItem("token", data.token);
-      }
-        nameInput.style.display = 'none';
-        nameInput.required = false;
-      }
-    });
-
-    // Initialize with Login form visible
-    nameInput.style.display = 'none';
-  </script> -->
- <script>
-  const formTitle = document.getElementById('formTitle');
-  const authForm = document.getElementById('authForm');
-  const nameInput = document.getElementById('name');
-  const submitBtn = document.getElementById('submitBtn');
-  const switchText = document.getElementById('switchText');
-  const switchLink = document.getElementById('switchLink');
-
-  let mode = "login"; // login | register
-
-  function switchMode() {
-    if (mode === "login") {
-      mode = "register";
-      formTitle.textContent = "Register";
-      submitBtn.textContent = "Register";
-      nameInput.style.display = "block";
-      nameInput.required = true;
-      switchText.innerHTML = `Already have an account? <span id="switchLink">Login</span>`;
-    } else {
-      mode = "login";
-      formTitle.textContent = "Login";
-      submitBtn.textContent = "Login";
-      nameInput.style.display = "none";
-      nameInput.required = false;
-      switchText.innerHTML = `Don’t have an account? <span id="switchLink">Register</span>`;
-    }
-
-    // reattach click after DOM update
-    document.getElementById("switchLink").onclick = switchMode;
-  }
-
-  switchLink.onclick = switchMode;
-
-  authForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    if (mode === "register") {
-      const res = await fetch(`${API_BASE_URL}/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: nameInput.value,
-          email: authForm.email.value,
-          password: authForm.password.value
-        })
-      });
-      
-      const data = await res.json();
-      localStorage.setItem('name' , nameInput.value);
-      localStorage.setItem('email' , authForm.email.value);
-      alert("Registered successfully");
-      switchMode(); // auto go to login
-    }
-
-    if (mode === "login")  {
-      const res = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: authForm.email.value,
-          password: authForm.password.value
-        })
-      });
-//       if(localStorage.getItem('name') != null) {
-//  localStorage.setItem('name' , nameInput.value);
-//       }
-      
-      localStorage.setItem('email' , authForm.email.value);
-
-      const data = await res.json();
-      if (data.token) {
-        localStorage.setItem("token", data.token);
+      try {
+        const endpoint = mode === "register" ? "/auth/register" : "/auth/login";
+        const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
         
-        window.location.href = "tournament.html";
-      } else {
-           alert("Invalid Credentials");
-      }
-    }
-  });
-</script>
-
- 
-  <script src="config.js"></script>
-
+        if (res.ok) {
+          if (mode === "register") {
+            localStorage.setItem("pendingEmail", payload.email);
+            window.location.href = "verify.html";
+          } else {
+            localStorage.setItem("token", data.token);
+            localStorage.setItem("userId", data.user.id);
+            localStorage.setItem("userType", data.user.userType);
+            localStorage.setItem("name", data.user.name);
+            localStorage.setItem("email", data.user.email);
+            window.location.href = "ground.html";
+          }
+        } else {
+          if (data.error === "NOT_APPROVED_BY_ASSOCIATION") {
+            alert("Your account is pending. Please get approved by your Association, then you can login.");
+          } else {
+            alert(data.message || "Request failed");
+          }
+        }
+      } catch (err) { alert("Server error"); }
+    });
+  </script>
 </body>
 </html>

@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Matches – Crik.ai</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Roboto+Condensed:wght@600&family=Public+Sans:wght@400&family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400;600&family=Inter:wght@600&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --color-text-primary: #1f2022;
+      --color-text-secondary: #83878d;
+      --color-border: #e5f0ff;
+      --color-bg-page: #f5f7fa;
+      --color-bg-card: #ffffff;
+      --color-btn-primary: #4b70c3;
+      --color-btn-hover: #3a5aaa;
+      --color-logo: #022775;
+      --color-logo-ai: #00cdff;
+      --font-jakarta: 'Plus Jakarta Sans', sans-serif;
+      --font-public: 'Public Sans', sans-serif;
+      --font-roboto: 'Roboto Condensed', sans-serif;
+      --font-bricolage: 'Bricolage Grotesque', sans-serif;
+      --font-inter: 'Inter', sans-serif;
+    }
+
+    body {
+      font-family: var(--font-jakarta);
+      background: var(--color-bg-page);
+      color: var(--color-text-primary);
+      min-height: 100vh;
+    }
+
+    /* ── TOP NAV ── */
+    .top-nav {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 68px;
+      background: #fff;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      padding: 0 40px;
+      gap: 5px;
+      z-index: 1000;
+    }
+
+    .back-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px; height: 40px;
+      border-radius: 8px;
+      background: none; border: none;
+      cursor: pointer;
+      color: var(--color-text-primary);
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .back-btn:hover { background: #f3f4f6; }
+
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+      text-decoration: none;
+    }
+    .logo-wrap img { width: 34px; height: 40px; }
+    .logo-text {
+      font-family: var(--font-roboto);
+      font-weight: 600;
+      font-size: 24px;
+      line-height: 1;
+      color: var(--color-logo);
+    }
+    .logo-text span { color: var(--color-logo-ai); }
+
+    .search-bar {
+      flex: 1;
+      margin: 0 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #fff;
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 10px 16px;
+      height: 48px;
+    }
+    .search-bar svg { flex-shrink: 0; color: var(--color-text-secondary); }
+    .search-bar input {
+      border: none; outline: none;
+      font-family: var(--font-public);
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      background: transparent;
+      width: 100%;
+    }
+    .search-bar input::placeholder { color: var(--color-text-secondary); }
+
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    .profile-avatar {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .profile-info { display: flex; flex-direction: column; gap: 4px; }
+    .profile-name { font-size: 16px; font-weight: 600; color: var(--color-text-primary); white-space: nowrap; line-height: 1; }
+    .profile-email { font-size: 14px; font-weight: 400; color: var(--color-text-secondary); white-space: nowrap; line-height: 1; }
+    .profile-chevron { color: var(--color-text-secondary); flex-shrink: 0; }
+
+    /* ── PAGE ── */
+    .page-body {
+      margin-top: 68px;
+      padding: 32px 40px 40px;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .page-title {
+      font-size: 24px;
+      font-weight: 600;
+      line-height: 30px;
+      color: var(--color-text-primary);
+    }
+
+    .create-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--color-btn-primary);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      height: 42px;
+      padding: 0 20px;
+      font-family: var(--font-jakarta);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .create-btn:hover { background: var(--color-btn-hover); }
+
+    /* ── MATCH GRID ── */
+    .match-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+
+    /* ── MATCH CARD ── */
+    .card {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: 24px;
+      width: 250px;
+      height: 142px;
+      overflow: hidden;
+      position: relative;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: box-shadow 0.18s, transform 0.18s;
+    }
+    .card:hover {
+      box-shadow: 0 4px 20px rgba(75, 112, 195, 0.15);
+      transform: translateY(-2px);
+    }
+
+    /* Date row at top */
+    .card-date {
+      position: absolute;
+      top: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--font-bricolage);
+      font-weight: 500;
+      font-size: 15px;
+      line-height: 20px;
+      color: #121212;
+      white-space: nowrap;
+      text-align: center;
+    }
+
+    /* Teams row */
+    .card-teams {
+      position: absolute;
+      top: 51px;
+      left: 15px;
+      display: flex;
+      align-items: flex-start;
+      gap: 34px;
+    }
+
+    .team {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 65px;
+    }
+    .team-avatar {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      overflow: hidden;
+      background: linear-gradient(135deg, #e63946, #f4d35e);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .team-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .team-name {
+      font-family: var(--font-bricolage);
+      font-weight: 600;
+      font-size: 13px;
+      color: #121212;
+      white-space: nowrap;
+      text-align: center;
+      max-width: 65px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* VS divider */
+    .vs-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding-top: 18px;
+      position: relative;
+      width: 20px;
+      flex-shrink: 0;
+    }
+    .vs-line {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2px;
+      height: 68px;
+      background: #d1d5db;
+    }
+    .vs-v {
+      font-family: var(--font-inter);
+      font-weight: 600;
+      font-size: 17px;
+      color: #121212;
+      line-height: 20px;
+      position: relative;
+      z-index: 1;
+    }
+    .vs-s {
+      font-family: var(--font-inter);
+      font-weight: 600;
+      font-size: 17px;
+      color: #121212;
+      line-height: 20px;
+      position: relative;
+      z-index: 1;
+      margin-left: 11px;
+    }
+
+    /* empty / error */
+    .empty-state {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      padding: 40px 0;
+    }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: #fff;
+      border: 1px solid #dfe9ff;
+      border-radius: 16px;
+      width: 615px;
+      padding: 31px 45px 40px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.12);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 16px; right: 16px;
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: #f3f4f6;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: #6b7280;
+      transition: background 0.15s;
+    }
+    .modal-close:hover { background: #e5e7eb; }
+
+    .modal-icon-wrap {
+      width: 68px; height: 68px;
+      border-radius: 34px;
+      background: #dfe9ff;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 8px;
+      flex-shrink: 0;
+    }
+    .modal-icon-wrap img { width: 30px; height: 30px; object-fit: cover; }
+
+    .modal-heading {
+      font-size: 32px;
+      font-weight: 600;
+      color: #000;
+      text-align: center;
+      line-height: normal;
+      margin-bottom: 4px;
+    }
+    .modal-subheading {
+      font-size: 15px;
+      font-weight: 400;
+      color: #6b7280;
+      text-align: center;
+      line-height: 24px;
+      margin-bottom: 32px;
+    }
+
+    .modal-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      width: 525px;
+      margin-bottom: 32px;
+    }
+    .modal-field { display: flex; flex-direction: column; gap: 0; }
+    .modal-label {
+      font-family: var(--font-jakarta);
+      font-size: 20px;
+      font-weight: 600;
+      color: #1e1e1e;
+      line-height: 1.6;
+    }
+
+    .modal-input,
+    .modal-select {
+      width: 100%;
+      height: 48px;
+      padding: 0 16px;
+      background: #f5f5f5;
+      border: none;
+      border-radius: 10px;
+      font-family: var(--font-jakarta);
+      font-size: 13px;
+      color: var(--color-text-primary);
+      outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+      transition: background 0.15s;
+    }
+    .modal-input::placeholder { color: #83878d; }
+    .modal-input:focus, .modal-select:focus { background: #eff3ff; }
+
+    /* Date input wrapper — calendar icon on right */
+    .modal-date-wrap {
+      position: relative;
+      width: 100%;
+    }
+    .modal-date-wrap .modal-input {
+      padding-right: 44px;
+      color: #83878d;
+    }
+    .modal-date-wrap .modal-input:valid,
+    .modal-date-wrap .modal-input:not([value=""]) { color: var(--color-text-primary); }
+    .modal-date-icon {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: #83878d;
+    }
+
+    /* Select wrapper */
+    .modal-select-wrap {
+      position: relative;
+      width: 100%;
+    }
+    .modal-select-wrap::after {
+      content: '';
+      position: absolute;
+      right: 14px; top: 50%;
+      transform: translateY(-50%);
+      width: 0; height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 6px solid #83878d;
+      pointer-events: none;
+    }
+    .modal-select { color: #83878d; }
+    .modal-select option { color: var(--color-text-primary); }
+
+    .modal-submit {
+      width: 525px;
+      height: 56px;
+      background: #4b70c3;
+      color: #fff;
+      border: none;
+      border-radius: 15px;
+      font-family: var(--font-jakarta);
+      font-size: 20px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .modal-submit:hover { background: var(--color-btn-hover); }
+
+    @media (max-width: 760px) {
+      .page-body { padding: 24px 16px; }
+      .top-nav { padding: 0 16px; }
+      .match-grid { gap: 16px; }
+      .card { width: 100%; }
+      .modal { width: 95vw; padding: 24px 20px 28px; }
+      .modal-fields, .modal-submit { width: 100%; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- TOP NAV -->
+  <nav class="top-nav">
+    <button class="back-btn" onclick="goBack()" aria-label="Go back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </button>
+
+    <a class="logo-wrap" href="index.html">
+      <img src="./assets/logo.svg" alt="Crik.ai logo" />
+      <span class="logo-text">Crik.<span>ai</span></span>
+    </a>
+
+    <div class="search-bar">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" placeholder="Type anything to search" />
+    </div>
+
+    <div class="profile">
+      <div class="profile-avatar">
+        <img src="./assets/default_image.jpeg" alt="Profile" onerror="this.style.display='none'" />
+      </div>
+      <div class="profile-info">
+        <span class="profile-name" id="profileName">User</span>
+        <span class="profile-email" id="profileEmail"></span>
+      </div>
+      <svg class="profile-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="6 9 12 15 18 9"/>
+      </svg>
+    </div>
+  </nav>
+
+  <!-- PAGE -->
+  <main class="page-body">
+    <div class="page-header">
+      <h1 class="page-title">Matches</h1>
+      <button class="create-btn" id="createBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+        </svg>
+        Create New Match
+      </button>
+    </div>
+
+    <div class="match-grid" id="matchGrid">
+      <p class="empty-state">Loading matches…</p>
+    </div>
+  </main>
+
+  <!-- CREATE MATCH MODAL -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+
+      <!-- Close -->
+      <button class="modal-close" id="cancelBtn" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+
+      <!-- Icon -->
+      <div class="modal-icon-wrap">
+        <img src="https://www.figma.com/api/mcp/asset/02c259b9-fb6e-4e76-915b-5266d6cb408b" alt="cricket bats" />
+      </div>
+
+      <p class="modal-heading">Create New Match</p>
+      <p class="modal-subheading">Enter the details below to Start new match</p>
+
+      <div class="modal-fields">
+        <div class="modal-field">
+          <label class="modal-label" for="teamA">Team A</label>
+          <input class="modal-input" type="text" id="teamA" placeholder="Enter Team A Name" />
+        </div>
+        <div class="modal-field">
+          <label class="modal-label" for="teamB">Team B</label>
+          <input class="modal-input" type="text" id="teamB" placeholder="Enter Team B Name" />
+        </div>
+        <div class="modal-field">
+          <label class="modal-label" for="matchDate">Date</label>
+          <div class="modal-date-wrap">
+            <input class="modal-input" type="date" id="matchDate" />
+            <span class="modal-date-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+            </span>
+          </div>
+        </div>
+        <div class="modal-field">
+          <label class="modal-label" for="innings">Inning</label>
+          <div class="modal-select-wrap">
+            <select class="modal-select" id="innings">
+              <option value="" disabled selected>Select Inning</option>
+              <option value="First">First</option>
+              <option value="Second">Second</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <button class="modal-submit" id="saveBtn">Start a Match</button>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script>
+    // Profile
+    document.getElementById("profileName").textContent = localStorage.getItem("name") || "User";
+    document.getElementById("profileEmail").textContent = localStorage.getItem("email") || "";
+
+    // Initials fallback for avatar
+    const avatarImg = document.querySelector(".profile-avatar img");
+    avatarImg.addEventListener("error", () => {
+      const name = localStorage.getItem("name") || "U";
+      avatarImg.parentElement.innerHTML = `<span style="font-size:18px;font-weight:600;color:#fff">${name.charAt(0).toUpperCase()}</span>`;
+      avatarImg.parentElement.style.background = "#4b70c3";
+    });
+
+    // Team avatar color seeds
+    function teamColor(name) {
+      const colors = ["#e63946","#2a9d8f","#e9c46a","#f4a261","#264653","#4b70c3","#8338ec","#fb5607"];
+      let h = 0;
+      for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) & 0xffff;
+      return colors[h % colors.length];
+    }
+
+    function buildCard(m, index) {
+      // Parse "Team A vs Team B" from match name
+      const nameParts = (m.name || "").split(" vs ");
+      const teamA = nameParts[0] || "Team A";
+      const teamB = nameParts[1] || "Team B";
+
+      // Format date
+      let dateStr = "N/A";
+      if (m.date) {
+        try {
+          const d = new Date(m.date);
+          dateStr = `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;
+        } catch { dateStr = m.date; }
+      }
+
+      const colorA = teamColor(teamA);
+      const colorB = teamColor(teamB);
+
+      return `
+        <div class="card" data-index="${index}">
+          <div class="card-date">Date – ${dateStr}</div>
+          <div class="card-teams">
+            <div class="team">
+              <div class="team-avatar" style="background:${colorA}">
+                ${teamA.charAt(0).toUpperCase()}
+              </div>
+              <span class="team-name">${escapeHtml(teamA)}</span>
+            </div>
+
+            <div class="vs-wrap">
+              <div class="vs-line"></div>
+              <span class="vs-v">v</span>
+              <span class="vs-s">s</span>
+            </div>
+
+            <div class="team">
+              <div class="team-avatar" style="background:${colorB}">
+                ${teamB.charAt(0).toUpperCase()}
+              </div>
+              <span class="team-name">${escapeHtml(teamB)}</span>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+    }
+
+    const grid = document.getElementById("matchGrid");
+
+    async function loadMatches() {
+      try {
+        const detail = JSON.parse(localStorage.getItem("selectedTournament"));
+        const res = await fetch(`${API_BASE_URL}/matches/tournament/${detail.id}`, {
+          headers: { "Authorization": `Bearer ${localStorage.getItem("token") || ""}` }
+        });
+        const data = await res.json();
+
+        if (!data.length) {
+          grid.innerHTML = `<p class="empty-state">No matches available.</p>`;
+          return;
+        }
+
+        grid.innerHTML = data.map((m, i) => buildCard(m, i)).join("");
+
+        grid.querySelectorAll(".card").forEach(card => {
+          card.addEventListener("click", () => {
+            openMatch(data[parseInt(card.dataset.index)]);
+          });
+        });
+      } catch {
+        grid.innerHTML = `<p class="empty-state">Failed to load matches.</p>`;
+      }
+    }
+
+    function openMatch(match) {
+      localStorage.setItem("selectedMatch", JSON.stringify(match));
+      window.location.href = "dashboard.html";
+    }
+
+    function goBack() {
+      window.location.href = "tournament.html";
+    }
+
+    // Modal
+    const overlay   = document.getElementById("modalOverlay");
+    const createBtn = document.getElementById("createBtn");
+    const cancelBtn = document.getElementById("cancelBtn");
+    const saveBtn   = document.getElementById("saveBtn");
+
+    createBtn.addEventListener("click", () => overlay.classList.add("open"));
+    cancelBtn.addEventListener("click", closeModal);
+    overlay.addEventListener("click", e => { if (e.target === overlay) closeModal(); });
+
+    function closeModal() {
+      overlay.classList.remove("open");
+      ["teamA","teamB","matchDate","innings"].forEach(id => {
+        document.getElementById(id).value = "";
+      });
+    }
+
+    saveBtn.addEventListener("click", async () => {
+      const teamA    = document.getElementById("teamA").value.trim();
+      const teamB    = document.getElementById("teamB").value.trim();
+      const matchDate = document.getElementById("matchDate").value;
+      const innings  = document.getElementById("innings").value;
+
+      if (!teamA || !teamB || !matchDate || !innings) {
+        alert("All fields are required");
+        return;
+      }
+
+      try {
+        await fetch(`${API_BASE_URL}/matches`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+          },
+          body: JSON.stringify({
+            name: `${teamA} vs ${teamB}`,
+            inings: innings === "First" ? "1" : innings === "Second" ? "2" : null,
+            date: matchDate,
+            tournament_id: JSON.parse(localStorage.getItem("selectedTournament")).id
+          })
+        });
+        closeModal();
+        loadMatches();
+      } catch {
+        alert("Failed to create match");
+      }
+    });
+
+    loadMatches();
+  </script>
+
+</body>
+</html>

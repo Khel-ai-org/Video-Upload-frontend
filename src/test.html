@@ -1,0 +1,4292 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Video Upload</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
+    rel="stylesheet">
+  
+
+  <style>
+   
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      /* overflow: hidden; Prevents accidental scrollbars */
+    }
+
+
+
+
+
+
+
+
+
+    .main-content {
+      display: flex;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .left-panel {
+      width: 78%;
+      /* Corrected percentage */
+      /* background-color: lightblue; */
+      /* min-height: 100vh; */
+      display: flex;
+      flex-direction: column;
+      padding: 40px 54px;
+      gap: 32px;
+      border-right: 1px solid #E5F0FF;
+      box-sizing: border-box;
+      /* This keeps padding INSIDE the 60% */
+    }
+
+    .right-panel {
+      display: flex;
+      flex-direction: column;
+      width: 22%;
+      /* Changed from 60% to 40% */
+      /* background-color: #e0e0e0; Different color to see the split */
+      padding: 40px 24px;
+
+      gap: 32px;
+      box-sizing: border-box;
+      /* This keeps padding INSIDE the 40% */
+    }
+
+    .left-divs {
+      display: flex;
+      flex-direction: row;
+      gap: 23px;
+      /* padding:0; */
+      height: max-content;
+    }
+
+    .search-container {
+      /* Your Layout Styles */
+      display: flex;
+      /* Change width to 100% to fill the parent container */
+      width: 100%;
+
+      /* Use max-width if you want to prevent it from getting TOO huge on wide screens */
+      /* max-width: 840px; */
+
+      padding: 14px 16px;
+      align-items: center;
+      gap: 16px;
+
+      /* Design Styles */
+      border-radius: 12px;
+      border: 1px solid #E5F0FF;
+      background: #FFF;
+      box-sizing: border-box;
+    }
+
+
+
+
+    .boxes-row {
+      display: flex;
+      flex-direction: row;
+      /* Align boxes in a row */
+      gap: 105px;
+      /* The specific gap you requested */
+      width: 100%;
+      /* Fill the 60% panel */
+      /* margin-top: 24px;    Optional spacing from search bar */
+      box-sizing: border-box;
+      margin: 0px 10px 0px 10px;
+    }
+
+    .feature-box {
+      /* Layout Styles */
+      display: flex;
+      flex: 1;
+      /* Key: Makes all boxes equal width and responsive */
+      padding: 16px 16px 16px 32px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+
+      /* Design Styles */
+      border-radius: 12px;
+      border: 1px solid #E5F0FF;
+      background: #FFF;
+      box-sizing: border-box;
+
+      /* Optional: Shadow for a better Electron app look */
+      box-shadow: 0 1.5px 4px rgba(0, 0, 0, 0.02);
+    }
+
+    .head-title {
+      font-family: Plus Jakarta Sans;
+      font-weight: 500;
+      font-style: Medium;
+      font-size: 14px;
+      line-height: 100%;
+      letter-spacing: 0%;
+      color: #59677B;
+    }
+
+    .feature-title {
+      color: #000;
+      text-align: justify;
+      font-family: "Plus Jakarta Sans";
+      font-size: 28px;
+      font-style: normal;
+      font-weight: 700;
+      line-height: normal;
+    }
+
+    .feature-desc {
+      color: #000;
+
+      text-align: justify;
+      font-family: "Plus Jakarta Sans";
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+      letter-spacing: -0.28px;
+    }
+
+
+
+
+    .upload-section {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      /* Space between the text and the boxes */
+      width: 100%;
+      /* margin-top: 10px; */
+    }
+
+    .section-title {
+
+
+      color: #1F2022;
+
+      /* Plus Jakarta Sans/18 Semibold */
+      font-family: "Plus Jakarta Sans";
+      font-size: 18px;
+      font-style: normal;
+      font-weight: 600;
+      line-height: 24p
+    }
+
+    .upload-box-row {
+      display: flex;
+      flex-direction: row;
+      gap: 60px;
+      /* Space between the two boxes */
+      width: 100%;
+    }
+
+    .upload-box {
+      /* Your provided layout styles */
+      display: flex;
+      padding: 32px 0 16px 0;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      flex: 1;
+      /* Makes them fill the row evenly (responsive) */
+      align-self: stretch;
+
+      /* Your provided design styles */
+      border-radius: 8px;
+      border: 2px dashed #458DF9;
+      background: #FCFDFF;
+
+      /* Text inside the box */
+      font-family: "Plus Jakarta Sans", sans-serif;
+      color: #458DF9;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .upload-box:hover {
+      background: #f0f7ff;
+      /* Subtle hover effect for better UX */
+    }
+
+
+    .drag-text {
+      color: #1F2022;
+
+      /* Plus Jakarta Sans/16 Semibold */
+      font-family: "Plus Jakarta Sans";
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 600;
+      line-height: normal;
+    }
+
+    .select-btn {
+      border-radius: 12px;
+      border: 1px solid #E5F0FF;
+      gap: 6px;
+      width: 130px;
+      height: 40px;
+      background: #458DF9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .button-title {
+      color: #FFF;
+
+      /* Plus Jakarta Sans/14 Semibold */
+      font-family: "Plus Jakarta Sans";
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 600;
+      line-height: normal;
+    }
+
+    .name {
+      color: #1F2022;
+      /* Plus Jakarta Sans/16 Semibold */
+      font-family: "Plus Jakarta Sans";
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 600;
+      line-height: normal;
+    }
+
+    .email {
+      color: #83878D;
+      /* Plus Jakarta Sans/14 Regular */
+      font-family: "Plus Jakarta Sans";
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+    }
+
+    .right-title {
+
+      color: #1F2022;
+      /* Plus Jakarta Sans/18 Semibold */
+      font-family: "Plus Jakarta Sans";
+      font-size: 18px;
+      font-style: normal;
+      font-weight: 600;
+      line-height: 24px;
+      /* 133.333% */
+      text-align: center;
+    }
+
+    .speed-gauge {
+      margin-top: 10px;
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .speed-gauge svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .speed {
+      color: #83878D;
+      /* Plus Jakarta Sans/14 Semibold */
+      font-family: "Plus Jakarta Sans";
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 600;
+      line-height: normal;
+    }
+
+    .speed-value {
+      color: #1F2022;
+      /* Plus Jakarta Sans/20 Bold */
+      font-family: "Plus Jakarta Sans";
+      font-size: 20px;
+      font-style: normal;
+      font-weight: 700;
+      line-height: 24px;
+    }
+
+    .speed-unit {
+      color: #5A5E63;
+      /* Plus Jakarta Sans/16 Semibold */
+      font-family: "Plus Jakarta Sans";
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 600;
+      line-height: normal;
+    }
+
+    .active {
+      color: #000;
+
+      text-align: justify;
+      font-family: "Plus Jakarta Sans";
+      font-size: 24px;
+      font-style: normal;
+      font-weight: 600;
+      line-height: normal;
+    }
+
+    .fm-body {
+      padding: 10px;
+    }
+
+    .fm {
+      width: 520px;
+      border: 1px solid #ddd;
+      font-family: system-ui, sans-serif;
+      font-size: 14px;
+    }
+
+    .fm-header {
+      padding: 8px;
+      border-bottom: 1px solid #e5e7eb;
+      background: #f9fafb;
+    }
+
+    .upload-video-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 20px;
+    }
+
+    .upload-folder-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 20px;
+    }
+
+    .uploading {
+      position: relative;
+      animation: uploadBounce 1s ease-in-out infinite;
+    }
+
+    #viewMatchBtn {
+      padding: 6px 14px;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      background-color: #458DF9;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+
+    #viewMatchBtn.active {
+      /* background-color: #1f2937;     dark slate */
+
+      color: #ffffff;
+      box-shadow: 0 4px 10px rgba(31, 41, 55, 0.35);
+      transform: translateY(-2px);
+    }
+
+    .uploading::after {
+      content: '';
+      position: absolute;
+      bottom: -12px;
+      left: 50%;
+      width: 18px;
+      height: 4px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 50%;
+      transform: translateX(-50%);
+      animation: shadowPulse 1s ease-in-out infinite;
+    }
+
+    @keyframes uploadBounce {
+      0% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
+
+      100% {
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes shadowPulse {
+      0% {
+        width: 18px;
+        opacity: 0.3;
+      }
+
+      50% {
+        width: 10px;
+        opacity: 0.15;
+      }
+
+      100% {
+        width: 18px;
+        opacity: 0.3;
+      }
+    }
+
+    .files-text {
+      color: #59677B;
+
+      font-family: "Plus Jakarta Sans";
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 500;
+      line-height: normal;
+    }
+
+    .file-manager {
+      display: flex;
+      /* 👈 REQUIRED */
+      flex-direction: column;
+      border: 1px solid #E5F0FF;
+      border-radius: 12px;
+      /* min-height: 00px;    */
+      max-height: 80vh;
+      width: 100%;
+      overflow: hidden;
+      font-family: system-ui;
+      overflow-x: hidden;
+      overflow-y: hidden;
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      padding: 12px 24px;
+    }
+
+    .row span {
+      flex: 1;
+    }
+
+    .row span:nth-child(2) {
+      flex: 0.7;
+      text-align: left;
+    }
+
+    .row span:nth-child(3) {
+      flex: 0.7;
+      text-align: center;
+    }
+
+    .header {
+      background: #E5F0FF;
+      font-weight: 600;
+      width: 100%;
+      flex-shrink: 0;
+    }
+
+    .folder {
+      cursor: pointer;
+      background: #fff;
+      border-top: 1px solid #f1f5f9;
+    }
+
+    .folder:hover {
+      background: #f8fafc;
+    }
+
+    .files {
+      display: none;
+      flex-direction: column;
+    }
+
+    .file {
+      padding-left: 48px;
+      /* 👈 Finder indentation */
+      background: #fcfcfd;
+      border-top: 1px solid #f1f5f9;
+    }
+
+
+    .global-progress {
+      height: 6px;
+      background: #e5e7eb;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    #overall-progress {
+      height: 100%;
+      width: 0%;
+      background: #22c55e;
+      transition: width 0.15s linear;
+    }
+
+    .progress-row {
+      padding: 0 24px 8px 24px;
+    }
+
+    .progress-line {
+      width: 100%;
+      height: 4px;
+      background: #E6EAF2;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(269.97deg, #2AA430 7.68%, #6BCB70 100%);
+
+      transition: width 0.2s linear;
+    }
+
+    .file-name {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+
+
+    .dropdown {
+      position: absolute;
+      top: 70px;
+      right: 25px;
+      width: 15%;
+      height: 40px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
+      display: none;
+      overflow: hidden;
+      z-index: 10;
+    }
+
+    .dropdown.show {
+      display: block;
+    }
+
+    .dropdown-item {
+      padding: 12px 16px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .dropdown-item:hover {
+      background: #f4f6f9;
+    }
+
+    .menu-toggle {
+      cursor: pointer;
+    }
+
+    .dropdown-item.logout {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      /* gap: 10px; */
+      color: #333;
+      font-size: 17px;
+      font-weight: 500;
+    }
+
+    .filename {
+      font-family: Plus Jakarta Sans;
+      font-weight: 400;
+      font-style: Regular;
+      font-size: 14px;
+      line-height: 100%;
+      letter-spacing: 0%;
+      text-align: left;
+      cursor: pointer;
+
+      /* text-align: center; */
+      color: #1F2022;
+      max-width: 250px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: inline-block;
+    }
+
+    .status {
+      font-family: Plus Jakarta Sans;
+      font-weight: 700;
+      font-style: Bold;
+      font-size: 14px;
+      line-height: 100%;
+      letter-spacing: 0%;
+      color: #458DF9;
+    }
+
+    .download-col {
+      flex: 0 0 80px;
+      text-align: center;
+    }
+
+    .download-btn {
+      display: inline-block;
+      padding: 4px 8px;
+      border: none;
+      background: #458DF9;
+      border-radius: 4px;
+      color: white;
+      text-decoration: none;
+      font-size: 12px;
+      transition: background 0.2s;
+    }
+
+    .download-btn:hover {
+      background: #1f5bb5;
+    }
+
+    .download-btn svg {
+      fill: white;
+      width: 16px;
+      height: 16px;
+      vertical-align: middle;
+    }
+
+
+    #expand-arrow {
+      transition: transform 0.25s ease;
+    }
+
+    #match_videos {
+      display: none;
+      margin-top: 5vh;
+      flex-direction: column;
+      gap: 20px;
+      flex: 1;
+      /* take remaining height */
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    #expand-arrow.rotated {
+      transform: rotate(180deg);
+
+    }
+
+    #fileBody {
+      flex: 1;
+      /* take remaining height */
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+
+    #video-wrapper {
+      position: fixed;
+      top: 60px;
+      left: 180px;
+      width: 1200px;
+      height: 700px;
+      background: rgba(0, 0, 0, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    #video-wrapper.hidden {
+      display: none;
+    }
+
+    #videoPlayer {
+      width: 900px;
+      height: 500px;
+      max-width: 90%;
+      max-height: 80vh;
+      border-radius: 12px;
+      background: black;
+    }
+  </style>
+</head>
+
+<body>
+  <div>
+    <!-- <div class="top-bar">
+  <button id="backBtn" class="back-btn" onclick="goBack()">
+    <span class="arrow"></span>
+  Back
+  </button>
+</div> -->
+    <div class="main-content">
+      <div class="left-panel">
+        <div class="left-divs">
+          <div style="display: flex; flex-direction: row;  align-items: center; ">
+            <img src="./assets/back-arrow.svg" onclick="goBack()" />
+            <div style="display: flex; flex-direction: row; gap:16px; align-items: center; justify-content: center;">
+
+              <img src="./assets/logo.svg" />
+              <span style="font-size:24px; font-weight: 600; line-height: 20px; font-family: Roboto Condensed;">
+                <span style="color: #022775;">Crik</span><span style="color: #00CDFF;">.ai</span>
+              </span>
+            </div>
+          </div>
+          <!-- <div class="search-container">
+  <img src="./assets/search-icon.svg"/>
+  
+  <input type="text" id="searchInput" class="search-input" placeholder="Type to search..." style="border: none; outline: none; flex: 1; font-size: 16px;"/>
+</div> -->
+
+        </div>
+
+
+
+
+        <!-- <div class="boxes-row">
+  <div class="feature-box">
+    <div style="width:48px; height:48px; border-radius: 20px;">
+    <img src="./assets/folder.svg"/>
+    </div>
+    <span class="feature-title">Shared Files</span>
+    <div style="display: flex; flex-direction: row;">
+    <span id="total-folders" class="feature-desc">
+      0 Folders &nbsp;&nbsp;|
+    </span>
+     <span id="total-files" class="feature-desc">
+    &nbsp;&nbsp; 0 Files
+    </span>
+    </div>
+   
+  </div>
+
+  <div class="feature-box">
+    <div style="width:48px; height:48px; border-radius: 20px;">
+    <img src="./assets/folder.svg"/>
+    </div>
+    <span class="feature-title">Shared Files</span>
+    <span class="feature-desc">
+      22 Folders  |  120 Files
+    </span>
+  </div>
+
+  <div class="feature-box">
+    <div style="width:48px; height:48px; border-radius: 20px;">
+    <img src="./assets/folder.svg"/>
+    </div>
+   <span class="feature-title">Shared Files</span>
+    <span class="feature-desc">
+      22 Folders  |  120 Files
+    </span>
+  </div>
+</div> -->
+
+
+
+
+
+
+
+
+
+        <div id="upload-sections" class="upload-section">
+          <div style="display: flex; flex-direction: row;  gap:5px ">
+            <span class="section-title">Upload files
+
+            </span>
+            <svg id="expand-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              xmlns="http://www.w3.org/2000/svg">
+              <path d="M6 9L12 15L18 9" stroke="#83878D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                transform="translate(0 0)" />
+            </svg>
+          </div>
+
+
+          <div id="upload-parts" class="upload-box-row" style="display:flex;">
+            <div id="selectVideosBtn" class="upload-box">
+              <div id="video-icon" class="upload-video-icon">
+                <img src="./assets/icon.svg" />
+              </div>
+
+
+              <div id="video-loader" style="display: flex; flex-direction: row;">
+                <span class="drag-text">Drag and drop Videos, or &nbsp;&nbsp; </span>
+                <span class="drag-text" style="color:#458DF9;">
+                  Browse
+                </span>
+
+              </div>
+              <span id="video-uploading-text" class="drag-text" style="display: none;"> Uploading...</span>
+              <div id="videocontainer" style="display: none; flex-direction: row; gap:24px;">
+                <button id="video-pause" onclick="event.stopPropagation(); pauseupload(1)" class="select-btn">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="12" viewBox="0 0 13 12" fill="none">
+                    <path
+                      d="M0 11.3513V0.651284C0 0.466689 0.0608496 0.311992 0.182549 0.187195C0.304248 0.0623985 0.454064 0 0.631997 0C0.809929 0 0.959326 0.0623985 1.08019 0.187195C1.20105 0.311992 1.26106 0.466255 1.26022 0.649984V11.35C1.26022 11.5346 1.19979 11.6893 1.07893 11.8141C0.958067 11.938 0.808251 12 0.629479 12C0.450707 12 0.301311 11.938 0.18129 11.8141C0.0612694 11.6902 0.00125887 11.5355 0.00125887 11.35M5.79498 11.0549C5.4559 11.2655 5.11557 11.2664 4.77397 11.0575C4.43237 10.8478 4.26157 10.5427 4.26157 10.1423V1.85895C4.26157 1.45856 4.43237 1.1535 4.77397 0.943776C5.11557 0.735781 5.45548 0.736649 5.79372 0.946377L12.5166 5.09587C12.8389 5.30907 13 5.61153 13 6.00325C13 6.39497 12.8384 6.6957 12.5153 6.90543L5.79498 11.0549Z"
+                      fill="white" />
+                  </svg>
+                  <span class="button-title">
+                    Pause
+                  </span>
+                </button>
+                <button id="video-resume" onclick="event.stopPropagation(); resumeupload(1)" class="select-btn"
+                  style="display: none;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="14" viewBox="0 0 12 14" fill="none">
+                    <path
+                      d="M10 14C9.45 14 8.97933 13.8043 8.588 13.413C8.19667 13.0217 8.00067 12.5507 8 12V2C8 1.45 8.196 0.979335 8.588 0.588001C8.98 0.196668 9.45067 0.000668362 10 1.69492e-06C10.5493 -0.000664972 11.0203 0.195335 11.413 0.588001C11.8057 0.980668 12.0013 1.45133 12 2V12C12 12.55 11.8043 13.021 11.413 13.413C11.0217 13.805 10.5507 14.0007 10 14ZM2 14C1.45 14 0.979333 13.8043 0.588 13.413C0.196666 13.0217 0.000666667 12.5507 0 12V2C0 1.45 0.196 0.979335 0.588 0.588001C0.98 0.196668 1.45067 0.000668362 2 1.69492e-06C2.54933 -0.000664972 3.02033 0.195335 3.413 0.588001C3.80567 0.980668 4.00133 1.45133 4 2V12C4 12.55 3.80433 13.021 3.413 13.413C3.02167 13.805 2.55067 14.0007 2 14Z"
+                      fill="white" />
+                  </svg>
+                  <span class="button-title">
+                    Resume
+                  </span>
+                </button>
+                <button onclick="event.stopPropagation(); cancelupload(1)" class="select-btn">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M20 6.91L17.09 4L12 9.09L6.91 4L4 6.91L9.09 12L4 17.09L6.91 20L12 14.91L17.09 20L20 17.09L14.91 12L20 6.91Z"
+                      fill="white" />
+                  </svg>
+                  <span class="button-title">
+                    Cancel
+                  </span>
+                </button>
+
+              </div>
+              <div id="videocontainer" style="display: flex; flex-direction: row; gap:24px;">
+                <button id="button-submit" onclick="event.stopPropagation(); uploadVideo('1')" class="select-btn">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 16V4M12 4L7 9M12 4L17 9" stroke="white" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round" />
+                    <path d="M4 16V20H20V16" stroke="white" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round" />
+                  </svg>
+                  <span class="button-title">
+                    Upload
+                  </span>
+                </button>
+
+
+              </div>
+
+            </div>
+
+
+
+
+            <div id="selectFoldersBtn" class="upload-box">
+              <div class="upload-folder-icon">
+                <img src="./assets/icon.svg" />
+              </div>
+              <div id="folder-loader" style="display: flex; flex-direction: row;">
+                <span class="drag-text">Drag and drop Folders, or &nbsp;&nbsp;</span>
+                <span class="drag-text" style="color:#458DF9;">
+                  Browse
+                </span>
+              </div>
+              <span id="folder-uploading-text" class="drag-text" style="display: none;"> Uploading...</span>
+              <div id="foldercontainer" style="display: none; flex-direction: row; gap:24px;">
+                <button id="folder-resume" onclick="event.stopPropagation(); resumeupload(2)" class="select-btn"
+                  style="display: none;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="14" viewBox="0 0 12 14" fill="none">
+                    <path
+                      d="M10 14C9.45 14 8.97933 13.8043 8.588 13.413C8.19667 13.0217 8.00067 12.5507 8 12V2C8 1.45 8.196 0.979335 8.588 0.588001C8.98 0.196668 9.45067 0.000668362 10 1.69492e-06C10.5493 -0.000664972 11.0203 0.195335 11.413 0.588001C11.8057 0.980668 12.0013 1.45133 12 2V12C12 12.55 11.8043 13.021 11.413 13.413C11.0217 13.805 10.5507 14.0007 10 14ZM2 14C1.45 14 0.979333 13.8043 0.588 13.413C0.196666 13.0217 0.000666667 12.5507 0 12V2C0 1.45 0.196 0.979335 0.588 0.588001C0.98 0.196668 1.45067 0.000668362 2 1.69492e-06C2.54933 -0.000664972 3.02033 0.195335 3.413 0.588001C3.80567 0.980668 4.00133 1.45133 4 2V12C4 12.55 3.80433 13.021 3.413 13.413C3.02167 13.805 2.55067 14.0007 2 14Z"
+                      fill="white" />
+                  </svg>
+                  <span class="button-title">
+                    Resume
+                  </span>
+                </button>
+                <button id="folder-pause" onclick="event.stopPropagation(); pauseupload(2)" class="select-btn">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="12" viewBox="0 0 13 12" fill="none">
+                    <path
+                      d="M0 11.3513V0.651284C0 0.466689 0.0608496 0.311992 0.182549 0.187195C0.304248 0.0623985 0.454064 0 0.631997 0C0.809929 0 0.959326 0.0623985 1.08019 0.187195C1.20105 0.311992 1.26106 0.466255 1.26022 0.649984V11.35C1.26022 11.5346 1.19979 11.6893 1.07893 11.8141C0.958067 11.938 0.808251 12 0.629479 12C0.450707 12 0.301311 11.938 0.18129 11.8141C0.0612694 11.6902 0.00125887 11.5355 0.00125887 11.35M5.79498 11.0549C5.4559 11.2655 5.11557 11.2664 4.77397 11.0575C4.43237 10.8478 4.26157 10.5427 4.26157 10.1423V1.85895C4.26157 1.45856 4.43237 1.1535 4.77397 0.943776C5.11557 0.735781 5.45548 0.736649 5.79372 0.946377L12.5166 5.09587C12.8389 5.30907 13 5.61153 13 6.00325C13 6.39497 12.8384 6.6957 12.5153 6.90543L5.79498 11.0549Z"
+                      fill="white" />
+                  </svg>
+                  <span class="button-title">
+                    Pause
+                  </span>
+                </button>
+
+                <button onclick="event.stopPropagation(); cancelupload(2)" class="select-btn">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M20 6.91L17.09 4L12 9.09L6.91 4L4 6.91L9.09 12L4 17.09L6.91 20L12 14.91L17.09 20L20 17.09L14.91 12L20 6.91Z"
+                      fill="white" />
+                  </svg>
+                  <span class="button-title">
+                    Cancel
+                  </span>
+                </button>
+
+              </div>
+              <div style="display: flex; flex-direction: row; gap:24px;">
+                <button id="button-submit-folder" onclick="event.stopPropagation();  uploadVideo('2')"
+                  class="select-btn">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 16V4M12 4L7 9M12 4L17 9" stroke="white" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round" />
+                    <path d="M4 16V20H20V16" stroke="white" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round" />
+                  </svg>
+                  <span class="button-title">
+                    Upload
+                  </span>
+                </button>
+
+
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+        <!-- <div style="display: flex; flex-direction: row; justify-content: space-between;">
+        <span class="section-title">Uploaded files</span>
+           <button
+    id="retryAllBtn"
+    style="
+      display: none;
+      padding: 6px 14px;
+      background-color: #E5533D;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    "
+  >
+    Retry All
+  </button>
+      </div> -->
+
+        <div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
+          <span class="section-title">Uploaded files</span>
+
+          <div style="display: flex; gap: 8px;">
+            <button id="viewMatchBtn">
+              View Match
+            </button>
+
+            <button id="retryAllBtn" style="
+        display: none;
+        padding: 6px 14px;
+        background-color: #E5533D;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+      ">
+              Retry All
+            </button>
+          </div>
+        </div>
+
+
+
+
+        <!-- <div>
+ <div class="fm">
+  <div class="fm-header">
+    <button id="fmBackBtn">⬅</button>
+    <span id="path"></span>
+  </div>
+
+  <div class="fm-body" id="fmBody"></div>
+</div>
+
+   </div> -->
+        <!-- <div style="display: flex; flex-direction: column; border-radius: 12px; border: 1px solid #E5F0FF; width:100%">
+     <div style="display: flex;
+padding: 15px 24px;
+align-items: center;
+gap: 300px;
+align-self: stretch; background: #E5F0FF;">
+<span class="files-text" style="flex:1">Name</span>
+<span class="files-text" style="flex:2">File Size</span>
+<span class="files-text" style="flex:3">File Status</span>
+
+     </div>
+      <div id="fileBody"></div>
+   </div> -->
+        <div class="file-manager">
+
+          <!-- Header -->
+          <div class="row header">
+            <span class="head-title">Name</span>
+            <span class="head-title">File Size</span>
+            <span class="head-title">Status</span>
+          </div>
+
+          <!-- Folders will be injected here -->
+          <div id="fileBody"></div>
+
+
+
+
+
+
+        </div>
+
+        <div id="match_videos">
+
+
+          <div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
+            <span class="section-title">View Match Uploaded files</span>
+
+
+          </div>
+          <div class="row header">
+            <span class="head-title">Name</span>
+            <span class="head-title">File Size</span>
+            <span class="head-title">Status</span>
+            <span class="head-title download-col">Download</span>
+          </div>
+
+          <!-- Folders will be injected here -->
+          <div id="fileMatchBody"></div>
+        </div>
+      </div>
+      <div class="right-panel">
+        <div style="display: flex; flex-direction: row; gap:20px; justify-content: center; align-items: center;">
+          <img src="./assets/default_image.jpeg" style="width: 48px; height: 48px; border-radius: 24px;" />
+          <div style="display: flex; flex-direction: column; gap:8px;">
+            <span class="name">User</span>
+            <span class="email"></span>
+
+          </div>
+          <svg class="menu-toggle" xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8"
+            fill="none">
+            <path d="M0.75 0.750019L5.75 6.75002L10.75 0.750019" stroke="#83878D" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+        <div class="dropdown" id="userDropdown">
+          <div class="dropdown-item logout">Logout</div>
+        </div>
+        <span class="right-title">
+          Uploading Speed
+        </span>
+        <div class="speed-gauge">
+          <svg width="100%" height="140" viewBox="0 0 260 140">
+            <!-- Background arc -->
+            <path d="M20 120 A110 110 0 0 1 240 120" fill="none" stroke="#EEF4FF" stroke-width="30"
+              stroke-linecap="round" />
+
+            <!-- Progress arc -->
+            <path d="M20 120 A110 110 0 0 1 240 120" fill="none" stroke="#4C8DFF" stroke-width="20"
+              stroke-linecap="round" stroke-dasharray="346" stroke-dashoffset="346" class="progress-arc" />
+
+            <!-- Needle -->
+            <g class="needle" transform="rotate(-90 130 120)">
+              <circle cx="130" cy="120" r="6" fill="#4C8DFF" />
+              <line x1="130" y1="120" x2="130" y2="40" stroke="#4C8DFF" stroke-width="4" stroke-linecap="round" />
+            </g>
+          </svg>
+        </div>
+
+        <div style="display: flex; flex-direction: row; justify-content: space-between; gap:90px;">
+          <div style="display: flex; flex-direction: column; gap:8px;">
+            <span class="speed">
+              Speed
+            </span>
+            <div style="display: flex; flex-direction: row; gap:3px; align-items: center;">
+              <span id="speed-meter" class="speed-value">
+                0
+              </span>
+              <span class="speed-unit">
+                Mbps
+              </span>
+            </div>
+
+          </div>
+          <div style="display: flex; flex-direction: column; gap:8px;">
+            <span class="speed">
+              File Size
+            </span>
+            <div style="display: flex; flex-direction: row; gap:3px; align-items: center;">
+              <span id='size-inNumber' class="speed-value"> 0 </span>
+              <span id='size-unit' class="speed-unit"> Gb</span>
+            </div>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column;
+     padding:16px; gap:32px; justify-content: center;
+align-items: center; border-radius: 12px;
+border: 1px solid #E5F0FF;">
+          <div
+            style="display: flex; flex-direction: column; justify-content: flex-start; align-items: flex-start; padding: 24px 12px 24px 12px; gap:24px;">
+            <img src="./assets/icon.svg">
+            <span class="active">
+              Active Uploads
+            </span>
+            <div style="display: flex; flex-direction: row; gap:8px;">
+              <span id="completed-files" class="feature-desc"> 0 Completed &nbsp;&nbsp; | &nbsp;&nbsp; </span>
+              <span id="selected-files" class="feature-desc">
+                0 Selected
+              </span>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+    <div id="video-wrapper" class="hidden">
+      <button id="closeVideoBtn" style="
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0,0,0,0.6);
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    border-radius: 4px;
+    z-index: 1100;
+  ">×</button>
+      <video id="videoPlayer" controls preload="auto"></video>
+    </div>
+
+
+
+  </div>
+
+
+
+
+  <script>
+
+    let uploadAbortController = null;
+    let fileTree = null;
+    let currentFolder = null;
+    let history = [];
+    let videofile = [];
+    let folderfile = [];
+    const MAX_PARALLEL_UPLOADS = 6;
+    let isMatchViewOpen = false;
+    let matchDataLoaded = false;
+    let activeUploads = 0;
+    const uploadQueue = [];
+    const username = localStorage.getItem('name');
+    const email = localStorage.getItem('email');
+    let originalTree = null;
+    let currentTree = null; 
+
+    const fileSVG = `
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="14" viewBox="0 0 20 14" fill="none">
+<path d="M0 3.25C0 2.38805 0.34241 1.5614 0.951903 0.951903C1.5614 0.34241 2.38805 0 3.25 0H9.75C10.1768 0 10.5994 0.0840639 10.9937 0.247392C11.388 0.410719 11.7463 0.650112 12.0481 0.951903C12.3499 1.25369 12.5893 1.61197 12.7526 2.00628C12.9159 2.40059 13 2.8232 13 3.25V10.75C13 11.1768 12.9159 11.5994 12.7526 11.9937C12.5893 12.388 12.3499 12.7463 12.0481 13.0481C11.7463 13.3499 11.388 13.5893 10.9937 13.7526C10.5994 13.9159 10.1768 14 9.75 14H3.25C2.38805 14 1.5614 13.6576 0.951903 13.0481C0.34241 12.4386 0 11.612 0 10.75V3.25ZM17.257 12.688L14 10.44V3.562L17.257 1.313C18.418 0.511 20.002 1.343 20.002 2.753V11.248C20.002 12.658 18.418 13.49 17.257 12.688Z" fill="#83878D"/>
+</svg>
+`;
+    const folderSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="18" viewBox="0 0 20 18" fill="none">
+<path d="M0.650391 2.65002C0.650391 1.54545 1.54582 0.650024 2.65039 0.650024H6.50457C7.15329 0.650024 7.76172 0.964672 8.13667 1.49406L9.9189 4.01041C10.1064 4.2751 10.4106 4.43242 10.735 4.43242H16.6502C17.7547 4.43242 18.6502 5.32786 18.6502 6.43242V14.8361C18.6502 15.9407 17.7547 16.8361 16.6502 16.8361H2.65039C1.54582 16.8361 0.650391 15.9407 0.650391 14.8361V2.65002Z" fill="#83878D"/>
+<path d="M0.650391 2.65002C0.650391 1.54545 1.54582 0.650024 2.65039 0.650024H6.50457C7.15329 0.650024 7.76172 0.964672 8.13667 1.49406L9.9189 4.01041C10.1064 4.2751 10.4106 4.43242 10.735 4.43242H16.6502C17.7547 4.43242 18.6502 5.32786 18.6502 6.43242V14.8361C18.6502 15.9407 17.7547 16.8361 16.6502 16.8361H2.65039C1.54582 16.8361 0.650391 15.9407 0.650391 14.8361V2.65002Z" stroke="#83878D" stroke-width="1.3"/>
+</svg>`;
+
+    const downloadIcon = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18">
+      <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+    </svg>
+  `;
+
+    function formatTime(isoTime) {
+      const date = new Date(isoTime);
+
+      return date.toLocaleString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true
+      });
+    }
+
+
+    function acquireUploadSlot() {
+      if (activeUploads < MAX_PARALLEL_UPLOADS) {
+        activeUploads++;
+        return Promise.resolve();
+      }
+
+      return new Promise(resolve => uploadQueue.push(resolve));
+    }
+
+    function releaseUploadSlot() {
+      activeUploads--;
+
+      if (uploadQueue.length > 0) {
+        activeUploads++;
+        uploadQueue.shift()();
+      }
+    }
+
+
+    function formatSize(bytes) {
+      if (!bytes || bytes == 0) return "0 MB";
+
+      const k = 1024;
+      const sizes = ["B", "KB", "MB", "GB", "TB"];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+      return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
+    }
+
+
+
+
+    function setSpeed(speed, max = 300) {
+      const angle = (speed / max) * 180 - 90;
+      document.querySelector('.needle').style.transform =
+        `rotate(${angle}deg)`;
+
+      const arc = document.querySelector('.progress-arc');
+      const total = 346; // arc length
+      arc.style.strokeDashoffset = total - (speed / max) * total;
+    }
+
+
+
+    // const wrapper = document.getElementById("video-wrapper");
+
+    // let isDragging = false;
+    // let offsetX = 0;
+    // let offsetY = 0;
+
+    // wrapper.addEventListener("mousedown", (e) => {
+    //   isDragging = true;
+    //   offsetX = e.clientX - wrapper.offsetLeft;
+    //   offsetY = e.clientY - wrapper.offsetTop;
+    // });
+
+    // document.addEventListener("mousemove", (e) => {
+    //   if (!isDragging) return;
+
+    //   wrapper.style.left = `${e.clientX - offsetX}px`;
+    //   wrapper.style.top = `${e.clientY - offsetY}px`;
+    //   wrapper.style.transform = "none"; // important
+    // });
+
+    // document.addEventListener("mouseup", () => {
+    //   isDragging = false;
+    // });
+
+    // const closeBtn = document.getElementById("closeVideoBtn");
+
+    // closeBtn.addEventListener("click", () => {
+    //   const video = document.getElementById("videoPlayer");
+    //   video.pause();
+    //   video.currentTime = 0;  // optional: reset video to start
+    //   wrapper.classList.add("hidden");
+    //   video.src = ""; // clear src to stop loading/playing
+    // });
+
+
+    const toggle = document.querySelector(".menu-toggle");
+    const dropdown = document.getElementById("userDropdown");
+
+    toggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      dropdown.classList.toggle("show");
+    });
+
+    // Close when clicking outside
+    document.addEventListener("click", () => {
+      dropdown.classList.remove("show");
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.querySelector('.name').textContent =
+        username || '—';
+
+      document.querySelector('.email').textContent =
+        email || '';
+    });
+
+    // Logout action
+    document.querySelector(".logout").onclick = () => {
+      dropdown.classList.remove("show");
+      window.location.href = 'index.html';
+      // Electron logout call
+
+      // window.electron.notifyQuit(
+      //   null,
+      //   null,
+      //   null,
+      //   null
+      // );
+    };
+    const wrapper = document.getElementById("video-wrapper");
+
+    let isDragging = false;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    wrapper.addEventListener("mousedown", (e) => {
+      isDragging = true;
+      offsetX = e.clientX - wrapper.offsetLeft;
+      offsetY = e.clientY - wrapper.offsetTop;
+    });
+
+    document.addEventListener("mousemove", (e) => {
+      if (!isDragging) return;
+
+      wrapper.style.left = `${e.clientX - offsetX}px`;
+      wrapper.style.top = `${e.clientY - offsetY}px`;
+      wrapper.style.transform = "none"; // important
+    });
+
+    document.addEventListener("mouseup", () => {
+      isDragging = false;
+    });
+
+    const closeBtn = document.getElementById("closeVideoBtn");
+
+    closeBtn.addEventListener("click", () => {
+      const video = document.getElementById("videoPlayer");
+      video.pause();
+      video.currentTime = 0;  // optional: reset video to start
+      wrapper.classList.add("hidden");
+      video.src = ""; // clear src to stop loading/playing
+    });
+
+
+    function showPage(page) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(page).classList.add('active');
+
+      document.getElementById('homeBtn').classList.toggle('active', page === 'home');
+      document.getElementById('dashBtn').classList.toggle('active', page === 'dashboard');
+      if (page === 'dashboard') {
+        dashboardLoad();
+      }
+    }
+
+    // async function playVideo(s3Key) {
+    //   const res = await fetch(`${API_BASE_URL}/matches/files/video-url`, {
+    //     method: "POST",
+    //     headers: { "Content-Type": "application/json" ,
+    //        "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+    //     },
+    //     body: JSON.stringify({ s3Key })
+    //   });
+
+    //   const { videoUrl } = await res.json();
+
+    //   const video = document.getElementById("videoPlayer");
+    //   video.src = videoUrl;
+    //   video.load();
+    //   video.play();
+    //   video.addEventListener("playing", () => {
+    //   wrapper.classList.remove("hidden");
+    // }, { once: true });
+
+    //   // document.getElementById("videoModal").style.display = "flex";
+    // }
+
+    // async function playVideo(s3Key) {
+    //   const res = await fetch(`${API_BASE_URL}/matches/files/video-url`, {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //       "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+    //     },
+    //     body: JSON.stringify({ s3Key })
+    //   });
+
+    //   const { videoUrl, localPath } = await res.json();
+    //   // 👆 localPath = absolute file path (needed for VLC)
+
+    //   const video = document.getElementById("videoPlayer");
+
+    //   video.src = videoUrl;
+    //   video.load();
+
+    //   try {
+    //     await video.play(); // ✅ try HTML playback first
+
+    //     video.addEventListener(
+    //       "playing",
+    //       () => {
+    //         wrapper.classList.remove("hidden");
+    //       },
+    //       { once: true }
+    //     );
+
+    //   } catch (err) {
+    //     console.warn("HTML video failed, opening in VLC", err);
+
+    //     // 🔥 Electron-only fallback
+    //     if (window.electron?.openInVLC && localPath) {
+    //       window.electron.openInVLC(localPath);
+    //     } else {
+    //       alert("This video cannot be played");
+    //     }
+    //   }
+    // }
+
+
+    // async function playVideo(s3Key) {
+    //   console.group("▶ playVideo()");
+    //   console.log("s3Key:", s3Key);
+
+    //   const res = await fetch(`${API_BASE_URL}/matches/files/video-url`, {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //       "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+    //     },
+    //     body: JSON.stringify({ s3Key })
+    //   });
+
+    //   const { videoUrl } = await res.json();
+    //   console.log("videoUrl:", videoUrl);
+
+    //   const video = document.getElementById("videoPlayer");
+    //   video.src = videoUrl;
+    //   video.load();
+
+    //   // ❌ HTML decode failure → VLC
+    //   video.onerror = () => {
+    //     console.warn("HTML video failed → VLC");
+    //     window.electron?.openInVLC(videoUrl);
+    //   };
+
+    //   // ✅ HTML success
+    //   video.onplaying = () => {
+    //     console.log("HTML video playing");
+    //     if (typeof wrapper !== "undefined") {
+    //       wrapper.classList.remove("hidden");
+    //     }
+    //   };
+
+    //   video.play().catch(() => {
+    //     // ignore autoplay / gesture issues
+    //   });
+
+    //   console.groupEnd();
+    // }
+
+
+    async function playVideo(s3Key) {
+      const res = await fetch(`${API_BASE_URL}/matches/files/video-url`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+        },
+        body: JSON.stringify({ s3Key })
+      });
+
+      const { videoUrl } = await res.json();
+
+      const video = document.getElementById("videoPlayer");
+      const wrapper = document.getElementById("video-wrapper"); // ❗ missing before
+
+      video.src = videoUrl;
+      video.load();
+
+      wrapper.classList.remove("hidden"); // show modal
+      video.play();
+    }
+
+    document.getElementById("closeVideoBtn").onclick = () => {
+      const wrapper = document.getElementById("video-wrapper");
+      const video = document.getElementById("videoPlayer");
+
+      video.pause();
+      video.src = "";
+      wrapper.classList.add("hidden");
+    };
+    function toggleUploadSection() {
+      const icon = document.getElementById("expand-arrow");
+
+      icon.classList.toggle("rotated");
+      const section = document.getElementById('upload-parts')
+      console.log(section);
+      if (section.style.display === 'flex') {
+        section.style.display = 'none';
+        console.log('jc');
+        // section.style.transform = 'rotate(180deg)'
+      } else {
+        section.style.display = 'flex';
+        console.log('jhbh');
+        // section.style.transform = 'rotate(180deg)'
+
+      }
+    }
+
+    function goBack() {
+      window.location.href = 'matches.html';
+    }
+
+    document.getElementById('selectVideosBtn').onclick = async () => {
+      const paths = await window.electron.selectVideos('single');
+     
+      videofile = paths;
+      // document.getElementById('selectedCount').innerText =
+      //  `${paths.length} video(s) selected`;
+
+      // const files = paths.map(p => ({
+      //   path: p,
+      //   name: p.split('/').pop(),
+      //   status: 'queued' 
+      // }));
+
+      // console.log(files);
+    };
+
+    document.getElementById('expand-arrow').addEventListener('click', toggleUploadSection);
+
+    const searchInput = document.getElementById("searchInput");
+
+    // searchInput.addEventListener("input", (e) => {
+    //   const query = e.target.value.trim();
+
+    //   // treeContainer.innerHTML = "";
+    //    const container = document.getElementById('fileBody');
+    //    container.innerHTML = '';
+
+    //   if (!query) {
+    //     renderTree(originalTree, container);
+    //   } else {
+    //     const filteredTree = filterTree(originalTree, query);
+    //     renderTree(filteredTree, container);
+    //   }
+    // });
+
+
+
+
+    // document.getElementById('viewMatchBtn').onclick = async () => {
+    //   const matchSection = document.getElementById('match_videos');
+    //   const btn = document.getElementById('viewMatchBtn');
+
+    //   // 🔁 TOGGLE OFF
+    //   if (isMatchViewOpen) {
+    //     matchSection.style.display = 'none';
+    //     btn.classList.remove('active');
+    //     isMatchViewOpen = false;
+    //     return;
+    //   }
+
+    //   // 🔁 TOGGLE ON
+    //   matchSection.style.display = 'flex';
+    //   btn.classList.add('active');
+    //   isMatchViewOpen = true;
+
+    //   // ⛔ Already loaded → don’t fetch again
+    //   if (matchDataLoaded) return;
+
+    //   const matchID = JSON.parse(localStorage.getItem('selectedMatch'));
+    //   if (!matchID) return;
+    //   //  const detail = JSON.parse(localStorage.getItem("match"));
+
+
+    //   try {
+    //     const response = await fetch(
+    //       `${API_BASE_URL}/matches/${matchID.id}/sync-view?withDownloadUrls=true`,
+    //       {
+    //         method: "GET",
+    //         headers: {
+    //           "Content-Type": "application/json",
+    //           "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+    //         }
+    //       }
+    //     );
+
+    //     const datas = await response.json();
+    //     console.log("Folders:", datas.folders);
+    //     console.log("Keys:", Object.keys(datas.folders));
+
+
+    //     // const completedata = datas.folders.root.filter(
+    //     //   item => item.status === 'completed'
+    //     // );
+    //     const completeData = Object.values(datas.folders)
+    //       .flat()
+    //       .filter(item => item.status === "completed");
+
+    //     const tree = buildFileTree(completeData);
+    //     console.log(tree);
+    //     const body = document.getElementById('fileMatchBody');
+    //     body.innerHTML = '';
+    //     renderMatchTree(tree, body);
+
+    //     matchDataLoaded = true;
+
+    //   } catch (err) {
+    //     console.error("Failed to load match files", err);
+    //   }
+    // };
+
+    // document.getElementById('viewMatchBtn').onclick = async () => {
+    //   const matchSection = document.getElementById('match_videos');
+    //   const btn = document.getElementById('viewMatchBtn');
+
+    //   matchSection.style.display = 'flex';
+    //   btn.classList.add('active');
+
+    //   const matchID = JSON.parse(localStorage.getItem('selectedMatch'));
+    //   if (!matchID) return;
+
+    //   try {
+    //     const response = await fetch(
+    //       `${API_BASE_URL}/matches/${matchID.id}/sync-view?withDownloadUrls=true`,
+    //       {
+    //         headers: {
+    //           "Authorization": `Bearer ${localStorage.getItem("token")}`
+    //         }
+    //       }
+    //     );
+
+    //     const datas = await response.json();
+    //     console.log("FULL TREE:", datas);
+
+    //     // 🔥 BUILD REAL TREE FROM FOLDER MAP
+    //     const tree = buildFolderTree(datas.folders);
+
+    //     const body = document.getElementById('fileMatchBody');
+    //     body.innerHTML = '';
+
+    //     renderMatchTree(tree, body);
+
+    //   } catch (err) {
+    //     console.error("Fetch error:", err);
+    //   }
+    // };
+
+    // function buildFolderTree(folderMap) {
+    //   const root = { name: "root", files: [], children: {} };
+
+    //   Object.keys(folderMap).forEach(path => {
+    //     const parts = path.split("/");
+    //     let current = root;
+
+    //     parts.forEach((part, index) => {
+    //       if (!current.children[part]) {
+    //         current.children[part] = {
+    //           name: part,
+    //           files: [],
+    //           children: {}
+    //         };
+    //       }
+
+    //       current = current.children[part];
+
+    //       // last part → attach files
+    //       if (index === parts.length - 1) {
+    //         current.files = folderMap[path].files || [];
+    //       }
+    //     });
+    //   });
+
+    //   return root;
+    // }
+
+    // function renderMatchTree(node, container) {
+
+    //   // Render files
+    //   if (Array.isArray(node.files)) {
+    //     node.files.forEach(file => {
+    //       const div = document.createElement("div");
+    //       div.className = "file-item";
+    //       div.innerHTML = `
+    //     📹 <a href="${file.downloadUrl}" target="_blank">${file.fileName}</a>
+    //   `;
+    //       container.appendChild(div);
+    //     });
+    //   }
+
+    //   // Render folders
+    //   Object.values(node.children).forEach(child => {
+    //     const folderDiv = document.createElement("div");
+    //     folderDiv.className = "folder";
+
+    //     folderDiv.innerHTML = `
+    //   <div class="folder-title">📁 ${child.name}</div>
+    // `;
+
+    //     const childContainer = document.createElement("div");
+    //     childContainer.style.marginLeft = "20px";
+
+    //     folderDiv.appendChild(childContainer);
+    //     container.appendChild(folderDiv);
+
+    //     renderMatchTree(child, childContainer);
+    //   });
+    // }
+
+    document.getElementById('viewMatchBtn').onclick = async () => {
+      const matchSection = document.getElementById('match_videos');
+      const btn = document.getElementById('viewMatchBtn');
+
+      if (isMatchViewOpen) {
+        matchSection.style.display = 'none';
+        btn.classList.remove('active');
+        isMatchViewOpen = false;
+        return;
+      }
+      matchSection.style.display = 'flex';
+      btn.classList.add('active');
+      isMatchViewOpen = true;
+
+      const matchID = JSON.parse(localStorage.getItem('selectedMatch'));
+      if (!matchID) return;
+      console.log("match", matchID);
+
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/matches/${matchID.id}/sync-view?withDownloadUrls=true`,
+          {
+            headers: {
+              "Authorization": `Bearer ${localStorage.getItem("token")}`
+            }
+          }
+        );
+
+        const datas = await response.json();
+
+        // ⭐ BUILD TREE FOR YOUR RENDER FUNCTION
+        const tree = buildMatchTree(datas.folders);
+
+        const body = document.getElementById('fileMatchBody');
+        body.innerHTML = '';
+
+        renderMatchTree(tree, body);
+
+      } catch (err) {
+        console.error("Fetch error:", err);
+      }
+    };
+
+    function buildMatchTree(folderMap) {
+      const root = { folders: {}, files: [] };
+
+      Object.entries(folderMap).forEach(([path, data]) => {
+        const parts = path.split("/");
+        let current = root;
+
+        parts.forEach((part, index) => {
+          if (!current.folders[part]) {
+            current.folders[part] = { folders: {}, files: [] };
+          }
+
+          current = current.folders[part];
+
+          // last folder → attach files
+          if (index === parts.length - 1) {
+            current.files = data.files || [];
+          }
+        });
+      });
+
+      return root;
+    }
+
+
+
+    function renderMatchTree(node, container, indent = 0, currentPath = "") {
+
+      // FOLDERS
+      //       Object.entries(node.folders || {}).forEach(([folderName, folderNode]) => {
+      //         const folderRow = document.createElement('div');
+      //         folderRow.className = 'row folder';
+      //         folderRow.style.paddingLeft = `${24 + indent}px`;
+
+      //         folderRow.innerHTML = `
+      //   <span style="display:flex;align-items:center;gap:8px;">
+      //     ${folderSVG}
+      //     <span class="filename">${folderName}</span>
+      //   </span>
+
+      //   <span>—</span>
+
+      //   <span class="status">Completed</span>
+
+      //   <span class="download-col">
+      //     <button class="download-btn">${downloadIcon}</button>
+      //   </span>
+      // `;
+
+      //         folderRow.querySelector(".download-btn").onclick = (e) => {
+      //           e.stopPropagation(); // prevents toggle open
+      //           downloadFolder(folderName);
+      //         };
+
+      //         const children = document.createElement('div');
+      //         children.style.display = 'none';
+
+      //         folderRow.onclick = () => {
+      //           children.style.display =
+      //             children.style.display === 'none' ? 'block' : 'none';
+      //         };
+
+      //         container.appendChild(folderRow);
+      //         container.appendChild(children);
+
+      //         renderMatchTree(folderNode, children, indent + 24);
+      //       });
+
+
+      Object.entries(node.folders || {}).forEach(([folderName, folderNode]) => {
+
+        const folderPath = currentPath
+          ? `${currentPath}/${folderName}`
+          : folderName;
+
+        const folderRow = document.createElement('div');
+        folderRow.className = 'row folder';
+        folderRow.style.paddingLeft = `${24 + indent}px`;
+
+        folderRow.innerHTML = `
+      <span style="display:flex;align-items:center;gap:8px;">
+        ${folderSVG}
+        <span class="filename">${folderName}</span>
+      </span>
+
+      <span>—</span>
+      <span class="status">Completed</span>
+
+      <span class="download-col">
+        <button class="download-btn">${downloadIcon}</button>
+      </span>
+    `;
+
+        // ✅ Download click
+        folderRow.querySelector(".download-btn").onclick = (e) => {
+          e.stopPropagation();
+          downloadFolder(folderPath);
+        };
+
+        const children = document.createElement('div');
+        children.style.display = 'none';
+
+        folderRow.onclick = () => {
+          children.style.display =
+            children.style.display === 'none' ? 'block' : 'none';
+        };
+
+        container.appendChild(folderRow);
+        container.appendChild(children);
+
+        renderMatchTree(folderNode, children, indent + 24, folderPath);
+      });
+
+
+      // FILES
+      (node.files || []).forEach(file => {
+        const fileRow = document.createElement('div');
+        fileRow.className = 'row file';
+        fileRow.style.paddingLeft = `${24 + indent}px`;
+
+        const downloadButton = file.downloadUrl
+          ? `<a href="${file.downloadUrl}" download class="download-btn">${downloadIcon}</a>`
+          : '—';
+
+        fileRow.innerHTML = `
+      <span style="display:flex;align-items:center;gap:8px;">
+        ${fileSVG}
+        <span class="filename">${file.file || file.fileName}</span>
+      </span>
+
+      <span>${file.size ? (file.size / 1024 / 1024).toFixed(1) : 0} MB</span>
+
+      <span class="status" style="color:#16a34a;font-weight:500;">
+        Completed
+      </span>
+
+      <span class="download-col">${downloadButton}</span>
+    `;
+
+        container.appendChild(fileRow);
+
+        // play click
+        fileRow.querySelector('.filename').onclick = (e) => {
+          e.stopPropagation();
+          playVideo(file.s3Key);
+        };
+      });
+    }
+    //downlod folder
+
+
+    async function downloadFolder(folderPath) {
+      const matchID = JSON.parse(localStorage.getItem('selectedMatch'));
+      //   if (!matchID) return;
+      //   console.log("match", matchID);
+      try {
+        const res = await fetch(
+          `${API_BASE_URL}/matches/download/folder/${matchID.id}?folder=${encodeURIComponent(folderPath)}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token") || ""}`
+            }
+          }
+        );
+
+
+        if (!res.ok) throw new Error("Download failed");
+
+        const blob = await res.blob();
+
+        // Always force correct name
+        const fileName = folderPath.split("/").pop() + ".zip";
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+
+        a.href = url;
+        a.download = fileName;
+
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        window.URL.revokeObjectURL(url);
+
+      } catch (err) {
+        console.error(err);
+        alert("Download failed");
+      }
+    }
+    document.getElementById('selectFoldersBtn').onclick = async () => {
+      const paths = await window.electron.selectVideos('multi');
+      console.log(paths);
+      folderfile = paths;
+      // document.getElementById('selectedFolderCount').innerText =
+      // `${paths.length} video(s) selected`;
+
+      // const files = paths.map(p => ({
+      //   path: p,
+      //   name: p.split('/').pop(),
+      //   status: 'queued'
+      // }));
+
+      // console.log(files);
+    };
+    const uploadFileState = {
+      files: {},        // per-file progress
+      totalBytes: 0,    // all files size
+      uploadedBytes: 0
+
+    };
+    // function initUploadState(files) {
+    //   console.log(files);
+    //   uploadFileState.totalBytes = 0;
+    //   uploadFileState.uploadedBytes = 0;
+    //   uploadFileState.files = {};
+
+    //   files.forEach(f => {
+    //     uploadFileState.totalBytes += f.size;
+    //     uploadFileState.files[f.relativePath] = {
+    //       size: f.size,
+    //       uploaded: 0,
+    //       percent: 0
+    //     };
+    //   });
+    //   console.log(uploadFileState);
+    // }
+
+    function initUploadState(files) {
+      console.log(files);
+      uploadFileState.totalBytes = 0;
+      uploadFileState.uploadedBytes = 0;
+      uploadFileState.files = {};
+
+      files.forEach(f => {
+        uploadFileState.totalBytes += Number(f.size);
+        uploadFileState.files[f.id] = {
+          size: f.size,
+          uploaded: 0,
+          percent: 0,
+          completed: false
+        };
+      });
+      uploadFileState.lastBytes = 0;
+      uploadFileState.lastTime = Date.now();
+      uploadFileState.speed = 0;
+      uploadFileState.completedFiles = 0;
+      uploadFileState.totalFiles = files.length;
+      console.log(uploadFileState);
+    }
+
+    const UploadState = {
+      IDLE: "idle",
+      UPLOADING: "uploading",
+      PAUSED: "paused",
+      CANCELLED: "cancelled",
+      COMPLETED: "completed",
+      ERROR: "error"
+    };
+    let uploadState = UploadState.IDLE;
+
+    function renderFileManager(tree) {
+      const container = document.getElementById('fileBody');
+      container.innerHTML = '';
+
+      Object.entries(tree).forEach(([folder, files]) => {
+
+        const folderRow = document.createElement('div');
+        folderRow.className = 'row folder';
+        folderRow.innerHTML = `
+      <span> ${folder.split('/').pop()}</span>
+      <span>${files.length} files</span>
+      <span>—</span>
+    `;
+
+        const filesWrapper = document.createElement('div');
+        filesWrapper.className = 'files';
+
+        files.forEach(file => {
+          console.log(file);
+          const fileRow = document.createElement('div');
+          fileRow.className = 'row file';
+          fileRow.innerHTML = `
+        <span > ${file.relativePath}</span>
+        <span>${(file.size / 1024 / 1024).toFixed(1)} MB</span>
+        <span style="color: #458DF9 font-family: Plus Jakarta Sans;
+font-weight: 700;
+font-style: Bold;
+font-size: 14px;
+line-height: 100%;
+color: #458DF9;
+">Uploading</span>
+      `;
+          filesWrapper.appendChild(fileRow);
+        });
+
+        folderRow.onclick = () => {
+          filesWrapper.style.display =
+            filesWrapper.style.display === 'flex' ? 'none' : 'flex';
+        };
+
+        container.appendChild(folderRow);
+        container.appendChild(filesWrapper);
+      });
+    }
+    function renderSessions(data) {
+      const grid = document.getElementById("session-grid");
+      const sess = document.getElementById("fileList");
+      sess.innerHTML = "";
+      grid.innerHTML = ""; // clear old
+      // console.log(data);
+
+      data?.forEach(session => {
+        const card = document.createElement("div");
+        card.className = "card session-card";
+        card.onclick = () => onSessionClick(session);
+        card.innerHTML = `
+      <div class="session-time">${formatTime(session.createdAt)}</div>
+      <div class="session-size">${formatSize(session.totalSize)}</div>
+    `;
+
+        grid.appendChild(card);
+
+      });
+    }
+
+    //  async function onSessionClick(session) {
+    //      const res = await fetch(`${API_BASE_URL}/dashboard/sessions/${session.id}/files`, {
+    //         method: "GET",
+    //         headers: {
+    //           "Content-Type": "application/json",
+    //           "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+    //         },
+
+    //       })
+    //       // console.log(res);
+    //       const data = await res.json();
+    //       // console.log(data);
+    //       document.getElementById("session-grid").innerHTML = "";
+    //         document.getElementById("list-session").innerHTML = "";
+
+
+
+    //       const container = document.getElementById("fileList");
+
+    //   if (!data.length) {
+    //     container.innerHTML = "<p>No files found for this session.</p>";
+    //     return;
+    //   }
+
+    //   const listItems = data.map(file => `
+    //     <div class="file-item card" style="padding: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+    //       <span class="file-name">${file.relativePath}</span>
+    //       <span class="file-status" style="font-weight: 600; color: ${file.status === 'completed' ? 'green' : 'red'};">
+    //         ${file.status}
+    //       </span>
+    //     </div>
+    //   `).join("");
+
+    //   container.innerHTML = `
+    //     <h3>Files in Session</h3>
+    //     <div id="fileGrid" class="session-grid">${listItems}</div>
+    //   `;
+
+    //  }
+
+
+
+
+
+
+    // function renderMatchTree(node, container, indent = 0) {
+
+    //   /* ---------- FOLDERS ---------- */
+    //   Object.entries(node.folders || {}).forEach(([name, folder]) => {
+
+    //     const row = document.createElement("div");
+    //     row.className = "row folder";
+    //     row.style.paddingLeft = `${20 + indent}px`;
+
+    //     row.innerHTML = `
+    //   <span style="display:flex;gap:8px;align-items:center;">
+    //     ${folderSVG}
+    //     <span class="filename">${name}</span>
+    //   </span>
+    //   <span>—</span>
+    //   <span class="status">Completed</span>
+    // `;
+
+    //     const children = document.createElement("div");
+    //     children.style.display = "none";
+
+    //     row.onclick = () => {
+    //       children.style.display =
+    //         children.style.display === "none" ? "block" : "none";
+    //     };
+
+    //     container.appendChild(row);
+    //     container.appendChild(children);
+
+    //     // ⭐ recursive
+    //     renderMatchTree(folder, children, indent + 20);
+    //   });
+
+
+    //   /* ---------- FILES ---------- */
+    //   (node.files || []).forEach(file => {
+
+    //     const row = document.createElement("div");
+    //     row.className = "row file";
+    //     row.style.paddingLeft = `${20 + indent}px`;
+
+    //     const downloadBtn = file.downloadUrl
+    //       ? `<a href="${file.downloadUrl}" download class="download-btn">${downloadIcon}</a>`
+    //       : "—";
+
+    //     row.innerHTML = `
+    //   <span style="display:flex;gap:8px;align-items:center;">
+    //     ${fileSVG}
+    //     <span class="filename">${file.file}</span>
+    //   </span>
+    //   <span>${(file.size / 1024 / 1024).toFixed(1)} MB</span>
+    //   <span class="status" style="color:green;">Completed</span>
+    //   <span>${downloadBtn}</span>
+    // `;
+
+    //     container.appendChild(row);
+
+    //     row.querySelector(".filename").onclick = (e) => {
+    //       e.stopPropagation();
+    //       playVideo(file.s3Key);
+    //     };
+    //   });
+    // }
+
+
+    function updateSpeedGauge(speedBytesPerSec) {
+      const arc = document.querySelector(".progress-arc");
+      const needle = document.querySelector(".needle");
+      const meter = document.getElementById('speed-meter');
+
+
+      if (!arc || !needle) return;
+      const MAX_SPEED = 50 * 1024 * 1024;
+      const ARC_LENGTH = 346;
+      meter.textContent = (speedBytesPerSec / MAX_SPEED).toFixed(2);
+      // 1️⃣ Clamp speed
+      const clamped = Math.min(speedBytesPerSec, MAX_SPEED);
+
+      // 2️⃣ Normalize (0 → 1)
+      const progress = clamped / MAX_SPEED;
+
+      // 3️⃣ Arc fill (left → right)
+      const dashOffset = ARC_LENGTH * (1 - progress);
+      arc.style.strokeDashoffset = dashOffset;
+
+      // 4️⃣ Needle rotation (-90° → +90°)
+      const angle = -90 + progress * 180;
+      needle.style.transform = `rotate(${angle}deg)`;
+      needle.style.transformOrigin = "130px 120px";
+    }
+
+
+    async function pauseupload(a) {
+      stopLoader(a);
+      if (a == 1) {
+
+        //  document.getElementById("loader").style.display = "none";
+        document.getElementById("video-pause").style.display = "none";
+        document.getElementById("video-resume").style.display = "block";
+        // document.getElementsById("video-uploading-text")
+      } else {
+        document.getElementById("folder-pause").style.display = "none";
+        document.getElementById("folder-resume").style.display = "block";
+        // document.getElementById("loaders").style.display = "none";
+        //  document.getElementById("pause2").classList.add("hidden");
+        // document.getElementById("resume2").classList.remove("hidden"); 
+      }
+
+
+
+      const session_Id = localStorage.getItem("session-id");
+      //  const files =  document.getElementById("videoInput").files;
+      // const filed =  document.getElementById("folderInput").files;
+      // console.log(files , filed , files.length);
+      // console.log(session_Id);
+
+
+      const res = await fetch(`${API_BASE_URL}/upload/session/${session_Id}/pause`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+        }
+      });
+      // cancelUpload();
+      pauseUpload();
+
+
+
+
+    }
+
+
+    function cancelAllUploads() {
+      const fileWrappers = document.querySelectorAll('[data-fileid]');
+
+      fileWrappers.forEach(wrapper => {
+        const status = wrapper.querySelector('.status');
+        if (!status) return;
+
+        // ✅ Skip already completed files
+        if (status.textContent === 'Completed') return;
+
+        // ❌ Mark as cancelled
+        status.textContent = 'Cancelled';
+        status.style.color = '#B42318'; // red
+        status.style.fontWeight = '600';
+
+        // 🧹 Remove progress bar if present
+        const progressRow = wrapper.querySelector('.progress-row');
+        if (progressRow) {
+          progressRow.remove();
+        }
+      });
+    }
+
+    function cancelUpload() {
+
+      // console.log('hhhh' , uploadAbortController ,uploadState );
+      if (uploadAbortController) {
+        uploadState = UploadState.CANCELLED; uploadAbortController.abort();
+        cancelAllUploads();
+
+        // console.log('hhhh' , uploadAbortController , uploadState);
+      }
+
+    }
+
+    function onUploadFinished(status, error = null) {
+      // console.log("UPLOAD RESULT:", status);
+
+      switch (status) {
+        case "completed":
+          alert("✅ Upload fully completed");
+          // window.appDialog.alert("Upload completed successfully");
+
+          videofile = [];
+          folderfile = [];
+          // document.getElementById('selectedCount').innerText = 'No video selected';
+          // document.getElementById('selectedFolderCount').innerText = 'No videos selected';
+          document.getElementById("button-submit").style.display = 'flex';
+
+          document.getElementById("videocontainer").style.display = 'none';
+          document.getElementById("button-submit-folder").style.display = 'flex';
+
+          document.getElementById("foldercontainer").style.display = 'none';
+          // document.getElementById("total-folders").textContent = '0 Folders &nbsp&nbsp|&nbsp&nbsp';
+          //  document.getElementById("total-files").textContent =  '0 Files';
+          //  document.getElementById("selected-files").textContent = `0 Files`;
+          // document.getElementById("videoInput").value = "";
+          // document.getElementById("folderInput").value = "";
+          break;
+
+        case "paused":
+
+
+          // console.log("⏸ Upload paused");
+
+          // show resume button
+
+
+          break;
+
+        case "cancelled":
+          videofile = [];
+          folderfile = [];
+          alert("❌ Upload cancelled");
+          // document.getElementById('selectedCount').innerText = 'No video selected';
+          // document.getElementById('selectedFolderCount').innerText = 'No videos selected';
+          document.getElementById("button-submit").style.display = 'flex';
+
+          document.getElementById("videocontainer").style.display = 'none';
+          document.getElementById("button-submit-folder").style.display = 'flex';
+
+          document.getElementById("foldercontainer").style.display = 'none';
+          // document.getElementById("total-folders").textContent = '0 Folders &nbsp&nbsp|&nbsp&nbsp';
+          //  document.getElementById("total-files").textContent =  '0 Files';
+          //  document.getElementById("selected-files").textContent = `0 Files`;
+          //  document.getElementById("videoInput").value = "";
+          // document.getElementById("folderInput").value = "";
+          break;
+
+        case "error":
+          //  videofile = [];
+          // folderfile = [];
+          alert("💥 Upload failed");
+          // document.getElementById('selectedCount').innerText = 'No video selected';
+          // document.getElementById('selectedFolderCount').innerText = 'No videos selected';
+          document.getElementById("button-submit").style.display = 'flex';
+
+          document.getElementById("videocontainer").style.display = 'none';
+          document.getElementById("button-submit-folder").style.display = 'flex';
+
+          document.getElementById("foldercontainer").style.display = 'none';
+          // document.getElementById("total-folders").textContent = '0 Folders &nbsp&nbsp|&nbsp&nbsp';
+          //  document.getElementById("total-files").textContent =  '0 Files';
+          //  document.getElementById("selected-files").textContent = `0 Files`;
+          // console.error(error);
+          //  document.getElementById("videoInput").value = "";
+          // document.getElementById("folderInput").value = "";
+          break;
+      }
+
+      // resetUI();
+    }
+
+    function pauseUpload() {
+      if (uploadAbortController && uploadState === UploadState.UPLOADING) { uploadState = UploadState.PAUSED; uploadAbortController.abort(); }
+    }
+
+
+
+    async function resumeupload(a) {
+      console.log('resuime');
+      showLoader(a);
+      if (a == 1) {
+        //  document.getElementById("loader").style.display = "block";
+        document.getElementById("video-pause").style.display = "block";
+        document.getElementById("video-resume").style.display = "none";
+        // document.getElementById("pause1").classList.remove("hidden");
+        // document.getElementById("resume1").classList.add("hidden"); 
+      } else {
+        // document.getElementById("loaders").style.display = "block";
+        //  document.getElementById("pause2").classList.remove("hidden");
+        // document.getElementById("resume2").classList.add("hidden"); 
+        document.getElementById("folder-pause").style.display = "block";
+        document.getElementById("folder-resume").style.display = "none";
+      }
+
+      try {
+        //  const files =  document.getElementById("videoInput").files;
+        // const filed =  document.getElementById("folderInput").files;
+        const session_Id = localStorage.getItem("session-id");
+        const response = await fetch(`${API_BASE_URL}/dashboard/sessions/${session_Id}/files`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+          },
+
+        })
+
+        // console.log(response);
+
+        const datas = await response.json();
+        console.log(datas);
+
+
+        // resumeVideo(datas , files.length == 0 ? files : filed);
+        resumeVideo(datas, a);
+      } catch (err) {
+        console.log(err);
+      }
+
+    }
+
+    //  document.getElementById("fmBackBtn").onclick = () => {
+    //   if (!history.length) return;
+    //   currentFolder = history.pop();
+    //   renderFolder(currentFolder);
+    // }
+    async function cancelupload(a) {
+      stopLoader(a);
+      cancelUpload();
+      // document.getElementById("total-folders").textContent = '0 Folders &nbsp&nbsp|&nbsp&nbsp';
+      //  document.getElementById("total-files").textContent =  '0 Files';
+      document.getElementById("selected-files").textContent = `0 Selected`;
+      document.getElementById("completed-files").textContent = `0 Completed`;
+      if (a == 1) {
+        // console.log('sv');
+        //  document.getElementById("loader").style.display = "none";
+        // document.getElementById("button-submit").style.display = 'block';
+        // document.getElementById("controls1").style.display = "block";
+        // document.getElementById("pause1").style.display = "block";
+        // document.getElementById("controls1").classList.add("hidden");
+        document.getElementById("button-submit").style.display = 'flex';
+
+        document.getElementById("videocontainer").style.display = 'none';
+      } else {
+        // console.log('jhhhh');
+        document.getElementById("button-submit-folder").style.display = 'flex';
+        // document.getElementById("controls1").style.display = "block";
+        // document.getElementById("pause1").style.display = "block";
+        // document.getElementById("controls2").classList.add("hidden");
+        document.getElementById("foldercontainer").style.display = 'none';
+        //  document.getElementById("loaders").style.display = "none";
+        // document.getElementById("button-submit-folder").style.display = 'block';
+        // document.getElementById("controls1").style.display = "block";
+        // document.getElementById("pause1").style.display = "block";
+        // document.getElementById("controls2").classList.add("hidden");
+      }
+
+
+      const session_Id = localStorage.getItem("session-id");
+      console.log(session_Id);
+      // alert('fvfvfv');
+      const response = await fetch(`${API_BASE_URL}/dashboard/sessions/${session_Id}/files`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+        },
+
+      })
+      console.log(response);
+      const datas = await response.json();
+      console.log(datas);
+
+
+      for (let i = 0; i < datas.length; i++) {
+
+        const res = await fetch(`${API_BASE_URL}/upload/file/${datas[i].id}/cancel`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+          }
+        });
+      }
+      //  document.getElementById("videoInput").value = "";
+      // document.getElementById("folderInput").value = "";
+      // cancelUpload();
+
+      //  document.getElementById("loader").style.display = "none";
+      //   document.getElementById("loaders").style.display = "none";
+      //   document.getElementById("button-submit").style.display = "block";
+      //   document.getElementById("button-submit-folder").style.display = "block";
+      //   document.getElementById("controls1").style.display = "none";
+      //   document.getElementById("controls2").style.display = "none";
+    }
+
+
+    //   document.addEventListener('DOMContentLoaded', () => {
+    //     console.log("The DOM is fully loaded!");
+    //     dashboardLoad();
+    //     // Your function code here
+    // });
+
+
+    async function dashboardLoad() {
+      console.log("Dashboard Load Called");
+      const detail = JSON.parse(localStorage.getItem("match"));
+      const sessionId = localStorage.getItem("session-id");
+      //  localStorage.setItem("session-id" , sessionKey);
+      console.log(detail, sessionId);
+
+
+      const res = await fetch(`${API_BASE_URL}/dashboard/sessions/${sessionId}/files`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+        },
+
+      })
+      // console.log(res);
+      const data = await res.json();
+      console.log(data);
+
+      const tree = buildFileTree(data);
+      originalTree = tree;
+      // originalTree = buildTree(files);
+      currentTree = originalTree;
+      const container = document.getElementById('fileBody');
+
+      container.innerHTML = '';
+      renderTree(tree, container);
+      // renderFileManager(fileTree);
+      // const container = document.getElementById('fileBody');
+      //  const res = await fetch(`${API_BASE_URL}/dashboard/sessions`, {
+      //     method: "GET",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //       "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+      //     },
+      initUploadState(data);
+      // console.log(state);
+      console.log(uploadFileState);
+
+
+
+      //   })
+      //   console.log(res);
+      //   const data = await res.json();
+      // console.log(data);
+      // renderSessions(data);
+
+      const details = JSON.parse(localStorage.getItem("selectedMatch"));
+      //  const response = await fetch(`${API_BASE_URL}/matches/${details.id}/sync-view`, {
+      //   method: "GET",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //     "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+      //   },
+
+
+
+      // })
+      // console.log(response);
+      // const datas = await response.json();
+      //       console.log(datas);
+      //    const tree = buildTree(datas);
+      //         console.log(tree);
+      //         fileTree = tree;
+      // currentFolder = tree;
+      // history = [];
+      // console.log(tree);
+      // renderFolder(fileTree);
+      // renderFolders(tree, document.getElementById("folders"));
+      // renderFolder(tree);
+    }
+
+    //    function buildTree(apiData) {
+    //   const root = { name: "root", type: "folder", children: [] };
+
+    //   for (const [path, files] of Object.entries(apiData.folders)) {
+    //     const parts = path === "root" ? [] : path.split("/");
+    //     let current = root;
+
+    //     // build folder hierarchy
+    //     for (const part of parts) {
+    //       let folder = current.children.find(
+    //         c => c.type === "folder" && c.name === part
+    //       );
+
+    //       if (!folder) {
+    //         folder = { name: part, type: "folder", children: [] };
+    //         current.children.push(folder);
+    //       }
+    //       current = folder;
+    //     }
+
+    //     // add files
+    //     for (const f of files) {
+    //       if (f.file === ".DS_Store") continue;
+
+    //       current.children.push({
+    //         name: f.file,
+    //         type: "file",
+    //         size: f.size,
+    //         status: f.status,
+    //         s3Key: f.s3Key
+    //       });
+    //     }
+    //   }
+    //   console.log(root);
+    //   return root;
+    // }
+
+
+    function buildFileTree(files) {
+      const root = { files: [], folders: {} };
+
+      files.forEach(file => {
+        const parts = file.s3Key.split('/');
+
+        // parts = ['matches', matchId, ...folders, file]
+        const folders = parts.slice(2, -1); // AFTER matchId
+        const fileName = file.relativePath;
+
+        if (folders.length === 0) {
+          // root-level video
+          root.files.push(file);
+        } else {
+          let current = root.folders;
+
+          folders.forEach((folder, index) => {
+            current[folder] ??= { files: [], folders: {} };
+
+            if (index === folders.length - 1) {
+              current[folder].files.push(file);
+            }
+
+            current = current[folder].folders;
+          });
+        }
+      });
+
+      return root;
+    }
+
+
+
+    let selectedFolder = null;
+
+    // function renderFolders(node, container) {
+    //   const div = document.createElement("div");
+
+    //   if (node.name !== "root") {
+    //     div.textContent = "📁 " + node.name;
+    //     div.className = "folder";
+
+    //     div.onclick = () => {
+    //       selectedFolder = node;
+    //       renderFiles(node);
+    //     };
+
+    //     container.appendChild(div);
+    //   }
+
+    //   for (const child of node.children || []) {
+    //     if (child.type === "folder") {
+    //       const childContainer = document.createElement("div");
+    //       childContainer.style.paddingLeft = "14px";
+    //       renderFolders(child, childContainer);
+    //       container.appendChild(childContainer);
+    //     }
+    //   }
+    // }
+
+
+
+    function renderTree(node, container, indent = 0) {
+
+      // 1️⃣ Render folders
+      console.log(node);
+      Object.entries(node.folders).forEach(([folderName, folderNode]) => {
+        const folderRow = document.createElement('div');
+        folderRow.className = 'row folder';
+        folderRow.style.paddingLeft = `${24 + indent}px`;
+        folderRow.innerHTML = `
+      <span  display: flex;
+  align-items: center;
+  gap: 8px;>${folderSVG}<span class= "filename"> ${folderName}</span></span>
+      <span
+       style="
+    float: right;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 1;
+    letter-spacing: 0;
+    color: #1F2022;
+  ">${folderNode.files.length} files</span>
+      <span>—</span>
+    `;
+
+        const children = document.createElement('div');
+        children.style.display = 'none';
+
+        folderRow.onclick = () => {
+          children.style.display =
+            children.style.display === 'none' ? 'block' : 'none';
+        };
+
+        container.appendChild(folderRow);
+        container.appendChild(children);
+
+        renderTree(folderNode, children, indent + 24);
+      });
+
+      // 2️⃣ Render files at this level
+      node.files.forEach(file => {
+        const wrapper = document.createElement('div');
+        wrapper.dataset.fileid = file.id;
+        const state = uploadFileState.files[file.id];
+        const percent = state ? state.percent : 0;
+        const status = state ? state.status : "Uploading";
+        console.log(file);
+        // wrapper.innerHTML = `
+        //   <div class="row file" style="padding-left:${24 + indent}px">
+        //     <span style="display:flex;align-items:center;gap:8px;">
+        //       ${fileSVG}
+        //       <span class="filename">${file.relativePath}</span>
+        //     </span>
+
+        //     <span>${(file.size / 1024 / 1024).toFixed(1)} MB</span>
+        //     <span class="status">Uploading</span>
+        //   </div>
+
+        //   <!-- FULL WIDTH PROGRESS -->
+        //   <div class="progress-row" style="padding-left:${24 + indent}px">
+        //     <div class="progress-line">
+        //       <div class="progress-fill"></div>
+        //     </div>
+        //   </div>
+        // `;
+        wrapper.innerHTML = `
+  <div class="row file" data-s3key="${encodeURIComponent(file.s3Key)} style="padding-left:${24 + indent}px">
+    <span style="display:flex;align-items:center;gap:8px;">
+      ${fileSVG}
+      <span   class="filename">${file.relativePath}</span>
+    </span>
+
+    <span
+     style="
+    float: right;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 1;
+    letter-spacing: 0;
+    color: #1F2022;
+  ">${(file.size / 1024 / 1024).toFixed(1)} MB</span>
+    <span class="status">${status}</span>
+  </div>
+
+  <div class="progress-row" style="padding-left:${24 + indent}px">
+    <div class="progress-line">
+      <div class="progress-fill" style="width:${percent}%"></div>
+    </div>
+  </div>
+`;
+
+        container.appendChild(wrapper);
+        const filenameSpan = wrapper.querySelector('.filename');
+        filenameSpan.addEventListener('click', () => playVideo(file.s3Key));
+      });
+
+    }
+
+
+
+
+
+    function getStatusColor(status) {
+      switch (status) {
+        case "completed":
+          return "green";
+        case "uploading":
+          return "orange";
+        case "failed":
+          return "red";
+        case "orphaned":
+          return "red";
+        case "missing":
+          return "darkred";
+        case "pending":
+          return "blue";
+        default:
+          return "gray";
+      }
+    }
+
+    // async function playVideo(s3Key) {
+    //   const res = await fetch(`${API_BASE_URL}/matches/files/video-url`, {
+    //     method: "POST",
+    //     headers: { "Content-Type": "application/json" ,
+    //        "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+    //     },
+    //     body: JSON.stringify({ s3Key })
+    //   });
+
+    //   const { videoUrl } = await res.json();
+
+    //   const video = document.getElementById("videoPlayer");
+    //   video.src = videoUrl;
+    //   video.load();
+    //   video.play();
+    //   video.addEventListener("playing", () => {
+    //   wrapper.classList.remove("hidden");
+    // }, { once: true });
+
+    //   // document.getElementById("videoModal").style.display = "flex";
+    // }
+
+    // renderFolders(tree, document.getElementById("folders"));
+
+
+    // const tree = buildTree(apiResponse);
+
+    function renderFiles(folder) {
+      const content = document.getElementById("files");
+      content.innerHTML = "";
+
+      for (const item of folder.children) {
+        if (item.type !== "file") continue;
+
+        const div = document.createElement("div");
+        div.className = `file ${item.status}`;
+        div.innerHTML = `
+      🎬 ${item.name}
+     <span
+  style="
+    float: right;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1;
+    letter-spacing: 0;
+    color: #1F2022;
+  "
+>
+  ${formatSize(item.size)}
+</span>
+    `;
+
+        content.appendChild(div);
+      }
+    }
+
+
+
+
+
+
+
+
+    async function SaveUpload(etag, fileId, file, single, signal) {
+      console.log(etag);
+      const res = await fetch(`${API_BASE_URL}/upload/part`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+        },
+        body: JSON.stringify({
+          "fileId": fileId,
+          "partNumber": 1,
+          "etag": etag,
+          "size": file.size
+        }),
+        signal: signal
+      })
+      console.log(res);
+      //  const data = await res.json();
+      const response = await fetch(`${API_BASE_URL}/upload/complete`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+        },
+        body: JSON.stringify({
+          "fileId": fileId,
+        }),
+        signal: signal
+      })
+      console.log(res);
+      if (res.statusText == 'OK') {
+        // alert('Video Uploaded Successfully');
+        return true;
+      }
+      return true;
+
+      // document.getElementById("loader").style.display = "none";
+      // document.getElementById("loaders").style.display = "none";
+      // document.getElementById("button-submit").style.display = "block";
+
+
+
+
+    }
+
+    //   function UploadToS3(data, fileId, file, signal) {
+    //   return new Promise(async (resolve, reject) => {
+    //     const buffer = await window.electron.readFile(file.path);
+    //     const xhr = new XMLHttpRequest();
+
+    //     xhr.open("PUT", data.url);
+    //     xhr.setRequestHeader("Content-Type", file.type);
+
+    //     xhr.upload.onprogress = (e) => {
+    //       if (!e.lengthComputable) return;
+
+    //       const delta = e.loaded - (uploadFileState.files[file.name].uploaded || 0);
+
+    //       // update per-file
+    //       uploadFileState.files[file.name].uploaded = e.loaded;
+    //       uploadFileState.files[file.name].percent = Math.round(
+    //         (e.loaded / file.size) * 100
+    //       );
+
+    //       // update global
+    //       uploadFileState.uploadedBytes += delta;
+
+    //       updateFileUI(fileId, uploadFileState.files[file.name].percent);
+    //       // updateGlobalUI();
+    //     };
+
+    //     xhr.onload = async () => {
+    //       if (xhr.status === 200) {
+    //         const etag = xhr.getResponseHeader("ETag");
+    //         await SaveUpload(etag, fileId, file, "1", signal);
+    //         resolve(true);
+    //       } else reject();
+    //     };
+
+    //     xhr.onerror = reject;
+    //     xhr.send(buffer);
+    //   });
+    // }
+
+
+
+
+
+
+    function UploadToS3(data, fileId, file, signal) {
+      console.log('called');
+      return new Promise(async (resolve, reject) => {
+        console.log(file, fileId, data);
+        // await acquireUploadSlot();
+        const buffer = await window.electron.readFile(file.path);
+        const xhr = new XMLHttpRequest();
+        if (signal) {
+          if (signal.aborted) {
+            xhr.abort();
+            return;
+          }
+
+          signal.addEventListener(
+            "abort",
+            () => {
+              console.log("Abort signal received for", fileId);
+              xhr.abort();
+            },
+            { once: true }
+          );
+        }
+        xhr.open("PUT", data.url);
+        xhr.setRequestHeader("Content-Type", file.type);
+
+        xhr.upload.onprogress = (e) => {
+          if (!e.lengthComputable) return;
+          console.log(uploadFileState);
+          const state = uploadFileState.files[fileId];
+          console.log(state);
+          const prev = state.uploaded;
+          const delta = Math.max(0, e.loaded - prev);
+
+          // per-file
+          state.uploaded = e.loaded;
+          state.percent = Math.round((e.loaded / state.size) * 100);
+
+          // global
+          uploadFileState.uploadedBytes += delta;
+          const now = Date.now();
+          const deltaBytes = uploadFileState.uploadedBytes - uploadFileState.lastBytes;
+          const deltaTime = (now - uploadFileState.lastTime) / 1000;
+
+          if (deltaTime > 0) {
+            uploadFileState.speed = deltaBytes / deltaTime;
+          }
+
+          uploadFileState.lastBytes = uploadFileState.uploadedBytes;
+          uploadFileState.lastTime = now;
+
+          updateSpeedGauge(uploadFileState.speed);
+          updateFileUI(fileId, state.percent);
+          // updateGlobalUI();
+        };
+
+        xhr.onload = async () => {
+          if (xhr.status === 200) {
+            const state = uploadFileState.files[fileId];
+            if (!state.completed) {
+              state.completed = true;
+              //  releaseUploadSlot();
+              uploadFileState.completedFiles++;
+              document.getElementById('completed-files').textContent = `${uploadFileState.completedFiles} Completed  |  `;
+              // updateCompletedUI();
+            }
+            const etag = xhr.getResponseHeader("ETag");
+            await SaveUpload(etag, fileId, file, "1", signal);
+            resolve(true);
+          } else {
+
+            //  const states = uploadFileState.files[fileId];
+            const wrapper = document.querySelector(`[data-fileid="${fileId}"]`);
+            const status = wrapper.querySelector(".status");
+            if (status) {
+              status.textContent = "Failed";
+
+              status.style.color = "#D32F2F";
+              status.style.fontFamily = "'Plus Jakarta Sans', sans-serif";
+              status.style.fontWeight = "700";
+              status.style.fontSize = "14px";
+              status.style.lineHeight = "1";           // 100%
+            }
+            uploadState = UploadState.ERROR;
+            //  releaseUploadSlot();
+            console.log(error);
+            reject(new Error("Upload failed"));
+          }
+        };
+
+        // xhr.onerror = reject;
+        xhr.onerror = () => {
+
+          const wrapper = document.querySelector(`[data-fileid="${fileId}"]`);
+          console.log('hhhhhh', wrapper);
+          //  uploadState = UploadState.ERROR;
+          if (wrapper) {
+            const status = wrapper.querySelector(".status");
+            if (status) {
+              status.textContent = "Failed";
+              status.style.color = "#D32F2F";
+              status.style.fontFamily = "'Plus Jakarta Sans', sans-serif";
+              status.style.fontWeight = "700";
+              status.style.fontSize = "14px";
+              status.style.lineHeight = "1";
+            }
+            //  releaseUploadSlot();
+            uploadState = UploadState.ERROR;
+          }
+          reject(new Error("Network error during upload"));
+        };
+        xhr.send(buffer);
+      });
+    }
+
+
+    function updateFileUI(fileId, percent) {
+      const el = document.getElementById(`progress-${fileId}`);
+      if (el) el.style.width = percent + "%";
+    }
+
+
+
+    function updateFileUI(fileId, percent) {
+      const wrapper = document.querySelector(`[data-fileid="${fileId}"]`);
+      if (!wrapper) return;
+
+      const bar = wrapper.querySelector(".progress-fill");
+      if (bar) bar.style.width = percent + "%";
+
+      if (percent >= 100) {
+
+        const status = wrapper.querySelector(".status");
+        if (status) {
+          status.textContent = "Completed";
+
+          status.style.color = "#0B9410";
+          status.style.fontFamily = "'Plus Jakarta Sans', sans-serif";
+          status.style.fontWeight = "700";
+          status.style.fontSize = "14px";
+          status.style.lineHeight = "1";           // 100%
+        }
+
+        const progressRow = wrapper.querySelector(".progress-row");
+        if (progressRow) {
+          setTimeout(() => progressRow.remove(), 500);
+        }
+      }
+    }
+
+
+    // function updateFileProgress(fileId, percent) {
+    //   const el = document.getElementById(`progress-${fileId}`);
+    //   if (el) el.style.width = `${percent}%`;
+    // }
+
+
+
+
+
+
+    //     async function UploadToS3(data, fileId , file , signal) {
+    //       console.log(data);
+
+    //       console.log(file);
+
+    // const buffer = await window.electron.readFile(file.path); //
+    //       const res = await fetch(data.url, {
+    //         method: "PUT",
+    //         body: buffer,
+    //         headers: {
+    //           "Content-Type": file.type
+    //         },
+    //         signal: signal
+
+    //       });
+    //       const etag = res.headers.get("ETag");
+    //       console.log(etag);
+    //       if (!res.ok) {
+    //         throw new Error("Upload failed");
+    //       }
+    //       console.log(res);
+    //       await SaveUpload(etag, fileId, file, '1' , signal);
+    //       return true;
+    //       // const datas = await res.json();
+    //       // status.textContent = "✅ Upload successful";
+    //       // console.log("Server response:", datas);
+    //     }
+
+
+
+
+
+
+
+    async function SingleSignedUrl(id, fileId, file, signal) {
+      try {
+        const res = await fetch(`${API_BASE_URL}/upload/sign`, {
+
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+          },
+          body: JSON.stringify({
+            fileId: fileId,
+            partNumber: "1"
+          }),
+          signal: signal
+        })
+        console.log(res);
+        const data = await res.json();
+        // status.textContent = "✅ Upload successful";
+        console.log("Server response:", data);
+        await UploadToS3(data, fileId, file, signal);
+        return true;
+      } catch (err) {
+        console.log(err);
+      }
+
+    }
+
+
+
+
+
+
+
+
+
+    async function multipart(fileid, file, signal) {
+      console.log(fileid);
+
+      const res = await fetch(`${API_BASE_URL}/upload/init`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+        },
+        body: JSON.stringify({
+          fileId: fileid,
+          type: file.type
+        }),
+        signal: signal
+      })
+      console.log(res);
+      const data = await res.json();
+      // status.textContent = "✅ Upload successful";
+      console.log("Server response:", data);
+      if (data.totalParts == 1) {
+        await SingleSignedUrl(data.uploadId, fileid, file, signal);
+      } else {
+        await MultiSignedUrl(data.uploadId, fileid, data.totalParts, file, signal);
+      }
+      return true;
+
+    }
+
+    document.getElementById("retryAllBtn").addEventListener("click", () => {
+      document.getElementById("button-submit-folder").style.display = 'none';
+      document.getElementById("foldercontainer").style.display = 'flex';
+      resumeupload("2");
+    });
+
+
+
+    async function MultiSignedUrl(id, fileId, parts, file, signal) {
+      const arr = Array.from({ length: parts }, (_, i) => i + 1);
+      const res = await fetch(`${API_BASE_URL}/upload/batch-sign`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+        },
+        body: JSON.stringify({
+          fileId: fileId,
+          partNumbers: arr
+        }),
+        signal: signal
+      })
+      console.log(res);
+
+      const data = await res.json();
+      // status.textContent = "✅ Upload successful";
+      console.log("Server response:", data);
+      // UploadToS3(data , fileId );
+      await UploadToMultiS3(data, fileId, parts, file, signal);
+      return true;
+    }
+
+
+
+
+
+
+    async function UploadToMultiS3(data, fileId, parts, file, signal) {
+      console.log(data, fileId, parts, file);
+      console.log(file, CHUNK_SIZE);
+      const uploadPromises = [];
+      const etags = [];
+      for (let partNumber = 1; partNumber <= parts; partNumber++) {
+        const start = (partNumber - 1) * CHUNK_SIZE * 1024 * 1024;
+        const end = Math.min(start + CHUNK_SIZE * 1024 * 1024, file.size);
+        // const chunk = file.slice(start, end);
+        // console.log(chunk);
+        console.log(start, end);
+        // const urlObj = presignedUrls.find(u => u.partNumber === partNumber);
+        // if (!urlObj) {
+        //   throw new Error(`No URL found for partNumber ${partNumber}`);
+        // }
+
+        // const uploadPromise = fetch(data[partNumber - 1].url, {
+        //   method: 'PUT',
+        //   body: chunk,
+        //   headers: {
+        //     "Content-Type": file.type
+        //   },
+        //   signal: signal
+        // }).then(response => {
+        //   if (!response.ok) {
+        //     throw new Error(`Failed to upload part ${partNumber}`);
+        //   }
+        //   console.log(`Uploaded part ${partNumber} (${chunk.size} bytes)`);
+
+        //   const etag = response.headers.get("ETag");
+
+        //   if (!etag) {
+        //     throw new Error(`No ETag returned for part ${partNumber}`);
+        //   }
+
+        //   // Save partNumber and ETag
+        //   etags.push({ PartNumber: partNumber, ETag: etag, chunkSize: end - start });
+        // });
+        const uploadPromise = window.electron.uploadChunk({
+          presignedUrl: data[partNumber - 1].url,
+          filePath: file.path,
+          start,
+          end,
+          partNumber,
+          type: file.type
+        }).then(etag => {
+          etags.push({
+            PartNumber: partNumber,
+            ETag: etag,
+            chunkSize: end - start
+          });
+        });
+
+
+
+
+        uploadPromises.push(uploadPromise);
+      }
+
+      try {
+        // Wait until ALL uploads finish
+        //  await SaveMultiUpload(etags , fileId);
+        await Promise.all(uploadPromises);
+        console.log("All parts uploaded successfully!");
+        console.log(etags);
+
+        await SaveMultiUpload(etags, fileId, signal);
+        // SaveUpload(etags , fileId , files , parts);
+
+        // Here you can trigger the "complete multipart upload" step if needed
+      } catch (error) {
+        console.error("Upload failed:", error);
+        uploadState = UploadState.ERROR;
+        // Handle retry or error reporting here
+      }
+
+      return true;
+    }
+
+
+
+
+
+    async function uploadSession(size, detail, signal) {
+      //  console.log(file);
+      console.log(detail);
+      //  const files = Array.from(file);
+      //  console.log(files);
+      //  const totalSize = files.reduce((acc, file) => acc + file.size, 0);
+
+      const res = await fetch(`${API_BASE_URL}/upload/session`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+        },
+        body: JSON.stringify({
+          "totalSize": size,
+          "match_id": detail.id
+        }),
+        signal: signal
+      });
+      console.log(res);
+      const sizes = formatSize(size);
+      const [value, unit] = sizes.split(" ");
+      document.getElementById('size-inNumber').textContent = value;
+      document.getElementById('size-unit').textContent = unit;
+      const data = await res.json();
+      status.textContent = "✅ Upload successful";
+      console.log("Server response:", data.id);
+      return data.id;
+      if (!res.ok) {
+        throw new Error("Upload failed");
+      }
+    }
+
+
+
+
+    async function SaveMultiUpload(tag, fileId, signal) {
+      for (const item of tag) {
+        try {
+          console.log(item);
+          const res = await fetch(`${API_BASE_URL}/upload/part`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+            },
+            body: JSON.stringify({
+              fileId: fileId,
+              partNumber: item.PartNumber, // correct case
+              etag: item.ETag,             // match the key used earlier
+              size: item.chunkSize,
+            }),
+            signal: signal
+          });
+
+          console.log(`Response for part ${item.PartNumber}:`, res);
+
+          if (!res.ok) {
+            console.error(`Failed to save part ${item.PartNumber}`);
+          } else {
+            console.log(`Saved part ${item.PartNumber} metadata`);
+          }
+        } catch (error) {
+          console.error(`Error saving part ${item.PartNumber}:`, error);
+        }
+      }
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/upload/complete`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+          },
+          body: JSON.stringify({
+            fileId: fileId,
+          }),
+          signal: signal
+        });
+
+        console.log("Complete upload response:", response);
+
+        if (!response.ok) {
+          console.error("Failed to complete multipart upload");
+        } else {
+          document.getElementById("loader").style.display = "none";
+          document.getElementById("button-submit").style.display = "block";
+          // document.getElementById("controls1").style.display = "none";
+          // document.getElementById("controls2").style.display = "none";
+          // alert("Multipart upload completed successfully");
+
+          console.log("Multipart upload completed successfully");
+        }
+
+      } catch (error) {
+        console.error("Error completing multipart upload:", error);
+      }
+      return true;
+    }
+
+
+    function filterValidVideos(files) {
+      return files.filter(file => {
+        // Check if file type starts with 'video/' and size is greater than 0
+        return file.type.startsWith('video/') && file.size > 0;
+      });
+    }
+
+    async function retryUpload() {
+      const session_Id = localStorage.getItem("session-id");
+      const token = localStorage.getItem("token") || "";
+      console.log(session_Id, token);
+      //     const response = await fetch(`${API_BASE_URL}/dashboard/sessions/${session_Id}/files`, {
+      //       method: "GET",
+      //       headers: {
+      //         "Content-Type": "application/json",
+      //         "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+      //       },
+
+      //     })
+      //     // console.log(response);
+
+      //     const datas = await response.json();
+      //     console.log(datas );
+      //     const videos = datas.filter(video => video.status == completed);
+      //  consokle.log(videos);
+
+      //  const input = document.getElementById("folderInput");
+      // const videoInput = document.getElementById("videoInput"); 
+      const file = folderfile.length != 0 ? folderfile : videofile;
+      // const files = convertFilesForIPC(filterValidVideos(Array.from(file)));
+      if (file.length == 0) return;
+      window.electron.notifyQuit(file, session_Id, token, JSON.parse(localStorage.getItem("selectedMatch")).id);
+
+    }
+
+    function convertFilesForIPC(files) {
+      return files.map(file => ([
+        file.lastModified,
+        file.lastModifiedDate,
+        file.name,
+        file.size,
+        file.type,
+        file.webkitRelativePath
+      ]));
+    }
+
+    function createLimiter(limit) {
+      let active = 0;
+      const queue = [];
+
+      const next = () => {
+        if (active >= limit || queue.length === 0) return;
+        active++;
+
+        const { fn, resolve, reject } = queue.shift();
+        fn()
+          .then(resolve)
+          .catch(reject)
+          .finally(() => {
+            active--;
+            next();
+          });
+      };
+
+      return (fn) =>
+        new Promise((resolve, reject) => {
+          queue.push({ fn, resolve, reject });
+          next();
+        });
+    }
+
+
+
+    function filterTree(node, query) {
+      const q = query.toLowerCase();
+
+      const filtered = {
+        folders: {},
+        files: []
+      };
+
+      // 1️⃣ Filter files
+      node.files.forEach(file => {
+        if (file.relativePath.toLowerCase().includes(q)) {
+          filtered.files.push(file);
+        }
+      });
+
+      // 2️⃣ Filter folders (recursive)
+      Object.entries(node.folders).forEach(([name, folderNode]) => {
+        const folderMatches = name.toLowerCase().includes(q);
+        const childFiltered = filterTree(folderNode, query);
+
+        if (
+          folderMatches ||
+          Object.keys(childFiltered.folders).length > 0 ||
+          childFiltered.files.length > 0
+        ) {
+          filtered.folders[name] = childFiltered;
+        }
+      });
+
+
+      return filtered;
+    }
+
+    window.addEventListener("beforeunload", onAppExit);
+
+    //Root folder
+
+
+
+    function getRootFolderName(files) {
+      if (!files || files.length === 0) return "";
+
+      const firstPath = files[0].path || files[0];
+
+      // Normalize slashes
+      const parts = firstPath.replace(/\\/g, "/").split("/");
+
+      // Folder is second last before filename
+      return parts[parts.length - 2];
+    }
+
+    function getRelativePathWithRoot(file, rootFolder) {
+      const fullPath = file.path.replace(/\\/g, "/");
+
+      const parts = fullPath.split("/");
+
+      // Find where root folder starts
+      const rootIndex = parts.lastIndexOf(rootFolder);
+
+      return parts.slice(rootIndex).join("/");
+    }
+
+    async function uploadVideo(a) {
+      console.log('upload video called');
+
+
+      if (uploadState === UploadState.UPLOADING) return;
+
+      try {
+
+        console.log(folderfile, videofile, folderfile?.length);
+        const file = folderfile?.length != 0 ? folderfile : videofile;
+        console.log(file);
+        const folder_count = getFolderCount(file);
+
+        if (file.length == 0) {
+          alert("Please select a video first");
+
+          return;
+        }
+
+
+        console.log(file);
+
+
+        uploadAbortController = new AbortController();
+        const signal = uploadAbortController.signal;
+        uploadState = UploadState.UPLOADING;
+        const detail = JSON.parse(localStorage.getItem("selectedMatch"));
+        console.log(detail, JSON.parse(localStorage.getItem("selectedMatch")));
+        console.log(file);
+
+        showLoader(a);
+
+        document.getElementById("selected-files").textContent = `${file.length} Selected`;
+        document.getElementById("completed-files").textContent = `0 Completed`;
+        if (a == 1) {
+          console.log('ggggg');
+
+
+
+          document.getElementById("button-submit").style.display = 'none';
+
+          document.getElementById("videocontainer").style.display = 'flex';
+
+
+        } else {
+
+          //  document.getElementById("loaders").style.display = "block";
+          document.getElementById("button-submit-folder").style.display = 'none';
+          document.getElementById("foldercontainer").style.display = 'flex';
+
+          // document.getElementById("controls2").classList.remove("hidden");
+
+
+        }
+
+
+
+        // document.getElementById("uploadStatus").innerText = 'Uploading...';
+        console.log(file);
+
+        // if(a == 2) {
+
+        const files = filterValidVideos(Array.from(file));
+        console.log(files);
+        // files = filterValidVideos(files);
+        console.log(files);
+        const totalSize = files.reduce((acc, file) => acc + file.size, 0);
+
+        const sessionKey = await uploadSession(totalSize, detail, signal);
+        localStorage.setItem("session-id", sessionKey);
+        //  dashboardLoad();
+        console.log(localStorage.getItem("session-id"));
+
+
+
+        //  const uploadPromises = [];
+        //   for (const file of files) {
+        //   const res = await fetch(`${API_BASE_URL}/upload/files`, {
+        //     method: "POST",
+        //     headers: {
+        //       "Content-Type": "application/json",
+        //       "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+        //     },
+        //     body: JSON.stringify({
+        //       files: [{
+        //         sessionId: sessionKey,
+        //         relativePath: file.name,
+        //         size: file.size,
+        //         s3Key: folderfile.length !== 0
+        //           ? `matches/${detail.id}/${file.webkitRelativePath}`
+        //           : `matches/${detail.id}/${file.name}`
+        //       }]
+        //     }),
+        //     signal
+        //   });
+
+        //   if (!res.ok) throw new Error("Upload failed");
+
+        //   const data = await res.json();
+
+        //   // Start upload immediately (parallel)
+        //   uploadPromises.push(
+        //     multipart(data.files[0].fileId, file, signal)
+        //   );
+        // }
+        //   const FILE_CONCURRENCY = 6;
+        // const limitFile = createLimiter(FILE_CONCURRENCY);
+        // for (const file of files) {
+        //   // ✅ safe for Electron
+
+
+        //   uploadPromises.push(
+        //     limitFile(async () => {
+        //       const res = await fetch(`${API_BASE_URL}/upload/files`, {
+        //         method: "POST",
+        //         headers: {
+        //           "Content-Type": "application/json",
+        //           "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+        //         },
+        //         body: JSON.stringify({
+        //           files: [{
+        //             sessionId: sessionKey,
+        //             relativePath: file.name,
+        //             size: file.size,
+        //             s3Key: folderfile.length !== 0
+        //               ? `matches/${detail.id}/${file.webkitRelativePath}`
+        //               : `matches/${detail.id}/${file.name}`
+        //           }]
+        //         }),
+        //         signal
+        //       });
+
+        //       if (!res.ok) throw new Error("Upload failed");
+
+        //       const data = await res.json();
+
+        //       // 👇 your existing multipart logic
+        //       return multipart(data.files[0].fileId, file, signal);
+        //     })
+        //   );
+        // }
+
+
+        // dashboardLoad();
+        //  console.log('ffffffff');
+
+        const fileTasks = [];
+        console.log(files);
+        const rootFolder = folderfile.length !== 0 ? getRootFolderName(files) : "";
+        for (const file of files) {
+          const res = await fetch(`${API_BASE_URL}/upload/files`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+            },
+            body: JSON.stringify({
+              files: [{
+                sessionId: sessionKey,
+                relativePath: file.name,
+                size: file.size,
+                s3Key: folderfile.length !== 0
+                  ? `matches/${detail.id}/${getRelativePathWithRoot(file, rootFolder)}`
+                  : `matches/${detail.id}/${file.name}`
+              }]
+            }),
+            signal
+          });
+
+          if (!res.ok) throw new Error("Upload failed");
+
+          const data = await res.json();
+
+          fileTasks.push({
+            file,
+            fileId: data.files[0].fileId
+          });
+        }
+        await dashboardLoad();
+
+
+        const FILE_CONCURRENCY = 6;
+        const limitFile = createLimiter(FILE_CONCURRENCY);
+
+        //  uploadPromises = fileTasks.map(({ file, fileId , signal }) =>
+        //   limitFile(() => multipart(fileId, file, signal))
+        // );
+        // uploadPromises.push(fileTasks.map(({ file, fileId }) =>
+        //   limitFile(() => multipart(fileId, file, signal))
+        // ));
+        const uploadPromises = fileTasks.map(({ file, fileId }) =>
+          limitFile(() => multipart(fileId, file, signal))
+        );
+
+
+
+
+        await Promise.all(uploadPromises);
+        stopLoader(a);
+        console.log('ffffffff');
+        // retryUpload();
+        console.log('gggggg');
+        if (uploadState === UploadState.UPLOADING) {
+          // document.getElementById("videoInput").value = "";
+          // document.getElementById("folderInput").value = "";
+          uploadState = UploadState.COMPLETED;
+
+          onUploadFinished("completed");
+        }
+        if (uploadState === UploadState.CANCELLED) {
+          console.log('gggggggggg');
+          onUploadFinished("cancelled");
+          return;
+        }
+        if (uploadState === UploadState.PAUSED) {
+          onUploadFinished("paused");
+          return;
+        }
+        if (uploadState === UploadState.ERROR) {
+          onUploadFinished("error", 'error');
+          //  retryUpload();
+        }
+
+        console.log(a);
+
+        if (a == 1) {
+          console.log('sv');
+
+          document.getElementById("button-submit").style.display = 'flex';
+
+          document.getElementById("videocontainer").style.display = 'none';
+        } else {
+          console.log('jhhhh');
+          //  document.getElementById("loaders").style.display = "none";
+          document.getElementById("button-submit-folder").style.display = 'flex';
+          // document.getElementById("controls1").style.display = "block";
+          // document.getElementById("pause1").style.display = "block";
+          // document.getElementById("controls2").classList.add("hidden");
+          document.getElementById("foldercontainer").style.display = 'none';
+        }
+      } catch (err) {
+        console.log(err);
+        stopLoader(a);
+        if (err.name === "AbortError") {
+          console.log('gggggggggg');
+          if (uploadState === UploadState.PAUSED) {
+            console.log('gggggggggg');
+            onUploadFinished("paused");
+          } else if (uploadState === UploadState.CANCELLED) {
+            console.log('gggggggggg');
+            onUploadFinished("cancelled");
+          }
+        } else {
+          console.log('gggggggggg');
+          // document.getElementById("total-folders").textContent = '0 Folders &nbsp&nbsp|&nbsp&nbsp';
+          //  document.getElementById("total-files").textContent =  '0 Files';
+          //  document.getElementById("selected-files").textContent = `0 Files`;
+          if (a == 1) {
+            console.log('ggggg');
+            // document.getElementById("loader").style.display = "none";
+            // document.getElementById("button-submit").style.display = 'block';
+
+            // document.getElementById("controls1").classList.add("hidden");
+            document.getElementById("button-submit").style.display = 'flex';
+
+            document.getElementById("videocontainer").style.display = 'none';
+
+
+          } else {
+            document.getElementById("button-submit-folder").style.display = 'flex';
+            // document.getElementById("controls1").style.display = "block";
+            // document.getElementById("pause1").style.display = "block";
+            // document.getElementById("controls2").classList.add("hidden");
+            document.getElementById("foldercontainer").style.display = 'none';
+
+            //  document.getElementById("loaders").style.display = "none";
+            //  document.getElementById("button-submit-folder").style.display = 'block';
+
+            // document.getElementById("controls2").classList.add("hidden");
+
+          }
+          uploadState = UploadState.ERROR;
+          //retryUpload();
+          onUploadFinished("error", err);
+        }
+
+
+      } finally {
+        console.log('hhhh');
+        uploadAbortController = null;
+      }
+      // document.getElementById("button-submit-folder").style.display = "block";
+      // document.getElementById("controls1").style.display = "none";
+      // document.getElementById("controls2").style.display = "none";
+    }
+
+
+    function getFolderCount(files) {
+      if (!Array.isArray(files)) return 0;
+
+      const folders = new Set(
+        files
+          .filter(f => f.path)
+          .map(f => f.path.substring(0, f.path.lastIndexOf('/')))
+      );
+
+      return folders.size;
+    }
+
+
+
+    function showLoader(a) {
+      if (a == 1) {
+        console.log('ggggg');
+        const icon = document.querySelector(".upload-video-icon");
+        console.log(icon);
+        // document.getElementById("loader").style.display = "block";
+        icon.classList.add("uploading");
+        document.getElementById("video-loader").style.display = "none";
+        document.getElementById("video-uploading-text").style.display = "block";
+      } else {
+        const icons = document.querySelector(".upload-folder-icon");
+        icons.classList.add("uploading");
+        document.getElementById("folder-loader").style.display = "none";
+        document.getElementById("folder-uploading-text").style.display = "block";
+        //  document.getElementById("loaders").style.display = "block";
+      }
+    }
+    function stopLoader(a) {
+      if (a == 1) {
+        console.log('ggggg');
+        const icon = document.querySelector(".upload-video-icon");
+
+        console.log(icon);
+        // document.getElementById("loader").style.display = "block";
+        icon.classList.remove("uploading");
+        document.getElementById("video-loader").style.display = "block";
+        document.getElementById("video-uploading-text").style.display = "none";
+      } else {
+        const icons = document.querySelector(".upload-folder-icon");
+        icons.classList.remove("uploading");
+        document.getElementById("folder-loader").style.display = "block";
+        document.getElementById("folder-uploading-text").style.display = "none";
+        //  document.getElementById("loaders").style.display = "block";
+      }
+    }
+
+
+    function sortByCreatedAt(items, order = "asc") {
+      return [...items].sort((a, b) => {
+        const timeA = new Date(a.createdAt).getTime();
+        const timeB = new Date(b.createdAt).getTime();
+
+        return order === "asc" ? timeA - timeB : timeB - timeA;
+      });
+    }
+    function onAppExit() {
+      // ✅ synchronous only
+
+      console.log("App / page is exiting");
+      // retryUpload();
+      // window.electron.notifyQuit();
+      // alert('back back');
+
+      // save lightweight state
+      // localStorage.setItem(
+      //   "upload_state",
+      //   JSON.stringify({
+      //     queue: uploadQueue,
+      //     ts: Date.now()
+      //   })
+      // );
+
+      // notify main process
+      // if (window.electron?.notifyQuit) {
+      //   window.electron.notifyQuit();
+      // }
+    }
+
+
+
+    async function resumeVideo(datas, a) {
+      console.log(datas, a);
+      //     document.querySelectorAll('#controls1, #pause1, #resume1')
+      // .forEach(el => el.style.display = '');
+      //  if (uploadState === UploadState.UPLOADING) return;
+
+      try {
+        // const input = document.getElementById("folderInput");
+        // const videoInput = document.getElementById("videoInput");
+        uploadAbortController = new AbortController();
+        const signal = uploadAbortController.signal;
+        uploadState = UploadState.UPLOADING;
+        const file = folderfile.length != 0 ? folderfile : videofile;
+        const detail = JSON.parse(localStorage.getItem("selectedMatch"));
+        console.log(detail, JSON.parse(localStorage.getItem("selectedMatch")));
+        console.log(file);
+        if (file.length == 0) {
+          alert("Please select a video first");
+          return;
+        }
+
+        // if(input.files.length !=0)  { 
+        // console.log('ggggg');
+        // document.getElementById("loader").style.display = "block";
+        // document.getElementById("button-submit").style.display = 'none';
+        // document.getElementById("controls1").style.display = "block";
+        // document.getElementById("pause1").style.display = "block";
+        // document.getElementById("controls1").classList.remove("hidden");
+        // document.getElementById("pause1").classList.remove("hidden");
+        // document.getElementById("resume1").classList.add("hidden");
+
+        // } else {
+        //  document.getElementById("loaders").style.display = "block";
+        //  document.getElementById("button-submit-folder").style.display = 'none';
+        // document.getElementById("controls2").style.display = "block";
+        // document.getElementById("pause2").style.display = "block";
+        // document.getElementById("controls2").classList.remove("hidden");
+        // document.getElementById("pause2").classList.remove("hidden");
+        // document.getElementById("resume2").classList.add("hidden");
+        // }
+
+
+
+        // document.getElementById("uploadStatus").innerText = 'Uploading...';
+        console.log(file);
+
+        // if(a == 2) {
+
+        const files = filterValidVideos(Array.from(file));
+        console.log(files, datas);
+        const totalSize = files.reduce((acc, file) => acc + file.size, 0);
+
+        const sessionKey = localStorage.getItem("session-id");
+        // localStorage.setItem("session-id" , sessionKey);
+        let currentFileIndex = 0;
+        console.log(localStorage.getItem("session-id"));
+        // const uploadPromises =[];
+        console.log(datas);
+        datas = sortByCreatedAt(datas);
+        console.log(datas, files);
+
+        //   const uploadPromises = datas.map(async (file , index) => {
+
+        //   if(file.status == "completed") {
+        //     return true;
+        //   }
+
+        //   currentFileIndex +=1;
+
+        //   console.log(index , file , datas);
+        //   // const res = await fetch(`${API_BASE_URL}/upload/files`, {
+        //   //   method: "POST",
+        //   //   headers: { "Content-Type": "application/json" ,
+        //   //     "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+        //   //   },
+        //   //   body: JSON.stringify({
+        //   //     files: [{
+        //   //       sessionId: sessionKey,
+        //   //       relativePath: files[index].name,
+        //   //       size: files[index].size,
+        //   //       s3Key: input.files.length !== 0
+        //   //         ? `uploads/${files[index].webkitRelativePath}`
+        //   //         : `uploads/${files[index].name}`
+        //   //     }]
+        //   //   }) ,
+        //   //   signal
+
+        //   // });
+        //   //  if (!res.ok) throw new Error("Upload failed");
+
+        //   // const data = await res.json();
+        //   // return multipart(data.files[0].fileId, files[index] , signal); // must return promise
+        //  console.log(file);
+        //     const res = await fetch(`${API_BASE_URL}/upload/init`, {
+        //       method: "POST",
+        //       headers: {
+        //         "Content-Type": "application/json",
+        //         "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+        //       },
+        //       body: JSON.stringify({
+        //         fileId: file.id,
+        //          type: files[index].type
+        //       }),
+        //       signal: signal
+        //     })
+        //     console.log(res);
+        //     const data = await res.json();
+
+        //      console.log("Server response:", data);
+        //     if (data.totalParts == 1) {
+        //     return  await  SingleSignedUrl(data.uploadId, file.id , files[index] , signal);
+        //     } else {
+        //     return  await  MultiSignedUrl(data.uploadId, file.id, data.totalParts, files[index] , signal);
+        //     }
+        //     // return true; 
+
+        // });
+
+        // await Promise.all(uploadPromises);
+        const FILE_CONCURRENCY = 6;
+        const limitFile = createLimiter(FILE_CONCURRENCY);
+
+        const uploadPromises = datas.map((file, index) =>
+          limitFile(async () => {
+
+            if (file.status === "completed") {
+              return true;
+            }
+
+            const res = await fetch(`${API_BASE_URL}/upload/init`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+              },
+              body: JSON.stringify({
+                fileId: file.id,
+                type: files[index].type
+              }),
+              signal
+            });
+
+            if (!res.ok) {
+              throw new Error("Resume init failed");
+            }
+
+            const data = await res.json();
+
+            if (data.totalParts === 1) {
+              return SingleSignedUrl(
+                data.uploadId,
+                file.id,
+                files[index],
+                signal
+              );
+            } else {
+              return MultiSignedUrl(
+                data.uploadId,
+                file.id,
+                data.totalParts,
+                files[index],
+                signal
+              );
+            }
+          })
+        );
+        await Promise.all(uploadPromises);
+
+
+        stopLoader(a);
+
+        if (uploadState === UploadState.UPLOADING) {
+          // document.getElementById("videoInput").value = "";
+          // document.getElementById("folderInput").value = "";
+          uploadState = UploadState.COMPLETED;
+
+          onUploadFinished("completed");
+        }
+        if (uploadState === UploadState.CANCELLED) {
+          onUploadFinished("cancelled");
+          return;
+        }
+        if (uploadState === UploadState.PAUSED) {
+          onUploadFinished("paused");
+          return;
+        }
+        if (a == 1) {
+          console.log('sv');
+          //  document.getElementById("loader").style.display = "none";
+          // document.getElementById("button-submit").style.display = 'block';
+          // document.getElementById("controls1").style.display = "block";
+          // document.getElementById("pause1").style.display = "block";
+          // document.getElementById("controls1").classList.add("hidden");
+          document.getElementById("button-submit").style.display = 'flex';
+
+          document.getElementById("videocontainer").style.display = 'none';
+          //  document.getElementById("total-folders").textContent = '0 Folders &nbsp&nbsp|&nbsp&nbsp';
+          //  document.getElementById("total-files").textContent =  '0 Files';
+          //  document.getElementById("selected-files").textContent = `0 Files`;
+        } else {
+          console.log('jhhhh');
+          document.getElementById("button-submit-folder").style.display = 'flex';
+          // document.getElementById("controls1").style.display = "block";
+          // document.getElementById("pause1").style.display = "block";
+          // document.getElementById("controls2").classList.add("hidden");
+          document.getElementById("foldercontainer").style.display = 'none';
+          //  document.getElementById("total-folders").textContent = '0 Folders &nbsp&nbsp|&nbsp&nbsp';
+          //  document.getElementById("total-files").textContent =  '0 Files';
+          //  document.getElementById("selected-files").textContent = `0 Files`;
+          //  document.getElementById("loaders").style.display = "none";
+          // document.getElementById("button-submit-folder").style.display = 'block';
+          // document.getElementById("controls1").style.display = "block";
+          // document.getElementById("pause1").style.display = "block";
+          // document.getElementById("controls2").classList.add("hidden");
+        }
+
+      } catch (err) {
+        console.log(err);
+        if (err.name === "AbortError") {
+          if (uploadState === UploadState.PAUSED) {
+            onUploadFinished("paused");
+          } else if (uploadState === UploadState.CANCELLED) {
+            onUploadFinished("cancelled");
+          }
+        } else {
+          if (a == 1) {
+            console.log('sv');
+            //  document.getElementById("loader").style.display = "none";
+            document.getElementById("button-submit").style.display = 'block';
+            // document.getElementById("controls1").style.display = "block";
+            // document.getElementById("pause1").style.display = "block";
+            // document.getElementById("controls1").classList.add("hidden");
+          } else {
+            console.log('jhhhh');
+            //  document.getElementById("loaders").style.display = "none";
+            // document.getElementById("button-submit-folder").style.display = 'block';
+            // document.getElementById("controls1").style.display = "block";
+            // document.getElementById("pause1").style.display = "block";
+            document.getElementById("controls2").classList.add("hidden");
+          }
+          uploadState = UploadState.ERROR;
+          onUploadFinished("error", err);
+        }
+      } finally {
+        console.log('hhhh');
+        uploadAbortController = null;
+      }
+      // alert('File uploaded');
+      //  document.getElementById("loader").style.display = "none";
+      // document.getElementById("loaders").style.display = "none";
+      // document.getElementById("button-submit").style.display = "block";
+      // document.getElementById("button-submit-folder").style.display = "block";
+      // document.getElementById("controls1").style.display = "none";
+      // document.getElementById("controls2").style.display = "none";
+
+
+
+    }
+   
+
+
+
+    function setupDropZone(elementId, type) {
+  const box = document.getElementById(elementId);
+
+  box.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    box.style.borderColor = '#1a6edf';
+    box.style.background = '#e8f2ff';
+  });
+
+  box.addEventListener('dragleave', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    box.style.borderColor = '#458DF9';
+    box.style.background = '#FCFDFF';
+  });
+
+  box.addEventListener('drop', async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // reset visual
+    box.style.borderColor = '#458DF9';
+    box.style.background = '#FCFDFF';
+   
+    // extract real filesystem paths — Electron patches .path onto File objects
+    const paths = Array.from(e.dataTransfer.files)
+  .map(f => f.path || f.webkitRelativePath || f.name)
+  .filter(Boolean);
+ console.log('jbnnn' ,paths);
+    if (paths.length === 0) return;
+
+    console.log('dropped paths:', paths);
+
+    // send to main process → stat + walk → returns same shape as dialog
+    const metadata = await window.electron.resolveDrop(paths);
+
+    console.log('resolved metadata:', metadata);
+
+    if (metadata.length === 0) {
+      alert('No valid video files found');
+      return;
+    }
+
+    if (type === 'video') {
+      videofile = metadata;
+    } else {
+      folderfile = metadata;
+    }
+
+    console.log(`${type} drop: ${metadata.length} file(s) ready`);
+  });
+}
+
+setupDropZone('selectVideosBtn', 'video');
+setupDropZone('selectFoldersBtn', 'folder');
+
+
+
+
+
+    // window.addEventListener("DOMContentLoaded", dashboardLoad());
+  </script>
+  <script src="config.js"></script>
+
+</body>
+
+</html>

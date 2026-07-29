@@ -589,15 +589,17 @@ ipcMain.handle('select-videos', async (_event, type) => {
     result = await dialog.showOpenDialog({
       properties: ['openFile', 'multiSelections'],
       filters: [
-        { name: 'Videos', extensions: ['mp4', 'mov', 'mkv', 'avi', 'webm'] }
+        { name: 'Videos', extensions: ['mp4', 'mov', 'mkv', 'avi', 'webm',] }
       ]
     });
 
     if (result.canceled) return [];
     // const gf = walk(result.filePaths[0]);
-    // console.log(gf);
+    console.log('dhfbhdbfhv' , result);
            return result.filePaths.map(p => {
+            console.log('dfjbvjdb ' , p);
       const stat = fs.statSync(p);
+      console.log('gggggg' , stat);
       return buildFileMeta(p, stat);
     });
     // return walk(result.filePaths);
@@ -615,7 +617,8 @@ ipcMain.handle('select-videos', async (_event, type) => {
 
   // Walk directory & return file paths
   const rootDir = result.filePaths[0];
-  return walk(result.filePaths[0] , rootDir);
+  const parentDir = path.dirname(rootDir); 
+  return walk(rootDir , parentDir);
 });
 
 ipcMain.handle('read-file', async (_event, filePath) => {
@@ -658,6 +661,37 @@ ipcMain.handle("upload-chunk", async (_e, d) => {
     req.on("error", reject);
   });
 });
+
+
+
+
+ipcMain.handle('resolve-drop', async (_event, paths) => {
+  const results = [];
+
+  for (const filePath of paths) {
+    try {
+      const stat = fs.statSync(filePath);
+
+      if (stat.isDirectory()) {
+        // reuse your existing walk function
+        const walked = walk(filePath, filePath);
+        results.push(...walked);
+      } else if (/\.(mp4|mov|mkv|avi|webm)$/i.test(filePath)) {
+        // reuse your existing buildFileMeta function
+        results.push(buildFileMeta(filePath, stat));
+      }
+    } catch (err) {
+      console.error('resolve-drop error for path:', filePath, err);
+    }
+  }
+
+  return results;
+  // returns exact same shape as select-videos
+  // { path, name, size, type, lastModified }
+  // walk also adds relativePath and webkitRelativePath
+});
+
+
 
 
 

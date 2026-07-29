@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .auth-card { box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.08); border: 1px solid #E5E7EB; }
+  </style>
+</head>
+<body class="bg-[#F8FAFC] min-h-screen flex items-center justify-center p-4">
+  <div class="auth-card bg-white rounded-3xl p-8 w-full max-w-[400px] text-center">
+    <div class="w-16 h-16 bg-[#F1F5F9] rounded-full flex items-center justify-center mx-auto mb-4">
+      <img src="assets/Logo.png" class="w-10 h-10 rounded-full" />
+    </div>
+    
+    <h1 class="text-xl font-bold mb-2">Enter the 6-digit code we emailed you</h1>
+    <p class="text-gray-500 text-sm mb-6">
+      Verify your email <span id="displayEmail" class="font-bold text-black"></span><br>
+      This helps us keep your account secure by verifying that it’s really you.
+    </p>
+
+    <!-- OTP Inputs -->
+    <div class="flex justify-between gap-2 mb-4" id="otp-inputs">
+      <input type="text" maxlength="1" class="w-12 h-14 border rounded-xl text-center text-xl font-bold focus:border-[#4F75C9] outline-none">
+      <input type="text" maxlength="1" class="w-12 h-14 border rounded-xl text-center text-xl font-bold focus:border-[#4F75C9] outline-none">
+      <input type="text" maxlength="1" class="w-12 h-14 border rounded-xl text-center text-xl font-bold focus:border-[#4F75C9] outline-none">
+      <input type="text" maxlength="1" class="w-12 h-14 border rounded-xl text-center text-xl font-bold focus:border-[#4F75C9] outline-none">
+      <input type="text" maxlength="1" class="w-12 h-14 border rounded-xl text-center text-xl font-bold focus:border-[#4F75C9] outline-none">
+      <input type="text" maxlength="1" class="w-12 h-14 border rounded-xl text-center text-xl font-bold focus:border-[#4F75C9] outline-none">
+    </div>
+
+    <div class="flex justify-between text-sm mb-6">
+      <span id="timer" class="text-gray-600">Timer - 02:00</span>
+      <button id="resendBtn" class="text-[#4F75C9] font-bold opacity-50 cursor-not-allowed" disabled>Resend Code</button>
+    </div>
+
+    <button id="verifyBtn" class="w-full bg-[#4F75C9] text-white py-3 rounded-2xl font-bold mb-3 hover:bg-[#3E5FA8]">Verify</button>
+    <button onclick="window.history.back()" class="w-full border border-gray-300 py-3 rounded-2xl font-bold text-gray-700 hover:bg-gray-50">Go back</button>
+  </div>
+
+  <script src="config.js"></script>
+  <script>
+    const email = localStorage.getItem("resetEmail");
+    document.getElementById("displayEmail").textContent = email;
+    
+    // Timer Logic
+    let timeLeft = 120;
+    const timerDisplay = document.getElementById("timer");
+    const resendBtn = document.getElementById("resendBtn");
+
+    const countdown = setInterval(() => {
+      timeLeft--;
+      const mins = Math.floor(timeLeft / 60);
+      const secs = timeLeft % 60;
+      timerDisplay.textContent = `Timer - ${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+      
+      if (timeLeft <= 0) {
+        clearInterval(countdown);
+        resendBtn.disabled = false;
+        resendBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+      }
+    }, 1000);
+
+    // Resend Logic
+    resendBtn.addEventListener("click", async () => {
+      await fetch(`${API_BASE_URL}/auth/resend-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+      });
+      alert("OTP Resent!");
+      location.reload(); // Simple way to restart timer
+    });
+
+    // Verification Logic
+    const inputs = document.querySelectorAll("#otp-inputs input");
+    inputs.forEach((input, index) => {
+      input.addEventListener("input", (e) => {
+        if (e.target.value && index < 5) inputs[index + 1].focus();
+      });
+    });
+
+    document.getElementById("verifyBtn").addEventListener("click", async () => {
+      const otp = Array.from(inputs).map(i => i.value).join("");
+      const res = await fetch(`${API_BASE_URL}/auth/verify-reset-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, otp })
+      });
+      if (res.ok) {
+        localStorage.setItem("verifiedOtp", otp);
+        window.location.href = "reset-password.html";
+      } else alert("Invalid or Expired OTP");
+    });
+  </script>
+</body>
+</html>

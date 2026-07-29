@@ -1,0 +1,2465 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Video Upload</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
+    rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      background: #F8FAFF;
+    }
+
+    /* ── TOP NAV ───────────────────────────────────── */
+    .top-nav {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 32px;
+      background: #FFF;
+      border-bottom: 1px solid #E5F0FF;
+    }
+
+    .back-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      padding: 4px;
+      border-radius: 6px;
+      transition: background 0.15s;
+      color: #59677B;
+    }
+    .back-btn:hover { background: #F0F5FF; }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-text {
+      font-family: "Roboto Condensed", sans-serif;
+      font-size: 22px;
+      font-weight: 600;
+      line-height: 1;
+    }
+    .logo-text .crik { color: #022775; }
+    .logo-text .ai   { color: #00CDFF; }
+
+    /* ── MAIN TWO-COL ──────────────────────────────── */
+    .main-content {
+      display: flex;
+      width: 100%;
+      min-height: calc(100vh - 57px);
+    }
+
+    /* ── LEFT PANEL ────────────────────────────────── */
+    .left-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 28px 32px;
+      gap: 24px;
+      border-right: 1px solid #8DA4C3;
+      overflow-y: auto;
+    }
+
+    /* ── ACTIVE UPLOADS BANNER ─────────────────────── */
+    .active-uploads-banner {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 20px;
+      width: 100%;
+      height: 67px;
+      border-radius: 12px;
+      border: 1px solid #E5F0FF;
+      background: #FFF;
+      flex-shrink: 0;
+    }
+
+    .banner-icon {
+      width: 48px;
+      height: 48px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .banner-title {
+      color: #000;
+      font-family: "Plus Jakarta Sans";
+      font-size: 24px;
+      font-weight: 600;
+      line-height: normal;
+      text-align: justify;
+    }
+
+    .banner-stats {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-left: auto;
+    }
+
+    .banner-stat {
+      color: #000;
+      font-family: "Plus Jakarta Sans";
+      font-size: 18px;
+      font-weight: 500;
+      line-height: normal;
+      letter-spacing: -0.36px;
+      text-align: justify;
+    }
+
+    .banner-sep {
+      width: 1px;
+      height: 22px;
+      background: #E5F0FF;
+    }
+
+    /* ── HORIZONTAL DIVIDER ────────────────────────── */
+    .h-divider {
+      width: 100%;
+      height: 1px;
+      background: #8DA4C3;
+      flex-shrink: 0;
+    }
+
+    /* ── UPLOAD SECTION ────────────────────────────── */
+    .upload-section {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .upload-section-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .section-title {
+      color: #1F2022;
+      font-family: "Plus Jakarta Sans";
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 24px;
+    }
+
+    #expand-arrow {
+      transition: transform 0.25s ease;
+      cursor: pointer;
+    }
+    #expand-arrow.rotated { transform: rotate(180deg); }
+
+    /* ── UPLOAD BOXES ──────────────────────────────── */
+    .upload-box-row {
+      display: flex;
+      flex-direction: row;
+      gap: 24px;
+      width: 100%;
+    }
+
+    .upload-box {
+      display: flex;
+      padding: 32px 0 16px 0;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      flex: 1;
+      align-self: stretch;
+      border-radius: 8px;
+      border: 1.5px dashed #4B70C3;
+      background: #FCFDFF;
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s;
+    }
+    .upload-box:hover {
+      background: #EEF4FF;
+      border-color: #2a52a3;
+    }
+
+    .upload-video-icon,
+    .upload-folder-icon {
+      width: 48px;
+      height: 48px;
+    }
+
+    .drag-label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .drag-text {
+      color: #1F2022;
+      font-family: "Plus Jakarta Sans";
+      font-size: 16px;
+      font-weight: 600;
+      line-height: normal;
+    }
+    .drag-text.browse {
+      color: #4B70C3;
+    }
+
+    .support-text {
+      color: #83878D;
+      font-family: "Plus Jakarta Sans";
+      font-size: 14px;
+      font-weight: 400;
+      line-height: normal;
+    }
+
+    /* ── UPLOAD CONTROL BUTTONS ────────────────────── */
+    .select-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 130px;
+      height: 40px;
+      border-radius: 12px;
+      border: none;
+      background: #4B70C3;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .select-btn:hover { background: #3a5ba8; }
+
+    .button-title {
+      color: #FFF;
+      font-family: "Plus Jakarta Sans";
+      font-size: 14px;
+      font-weight: 600;
+      line-height: normal;
+    }
+
+    /* ── UPLOADING ANIMATION ───────────────────────── */
+    .uploading {
+      position: relative;
+      animation: uploadBounce 1s ease-in-out infinite;
+    }
+    .uploading::after {
+      content: '';
+      position: absolute;
+      bottom: -12px;
+      left: 50%;
+      width: 18px;
+      height: 4px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 50%;
+      transform: translateX(-50%);
+      animation: shadowPulse 1s ease-in-out infinite;
+    }
+    @keyframes uploadBounce {
+      0%   { transform: translateY(0); }
+      50%  { transform: translateY(-10px); }
+      100% { transform: translateY(0); }
+    }
+    @keyframes shadowPulse {
+      0%   { width: 18px; opacity: 0.3; }
+      50%  { width: 10px; opacity: 0.15; }
+      100% { width: 18px; opacity: 0.3; }
+    }
+
+    /* ── BOTTOM AREA: TWO COLUMNS ──────────────────── */
+    .files-area {
+      display: flex;
+      flex-direction: row;
+      gap: 0;
+      width: 100%;
+      flex: 1;
+    }
+
+    .files-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .files-col:first-child {
+      padding-right: 24px;
+      border-right: 1px solid #8DA4C3;
+    }
+
+    .files-col:last-child {
+      padding-left: 24px;
+    }
+
+    /* ── BREADCRUMB ────────────────────────────────── */
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .breadcrumb-item {
+      color: #1F2022;
+      font-family: "Plus Jakarta Sans";
+      font-size: 18px;
+      font-weight: 500;
+      line-height: 24px;
+    }
+    .breadcrumb-sep {
+      color: #1F2022;
+      font-size: 18px;
+      font-weight: 500;
+    }
+    .breadcrumb-active {
+      color: #4B70C3;
+      font-family: "Plus Jakarta Sans";
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 24px;
+    }
+
+    /* ── FILE MANAGER (uploading) ──────────────────── */
+    .file-manager {
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 16px;
+      gap: 8px;
+      align-self: stretch;
+      border-radius: 12px;
+      border: 1px solid #E5F0FF;
+      background: #FFF;
+      max-height: 400px;
+      overflow: hidden;
+    }
+
+    .fm-header-bar {
+      display: flex;
+      padding: 15px 24px;
+      align-items: center;
+      gap: 98px;
+      align-self: stretch;
+      background: #E5F0FF;
+      flex-shrink: 0;
+    }
+
+    .head-title {
+      color: #59677B;
+      font-family: "Plus Jakarta Sans";
+      font-size: 14px;
+      font-weight: 500;
+      line-height: normal;
+    }
+
+    /* file manager bottom scrollable */
+    #fileBody {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    /* ── ROWS ──────────────────────────────────────── */
+    .row {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      padding: 6px 24px;
+    }
+
+    .row span { flex: 1; }
+    .row span:nth-child(2) { flex: 0.7; text-align: left; }
+    .row span:nth-child(3) { flex: 0.7; text-align: left; }
+
+    /* legacy .header class — keep for JS compatibility */
+    .header {
+      display: flex;
+      padding: 15px 24px;
+      align-items: center;
+      gap: 98px;
+      align-self: stretch;
+      background: #E5F0FF;
+      font-weight: 600;
+      width: 100%;
+      flex-shrink: 0;
+    }
+
+    .folder {
+      display: flex;
+      height: 24px;
+      align-items: center;
+      cursor: pointer;
+      background: #fff;
+      border-top: 1px solid #f1f5f9;
+      flex-shrink: 0;
+      align-self: stretch;
+    }
+    .folder:hover { background: #f8fafc; }
+
+    .files {
+      display: none;
+      flex-direction: column;
+    }
+
+    .file {
+      padding-left: 48px;
+      background: #fcfcfd;
+      border-top: 1px solid #f1f5f9;
+    }
+
+    .filename {
+      font-family: "Plus Jakarta Sans";
+      font-size: 14px;
+      font-weight: 400;
+      line-height: normal;
+      text-align: left;
+      cursor: pointer;
+      color: #1F2022;
+      max-width: 250px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: inline-block;
+    }
+
+    /* File size in uploading table */
+    .file-size-text {
+      color: #1F2022;
+      font-family: "Plus Jakarta Sans";
+      font-size: 14px;
+      font-weight: 600;
+      line-height: normal;
+    }
+
+    .status {
+      font-family: "Plus Jakarta Sans";
+      font-size: 14px;
+      font-weight: 700;
+      line-height: normal;
+      color: #4B70C3;
+    }
+
+    /* ── PROGRESS ──────────────────────────────────── */
+    .progress-row {
+      padding: 0 24px 4px 24px;
+    }
+    .progress-line {
+      width: 100%;
+      height: 4px;
+      background: #E6EAF2;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(269.97deg, #2AA430 7.68%, #6BCB70 100%);
+      transition: width 0.2s linear;
+    }
+
+    /* ── MATCH VIDEOS (uploaded files) ────────────── */
+    #match_videos {
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Match file manager box */
+    .file-manager-match {
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 16px;
+      gap: 4px;
+      align-self: stretch;
+      border-radius: 12px;
+      border: 1px solid #E5F0FF;
+      background: #FFF;
+      max-height: 400px;
+      overflow: hidden;
+    }
+
+    .fm-header-bar-match {
+      display: flex;
+      padding: 15px 24px;
+      align-items: center;
+      gap: 57px;
+      align-self: stretch;
+      background: #E5F0FF;
+      flex-shrink: 0;
+    }
+
+    #fileMatchBody {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    /* Match folder row */
+    .match-folder-row {
+      display: flex;
+      height: 40px;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-shrink: 0;
+      align-self: stretch;
+    }
+
+    /* Completed status */
+    .status-completed {
+      color: #2AA430;
+      font-family: "Plus Jakarta Sans";
+      font-size: 14px;
+      font-weight: 700;
+      line-height: normal;
+    }
+
+    /* File size in match table */
+    .size-muted {
+      color: #83878D;
+      font-family: "Plus Jakarta Sans";
+      font-size: 14px;
+      font-weight: 600;
+      line-height: normal;
+    }
+
+    /* Download column */
+    .download-col {
+      flex: 0 0 60px;
+      text-align: center;
+    }
+
+    .download-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 6px;
+      border: none;
+      background: transparent;
+      border-radius: 4px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .download-btn:hover { background: #EEF4FF; }
+    .download-btn svg { fill: #4B70C3; width: 24px; height: 24px; }
+
+    /* ── VIEW MATCH / RETRY BUTTONS ────────────────── */
+    #viewMatchBtn {
+      padding: 7px 16px;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      background-color: #4B70C3;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    #viewMatchBtn.active {
+      color: #ffffff;
+      box-shadow: 0 4px 10px rgba(75, 112, 195, 0.35);
+      transform: translateY(-1px);
+    }
+
+    /* ── RIGHT PANEL ───────────────────────────────── */
+    .right-panel {
+      display: flex;
+      flex-direction: column;
+      width: 344px;
+      min-width: 344px;
+      padding: 28px 24px;
+      gap: 0;
+      border-left: 1px solid #8DA4C3;
+      background: #FFF;
+      border: 1px solid #8DA4C3;
+      overflow-y: auto;
+    }
+
+    /* Profile row */
+    .profile-row {
+      display: flex;
+      flex-direction: row;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 24px;
+      position: relative;
+    }
+
+    .name {
+      color: #1F2022;
+      font-family: "Plus Jakarta Sans";
+      font-size: 16px;
+      font-weight: 600;
+      line-height: normal;
+    }
+    .email {
+      color: #83878D;
+      font-family: "Plus Jakarta Sans";
+      font-size: 14px;
+      font-weight: 400;
+      line-height: normal;
+    }
+
+    .menu-toggle { cursor: pointer; }
+
+    .dropdown {
+      position: absolute;
+      top: 60px;
+      right: 0;
+      width: 140px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
+      display: none;
+      overflow: hidden;
+      z-index: 10;
+    }
+    .dropdown.show { display: block; }
+    .dropdown-item {
+      padding: 12px 16px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .dropdown-item:hover { background: #f4f6f9; }
+    .dropdown-item.logout {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #333;
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    /* Speed box */
+    .speed-box {
+      display: flex;
+      width: 270px;
+      height: 270px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 26.118px;
+      flex-shrink: 0;
+      margin: 0 auto;
+    }
+
+    .right-title {
+      color: #1F2022;
+      font-family: "Plus Jakarta Sans";
+      font-size: 19.589px;
+      font-weight: 600;
+      line-height: 26.118px;
+    }
+
+    .speed-gauge-wrap {
+      width: 100%;
+      position: relative;
+    }
+    .speed-gauge-wrap svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* Speed & filesize numbers */
+    .speed-stats-row {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      width: 100%;
+      margin-top: 4px;
+    }
+
+    .speed-label {
+      color: #83878D;
+      font-family: "Plus Jakarta Sans";
+      font-size: 14px;
+      font-weight: 600;
+      line-height: normal;
+    }
+    .speed-value {
+      color: #1F2022;
+      font-family: "Plus Jakarta Sans";
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 24px;
+    }
+    .speed-unit {
+      color: #5A5E63;
+      font-family: "Plus Jakarta Sans";
+      font-size: 16px;
+      font-weight: 600;
+      line-height: normal;
+    }
+
+    /* Right panel divider */
+    .right-divider {
+      width: 100%;
+      height: 1px;
+      background: #8DA4C3;
+      margin: 20px 0;
+      flex-shrink: 0;
+    }
+
+    /* Active uploads card in right panel */
+    .active-card {
+      display: flex;
+      flex-direction: column;
+      padding: 20px 16px;
+      gap: 16px;
+      border-radius: 12px;
+      border: 1px solid #E5F0FF;
+      background: #FFF;
+    }
+
+    .active {
+      color: #000;
+      font-family: "Plus Jakarta Sans";
+      font-size: 24px;
+      font-weight: 600;
+      line-height: normal;
+      text-align: justify;
+    }
+
+    .feature-desc {
+      color: #000;
+      font-family: "Plus Jakarta Sans";
+      font-size: 14px;
+      font-weight: 400;
+      line-height: normal;
+      letter-spacing: -0.28px;
+      text-align: justify;
+    }
+
+    /* Uploaded-files header row (section title + buttons) */
+    .uploaded-header {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* ── VIDEO PLAYER ──────────────────────────────── */
+    #video-wrapper {
+      position: fixed;
+      top: 60px;
+      left: 180px;
+      width: 1200px;
+      height: 700px;
+      background: rgba(0, 0, 0, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    #video-wrapper.hidden { display: none; }
+    #videoPlayer {
+      width: 900px;
+      height: 500px;
+      max-width: 90%;
+      max-height: 80vh;
+      border-radius: 12px;
+      background: black;
+    }
+
+    .hidden { display: none !important; }
+
+    /* file-name helper (used internally) */
+    .file-name {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ═══════════════════════════════════════════════════
+       TOP NAV
+  ═══════════════════════════════════════════════════ -->
+  <div class="top-nav">
+    <button class="back-btn" onclick="goBack()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="#59677B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <div class="logo-area">
+      <img src="./assets/logo.svg" style="width:32px;height:32px;" />
+      <span class="logo-text"><span class="crik">Crik</span><span class="ai">.ai</span></span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       MAIN CONTENT
+  ═══════════════════════════════════════════════════ -->
+  <div class="main-content">
+
+    <!-- ─── LEFT PANEL ─────────────────────────────── -->
+    <div class="left-panel">
+
+      <!-- ACTIVE UPLOADS BANNER -->
+      <div class="active-uploads-banner">
+        <div class="banner-icon">
+          <img src="./assets/icon.svg" width="48" height="48" />
+        </div>
+        <span class="banner-title">Active Uploads</span>
+        <div class="banner-stats">
+          <span id="completed-files" class="banner-stat">0 Completed</span>
+          <div class="banner-sep"></div>
+          <span id="selected-files" class="banner-stat">0 Selected</span>
+        </div>
+      </div>
+
+      <!-- HORIZONTAL DIVIDER -->
+      <div class="h-divider"></div>
+
+      <!-- UPLOAD FILES SECTION -->
+      <div id="upload-sections" class="upload-section">
+        <div class="upload-section-header">
+          <span class="section-title">Upload Files</span>
+          <svg id="expand-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+            <path d="M6 9L12 15L18 9" stroke="#83878D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+
+        <div id="upload-parts" class="upload-box-row" style="display:flex;">
+
+          <!-- VIDEO UPLOAD BOX -->
+          <div id="selectVideosBtn" class="upload-box">
+            <div id="video-icon" class="upload-video-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" fill="none">
+                <rect width="48" height="48" rx="24" fill="#F5F9FF"/>
+                <path d="M18.4648 33H29.5346C30.6392 33 31.5346 32.1046 31.5346 31V21.1964C31.5346 20.6633 31.3217 20.1522 30.9433 19.7767L26.7141 15.5803C26.3394 15.2086 25.8331 15 25.3054 15H18.4648C17.3603 15 16.4648 15.8954 16.4648 17V31C16.4648 32.1046 17.3603 33 18.4648 33Z" fill="#4B70C3"/>
+                <path d="M26.1749 19.3603V15L31.5352 20.3603H27.1749C26.6226 20.3603 26.1749 19.9126 26.1749 19.3603Z" fill="#4B70C3" stroke="#F5F9FF" stroke-width="1.3" stroke-linejoin="round"/>
+                <path d="M22.4102 23.9238L24.0004 22.3336L25.5914 23.9246" stroke="white" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M24 22.334L24 27.6673" stroke="white" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+
+            <div id="video-loader" class="drag-label">
+              <span class="drag-text">Drag and drop Videos, or</span>
+              <span class="drag-text browse">&nbsp;Browse</span>
+            </div>
+            <span id="video-uploading-text" class="drag-text" style="display:none;">Uploading...</span>
+            <span class="support-text">Support zip and rar files</span>
+
+            <!-- Pause / Resume / Cancel controls (hidden until uploading) -->
+            <div id="videocontainer" style="display:none; flex-direction:row; gap:12px;">
+              <button id="video-pause" onclick="event.stopPropagation(); pauseupload(1)" class="select-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="12" viewBox="0 0 13 12" fill="none">
+                  <path d="M0 11.3513V0.651284C0 0.466689 0.0608496 0.311992 0.182549 0.187195C0.304248 0.0623985 0.454064 0 0.631997 0C0.809929 0 0.959326 0.0623985 1.08019 0.187195C1.20105 0.311992 1.26106 0.466255 1.26022 0.649984V11.35C1.26022 11.5346 1.19979 11.6893 1.07893 11.8141C0.958067 11.938 0.808251 12 0.629479 12C0.450707 12 0.301311 11.938 0.18129 11.8141C0.0612694 11.6902 0.00125887 11.5355 0.00125887 11.35M5.79498 11.0549C5.4559 11.2655 5.11557 11.2664 4.77397 11.0575C4.43237 10.8478 4.26157 10.5427 4.26157 10.1423V1.85895C4.26157 1.45856 4.43237 1.1535 4.77397 0.943776C5.11557 0.735781 5.45548 0.736649 5.79372 0.946377L12.5166 5.09587C12.8389 5.30907 13 5.61153 13 6.00325C13 6.39497 12.8384 6.6957 12.5153 6.90543L5.79498 11.0549Z" fill="white"/>
+                </svg>
+                <span class="button-title">Pause</span>
+              </button>
+              <button id="video-resume" onclick="event.stopPropagation(); resumeupload(1)" class="select-btn" style="display:none;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path d="M7 18.3513V7.65128C7 7.46669 7.06085 7.31199 7.18255 7.1872C7.30425 7.0624 7.45406 7 7.632 7C7.80993 7 7.95933 7.0624 8.08019 7.1872C8.20105 7.31199 8.26106 7.46626 8.26022 7.64998V18.35C8.26022 18.5346 8.19979 18.6893 8.07893 18.8141C7.95807 18.938 7.80825 19 7.62948 19C7.45071 19 7.30131 18.938 7.18129 18.8141C7.06127 18.6902 7.00126 18.5355 7.00126 18.35M12.795 18.0549C12.4559 18.2655 12.1156 18.2664 11.774 18.0575C11.4324 17.8478 11.2616 17.5427 11.2616 17.1423V8.85895C11.2616 8.45856 11.4324 8.1535 11.774 7.94378C12.1156 7.73578 12.4555 7.73665 12.7937 7.94638L19.5166 12.0959C19.8389 12.3091 20 12.6115 20 13.0033C20 13.395 19.8384 13.6957 19.5153 13.9054L12.795 18.0549Z" fill="white"/>
+                </svg>
+                <span class="button-title">Resume</span>
+              </button>
+              <button onclick="event.stopPropagation(); cancelupload(1)" class="select-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M20 6.91L17.09 4L12 9.09L6.91 4L4 6.91L9.09 12L4 17.09L6.91 20L12 14.91L17.09 20L20 17.09L14.91 12L20 6.91Z" fill="white"/>
+                </svg>
+                <span class="button-title">Cancel</span>
+              </button>
+            </div>
+
+            <!-- Upload submit button -->
+            <div id="videocontainer" style="display:flex; flex-direction:row; gap:12px;">
+              <button id="button-submit" onclick="event.stopPropagation(); uploadVideo('1')" class="select-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 16V4M12 4L7 9M12 4L17 9" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M4 16V20H20V16" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="button-title">Upload</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- FOLDER UPLOAD BOX -->
+          <div id="selectFoldersBtn" class="upload-box">
+            <div class="upload-folder-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" fill="none">
+                <rect width="48" height="48" rx="24" fill="#F5F9FF"/>
+                <path d="M18.4648 33H29.5346C30.6392 33 31.5346 32.1046 31.5346 31V21.1964C31.5346 20.6633 31.3217 20.1522 30.9433 19.7767L26.7141 15.5803C26.3394 15.2086 25.8331 15 25.3054 15H18.4648C17.3603 15 16.4648 15.8954 16.4648 17V31C16.4648 32.1046 17.3603 33 18.4648 33Z" fill="#4B70C3"/>
+                <path d="M26.1749 19.3603V15L31.5352 20.3603H27.1749C26.6226 20.3603 26.1749 19.9126 26.1749 19.3603Z" fill="#4B70C3" stroke="#F5F9FF" stroke-width="1.3" stroke-linejoin="round"/>
+                <path d="M22.4102 23.9238L24.0004 22.3336L25.5914 23.9246" stroke="white" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M24 22.334L24 27.6673" stroke="white" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+
+            <div id="folder-loader" class="drag-label">
+              <span class="drag-text">Drag and drop Folders, or</span>
+              <span class="drag-text browse">&nbsp;Browse</span>
+            </div>
+            <span id="folder-uploading-text" class="drag-text" style="display:none;">Uploading...</span>
+            <span class="support-text">Support zip and rar files</span>
+
+            <div id="foldercontainer" style="display:none; flex-direction:row; gap:12px;">
+              <button id="folder-resume" onclick="event.stopPropagation(); resumeupload(2)" class="select-btn" style="display:none;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path d="M7 18.3513V7.65128C7 7.46669 7.06085 7.31199 7.18255 7.1872C7.30425 7.0624 7.45406 7 7.632 7C7.80993 7 7.95933 7.0624 8.08019 7.1872C8.20105 7.31199 8.26106 7.46626 8.26022 7.64998V18.35C8.26022 18.5346 8.19979 18.6893 8.07893 18.8141C7.95807 18.938 7.80825 19 7.62948 19C7.45071 19 7.30131 18.938 7.18129 18.8141C7.06127 18.6902 7.00126 18.5355 7.00126 18.35M12.795 18.0549C12.4559 18.2655 12.1156 18.2664 11.774 18.0575C11.4324 17.8478 11.2616 17.5427 11.2616 17.1423V8.85895C11.2616 8.45856 11.4324 8.1535 11.774 7.94378C12.1156 7.73578 12.4555 7.73665 12.7937 7.94638L19.5166 12.0959C19.8389 12.3091 20 12.6115 20 13.0033C20 13.395 19.8384 13.6957 19.5153 13.9054L12.795 18.0549Z" fill="white"/>
+                </svg>
+                <span class="button-title">Resume</span>
+              </button>
+              <button id="folder-pause" onclick="event.stopPropagation(); pauseupload(2)" class="select-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="12" viewBox="0 0 13 12" fill="none">
+                  <path d="M0 11.3513V0.651284C0 0.466689 0.0608496 0.311992 0.182549 0.187195C0.304248 0.0623985 0.454064 0 0.631997 0C0.809929 0 0.959326 0.0623985 1.08019 0.187195C1.20105 0.311992 1.26106 0.466255 1.26022 0.649984V11.35C1.26022 11.5346 1.19979 11.6893 1.07893 11.8141C0.958067 11.938 0.808251 12 0.629479 12C0.450707 12 0.301311 11.938 0.18129 11.8141C0.0612694 11.6902 0.00125887 11.5355 0.00125887 11.35M5.79498 11.0549C5.4559 11.2655 5.11557 11.2664 4.77397 11.0575C4.43237 10.8478 4.26157 10.5427 4.26157 10.1423V1.85895C4.26157 1.45856 4.43237 1.1535 4.77397 0.943776C5.11557 0.735781 5.45548 0.736649 5.79372 0.946377L12.5166 5.09587C12.8389 5.30907 13 5.61153 13 6.00325C13 6.39497 12.8384 6.6957 12.5153 6.90543L5.79498 11.0549Z" fill="white"/>
+                </svg>
+                <span class="button-title">Pause</span>
+              </button>
+              <button onclick="event.stopPropagation(); cancelupload(2)" class="select-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M20 6.91L17.09 4L12 9.09L6.91 4L4 6.91L9.09 12L4 17.09L6.91 20L12 14.91L17.09 20L20 17.09L14.91 12L20 6.91Z" fill="white"/>
+                </svg>
+                <span class="button-title">Cancel</span>
+              </button>
+            </div>
+
+            <div style="display:flex; flex-direction:row; gap:12px;">
+              <button id="button-submit-folder" onclick="event.stopPropagation(); uploadVideo('2')" class="select-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 16V4M12 4L7 9M12 4L17 9" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M4 16V20H20V16" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="button-title">Upload</span>
+              </button>
+            </div>
+          </div>
+
+        </div><!-- /upload-parts -->
+      </div><!-- /upload-sections -->
+
+      <!-- HORIZONTAL DIVIDER -->
+      <div class="h-divider"></div>
+
+      <!-- FILES AREA: two columns -->
+      <div class="files-area">
+
+        <!-- LEFT COL: Uploading files -->
+        <div class="files-col">
+          <!-- Breadcrumb -->
+          <div class="breadcrumb">
+            <span id="breadcrumb-tournament" class="breadcrumb-item">Tournament</span>
+            <span class="breadcrumb-sep">›</span>
+            <span id="breadcrumb-match" class="breadcrumb-item">Matches</span>
+            <span class="breadcrumb-sep">›</span>
+            <span class="breadcrumb-active">Uploading Files</span>
+          </div>
+
+          <!-- File manager box -->
+          <div class="file-manager">
+            <!-- Header row -->
+            <div class="row header">
+              <span class="head-title">Name</span>
+              <span class="head-title">File Size</span>
+              <span class="head-title">File Status</span>
+            </div>
+            <!-- Folders/files injected here -->
+            <div id="fileBody"></div>
+          </div>
+        </div>
+
+        <!-- RIGHT COL: Uploaded files (match_videos) -->
+        <div class="files-col">
+          <!-- Uploaded-files header with View Match + Retry btns -->
+          <div class="uploaded-header">
+            <div class="breadcrumb">
+              <span id="breadcrumb-tournament2" class="breadcrumb-item">Tournament</span>
+              <span class="breadcrumb-sep">›</span>
+              <span id="breadcrumb-match2" class="breadcrumb-item">Matches</span>
+              <span class="breadcrumb-sep">›</span>
+              <span class="breadcrumb-active">Uploaded Files</span>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <button id="viewMatchBtn">View Match</button>
+              <button id="retryAllBtn" style="
+                display:none;
+                padding:6px 14px;
+                background-color:#E5533D;
+                color:#fff;
+                border:none;
+                border-radius:6px;
+                cursor:pointer;
+                font-size:14px;
+                font-family:'Plus Jakarta Sans',sans-serif;
+                font-weight:600;
+              ">Retry All</button>
+            </div>
+          </div>
+
+          <!-- Match videos section -->
+          <div id="match_videos" style="display:none; flex-direction:column; gap:12px;">
+            <div class="file-manager-match">
+              <div class="row header fm-header-bar-match">
+                <span class="head-title">Videos</span>
+                <span class="head-title">File Status</span>
+                <span class="head-title download-col">Actions</span>
+              </div>
+              <div id="fileMatchBody"></div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /files-area -->
+
+    </div><!-- /left-panel -->
+
+    <!-- ─── RIGHT PANEL ────────────────────────────── -->
+    <div class="right-panel">
+
+      <!-- Profile row -->
+      <div class="profile-row">
+        <img src="./assets/default_image.jpeg" style="width:48px;height:48px;border-radius:24px;flex-shrink:0;" />
+        <div style="display:flex;flex-direction:column;gap:6px;flex:1;">
+          <span class="name">User</span>
+          <span class="email"></span>
+        </div>
+        <svg class="menu-toggle" xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" fill="none">
+          <path d="M0.75 0.750019L5.75 6.75002L10.75 0.750019" stroke="#83878D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="dropdown" id="userDropdown">
+          <div class="dropdown-item logout">Logout</div>
+        </div>
+      </div>
+
+      <!-- Speed box -->
+      <div class="speed-box">
+        <span class="right-title">Uploading Speed</span>
+
+        <div class="speed-gauge-wrap">
+          <svg width="270" height="160" viewBox="0 0 270 160">
+            <!-- Background arc -->
+            <path d="M25 130 A110 110 0 0 1 245 130" fill="none" stroke="#F5F9FF" stroke-width="32" stroke-linecap="round"/>
+            <!-- Progress arc -->
+            <path d="M25 130 A110 110 0 0 1 245 130" fill="none" stroke="#4B70C3" stroke-width="22"
+              stroke-linecap="round" stroke-dasharray="346" stroke-dashoffset="346" class="progress-arc"/>
+            <!-- Needle group -->
+            <g class="needle" style="transform-origin:135px 130px; transform:rotate(-90deg);">
+              <!-- rotating icon substitute -->
+              <circle cx="135" cy="130" r="8" fill="#4B70C3"/>
+              <line x1="135" y1="130" x2="135" y2="44" stroke="#4B70C3" stroke-width="4" stroke-linecap="round"/>
+            </g>
+          </svg>
+        </div>
+
+        <!-- Speed & file size -->
+        <div class="speed-stats-row">
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <span class="speed-label">Speed</span>
+            <div style="display:flex;align-items:baseline;gap:3px;">
+              <span id="speed-meter" class="speed-value">0</span>
+              <span class="speed-unit">Mbps</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <span class="speed-label">File size</span>
+            <div style="display:flex;align-items:baseline;gap:3px;">
+              <span id="size-inNumber" class="speed-value">0</span>
+              <span id="size-unit" class="speed-unit">GB</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <div class="right-divider"></div>
+
+    </div><!-- /right-panel -->
+
+  </div><!-- /main-content -->
+
+  <!-- Video player modal -->
+  <div id="video-wrapper" class="hidden">
+    <button id="closeVideoBtn" style="
+      position:absolute;top:8px;right:8px;
+      background:rgba(0,0,0,0.6);border:none;color:white;
+      font-size:20px;cursor:pointer;border-radius:4px;z-index:1100;">×</button>
+    <video id="videoPlayer" controls preload="auto"></video>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════
+       ALL JAVASCRIPT — UNCHANGED FROM ORIGINAL
+  ═══════════════════════════════════════════════════ -->
+  <script>
+
+    let uploadAbortController = null;
+    let fileTree = null;
+    let currentFolder = null;
+    let history = [];
+    let videofile = [];
+    let folderfile = [];
+    const MAX_PARALLEL_UPLOADS = 6;
+    let isMatchViewOpen = false;
+    let matchDataLoaded = false;
+    let activeUploads = 0;
+    const uploadQueue = [];
+    const username = localStorage.getItem('name');
+    const email = localStorage.getItem('email');
+    let originalTree = null;
+    let currentTree = null;
+
+    // Populate breadcrumbs from localStorage
+    window.addEventListener('DOMContentLoaded', () => {
+      const selectedMatch = JSON.parse(localStorage.getItem('selectedMatch') || '{}');
+      const tournamentName = selectedMatch?.tournamentName || 'Tournament';
+      const matchName = selectedMatch?.name || 'Matches';
+
+      ['breadcrumb-tournament','breadcrumb-tournament2'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = tournamentName;
+      });
+      ['breadcrumb-match','breadcrumb-match2'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = matchName;
+      });
+
+      document.querySelector('.name').textContent = username || '—';
+      document.querySelector('.email').textContent = email || '';
+    });
+
+    const fileSVG = `
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="14" viewBox="0 0 20 14" fill="none">
+<path d="M0 3.25C0 2.38805 0.34241 1.5614 0.951903 0.951903C1.5614 0.34241 2.38805 0 3.25 0H9.75C10.1768 0 10.5994 0.0840639 10.9937 0.247392C11.388 0.410719 11.7463 0.650112 12.0481 0.951903C12.3499 1.25369 12.5893 1.61197 12.7526 2.00628C12.9159 2.40059 13 2.8232 13 3.25V10.75C13 11.1768 12.9159 11.5994 12.7526 11.9937C12.5893 12.388 12.3499 12.7463 12.0481 13.0481C11.7463 13.3499 11.388 13.5893 10.9937 13.7526C10.5994 13.9159 10.1768 14 9.75 14H3.25C2.38805 14 1.5614 13.6576 0.951903 13.0481C0.34241 12.4386 0 11.612 0 10.75V3.25ZM17.257 12.688L14 10.44V3.562L17.257 1.313C18.418 0.511 20.002 1.343 20.002 2.753V11.248C20.002 12.658 18.418 13.49 17.257 12.688Z" fill="#83878D"/>
+</svg>`;
+
+    const folderSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="18" viewBox="0 0 20 18" fill="none">
+<path d="M0.650391 2.65002C0.650391 1.54545 1.54582 0.650024 2.65039 0.650024H6.50457C7.15329 0.650024 7.76172 0.964672 8.13667 1.49406L9.9189 4.01041C10.1064 4.2751 10.4106 4.43242 10.735 4.43242H16.6502C17.7547 4.43242 18.6502 5.32786 18.6502 6.43242V14.8361C18.6502 15.9407 17.7547 16.8361 16.6502 16.8361H2.65039C1.54582 16.8361 0.650391 15.9407 0.650391 14.8361V2.65002Z" fill="#83878D"/>
+<path d="M0.650391 2.65002C0.650391 1.54545 1.54582 0.650024 2.65039 0.650024H6.50457C7.15329 0.650024 7.76172 0.964672 8.13667 1.49406L9.9189 4.01041C10.1064 4.2751 10.4106 4.43242 10.735 4.43242H16.6502C17.7547 4.43242 18.6502 5.32786 18.6502 6.43242V14.8361C18.6502 15.9407 17.7547 16.8361 16.6502 16.8361H2.65039C1.54582 16.8361 0.650391 15.9407 0.650391 14.8361V2.65002Z" stroke="#83878D" stroke-width="1.3"/>
+</svg>`;
+
+    const downloadIcon = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M9.00042 15L10.5862 16.5858C11.3673 17.3668 12.6336 17.3668 13.4146 16.5858L15.0004 15M12.0004 17V12M20.0004 7V8H4.00042V5C4.00042 3.34315 5.34357 2 7.00042 2H9.56959C10.2376 2 10.8866 2.22298 11.4135 2.6336L12.354 3.3664C12.8809 3.77702 13.5299 4 14.1979 4H17.0004C18.6573 4 20.0004 5.34315 20.0004 7ZM3.4744 8H20.5264C21.7997 8 22.7488 9.17403 22.4821 10.4191L20.678 18.8381C20.2828 20.6824 18.6529 22 16.7668 22H7.23409C5.34793 22 3.71808 20.6824 3.32288 18.8381L1.51879 10.4191C1.252 9.17404 2.20111 8 3.4744 8Z" stroke="#4B70C3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>`;
+
+    function formatTime(isoTime) {
+      const date = new Date(isoTime);
+      return date.toLocaleString("en-IN", {
+        day: "2-digit", month: "short", year: "numeric",
+        hour: "2-digit", minute: "2-digit", hour12: true
+      });
+    }
+
+    function acquireUploadSlot() {
+      if (activeUploads < MAX_PARALLEL_UPLOADS) {
+        activeUploads++;
+        return Promise.resolve();
+      }
+      return new Promise(resolve => uploadQueue.push(resolve));
+    }
+
+    function releaseUploadSlot() {
+      activeUploads--;
+      if (uploadQueue.length > 0) {
+        activeUploads++;
+        uploadQueue.shift()();
+      }
+    }
+
+    function formatSize(bytes) {
+      if (!bytes || bytes == 0) return "0 MB";
+      const k = 1024;
+      const sizes = ["B", "KB", "MB", "GB", "TB"];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
+    }
+
+    function setSpeed(speed, max = 300) {
+      const angle = (speed / max) * 180 - 90;
+      document.querySelector('.needle').style.transform = `rotate(${angle}deg)`;
+      const arc = document.querySelector('.progress-arc');
+      const total = 346;
+      arc.style.strokeDashoffset = total - (speed / max) * total;
+    }
+
+    const toggle = document.querySelector(".menu-toggle");
+    const dropdown = document.getElementById("userDropdown");
+
+    toggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      dropdown.classList.toggle("show");
+    });
+
+    document.addEventListener("click", () => {
+      dropdown.classList.remove("show");
+    });
+
+    // Logout action
+    document.querySelector(".logout").onclick = () => {
+      dropdown.classList.remove("show");
+      window.location.href = 'index.html';
+      // window.electron.notifyQuit(null, null, null, null);
+    };
+
+    const wrapper = document.getElementById("video-wrapper");
+
+    let isDragging = false;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    wrapper.addEventListener("mousedown", (e) => {
+      isDragging = true;
+      offsetX = e.clientX - wrapper.offsetLeft;
+      offsetY = e.clientY - wrapper.offsetTop;
+    });
+
+    document.addEventListener("mousemove", (e) => {
+      if (!isDragging) return;
+      wrapper.style.left = `${e.clientX - offsetX}px`;
+      wrapper.style.top = `${e.clientY - offsetY}px`;
+      wrapper.style.transform = "none";
+    });
+
+    document.addEventListener("mouseup", () => { isDragging = false; });
+
+    const closeBtn = document.getElementById("closeVideoBtn");
+    closeBtn.addEventListener("click", () => {
+      const video = document.getElementById("videoPlayer");
+      video.pause();
+      video.currentTime = 0;
+      wrapper.classList.add("hidden");
+      video.src = "";
+    });
+
+    function showPage(page) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(page).classList.add('active');
+      document.getElementById('homeBtn').classList.toggle('active', page === 'home');
+      document.getElementById('dashBtn').classList.toggle('active', page === 'dashboard');
+      if (page === 'dashboard') { dashboardLoad(); }
+    }
+
+    async function playVideo(s3Key) {
+      const res = await fetch(`${API_BASE_URL}/matches/files/video-url`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+        },
+        body: JSON.stringify({ s3Key })
+      });
+      const { videoUrl } = await res.json();
+      const video = document.getElementById("videoPlayer");
+      const wrapper = document.getElementById("video-wrapper");
+      video.src = videoUrl;
+      video.load();
+      wrapper.classList.remove("hidden");
+      video.play();
+    }
+
+    document.getElementById("closeVideoBtn").onclick = () => {
+      const wrapper = document.getElementById("video-wrapper");
+      const video = document.getElementById("videoPlayer");
+      video.pause();
+      video.src = "";
+      wrapper.classList.add("hidden");
+    };
+
+    function toggleUploadSection() {
+      const icon = document.getElementById("expand-arrow");
+      icon.classList.toggle("rotated");
+      const section = document.getElementById('upload-parts');
+      console.log(section);
+      if (section.style.display === 'flex') {
+        section.style.display = 'none';
+        console.log('jc');
+      } else {
+        section.style.display = 'flex';
+        console.log('jhbh');
+      }
+    }
+
+    function goBack() {
+      window.location.href = 'matches.html';
+    }
+
+    document.getElementById('selectVideosBtn').onclick = async () => {
+      const paths = await window.electron.selectVideos('single');
+      videofile = paths;
+    };
+
+    document.getElementById('expand-arrow').addEventListener('click', toggleUploadSection);
+
+    const searchInput = document.getElementById("searchInput");
+
+    document.getElementById('viewMatchBtn').onclick = async () => {
+      const matchSection = document.getElementById('match_videos');
+      const btn = document.getElementById('viewMatchBtn');
+
+      if (isMatchViewOpen) {
+        matchSection.style.display = 'none';
+        btn.classList.remove('active');
+        isMatchViewOpen = false;
+        return;
+      }
+      matchSection.style.display = 'flex';
+      btn.classList.add('active');
+      isMatchViewOpen = true;
+
+      const matchID = JSON.parse(localStorage.getItem('selectedMatch'));
+      if (!matchID) return;
+      console.log("match", matchID);
+
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/matches/${matchID.id}/sync-view?withDownloadUrls=true`,
+          { headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` } }
+        );
+        const datas = await response.json();
+        const tree = buildMatchTree(datas.folders);
+        const body = document.getElementById('fileMatchBody');
+        body.innerHTML = '';
+        renderMatchTree(tree, body);
+      } catch (err) {
+        console.error("Fetch error:", err);
+      }
+    };
+
+    function buildMatchTree(folderMap) {
+      const root = { folders: {}, files: [] };
+      Object.entries(folderMap).forEach(([path, data]) => {
+        const parts = path.split("/");
+        let current = root;
+        parts.forEach((part, index) => {
+          if (!current.folders[part]) {
+            current.folders[part] = { folders: {}, files: [] };
+          }
+          current = current.folders[part];
+          if (index === parts.length - 1) {
+            current.files = data.files || [];
+          }
+        });
+      });
+      return root;
+    }
+
+    function renderMatchTree(node, container, indent = 0, currentPath = "") {
+      Object.entries(node.folders || {}).forEach(([folderName, folderNode]) => {
+        const folderPath = currentPath ? `${currentPath}/${folderName}` : folderName;
+        const folderRow = document.createElement('div');
+        folderRow.className = 'row folder';
+        folderRow.style.paddingLeft = `${24 + indent}px`;
+        folderRow.innerHTML = `
+          <span style="display:flex;align-items:center;gap:8px;">
+            ${folderSVG}
+            <span class="filename">${folderName}</span>
+          </span>
+          <span>—</span>
+          <span class="status-completed">Completed</span>
+          <span class="download-col">
+            <button class="download-btn">${downloadIcon}</button>
+          </span>
+        `;
+        folderRow.querySelector(".download-btn").onclick = (e) => {
+          e.stopPropagation();
+          downloadFolder(folderPath);
+        };
+        const children = document.createElement('div');
+        children.style.display = 'none';
+        folderRow.onclick = () => {
+          children.style.display = children.style.display === 'none' ? 'block' : 'none';
+        };
+        container.appendChild(folderRow);
+        container.appendChild(children);
+        renderMatchTree(folderNode, children, indent + 24, folderPath);
+      });
+
+      (node.files || []).forEach(file => {
+        const fileRow = document.createElement('div');
+        fileRow.className = 'row file';
+        fileRow.style.paddingLeft = `${24 + indent}px`;
+        const downloadButton = file.downloadUrl
+          ? `<a href="${file.downloadUrl}" download class="download-btn">${downloadIcon}</a>`
+          : '—';
+        fileRow.innerHTML = `
+          <span style="display:flex;align-items:center;gap:8px;">
+            ${fileSVG}
+            <span class="filename">${file.file || file.fileName}</span>
+          </span>
+          <span class="status-completed">Completed <span class="size-muted">(${file.size ? (file.size/1024/1024).toFixed(1) : 0} MB)</span></span>
+          <span class="download-col">${downloadButton}</span>
+        `;
+        container.appendChild(fileRow);
+        fileRow.querySelector('.filename').onclick = (e) => {
+          e.stopPropagation();
+          playVideo(file.s3Key);
+        };
+      });
+    }
+
+    async function downloadFolder(folderPath) {
+      const matchID = JSON.parse(localStorage.getItem('selectedMatch'));
+      try {
+        const res = await fetch(
+          `${API_BASE_URL}/matches/download/folder/${matchID.id}?folder=${encodeURIComponent(folderPath)}`,
+          { headers: { Authorization: `Bearer ${localStorage.getItem("token") || ""}` } }
+        );
+        if (!res.ok) throw new Error("Download failed");
+        const blob = await res.blob();
+        const fileName = folderPath.split("/").pop() + ".zip";
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+      } catch (err) {
+        console.error(err);
+        alert("Download failed");
+      }
+    }
+
+    document.getElementById('selectFoldersBtn').onclick = async () => {
+      const paths = await window.electron.selectVideos('multi');
+      console.log(paths);
+      folderfile = paths;
+    };
+
+    const uploadFileState = {
+      files: {},
+      totalBytes: 0,
+      uploadedBytes: 0
+    };
+
+    function initUploadState(files) {
+      console.log(files);
+      uploadFileState.totalBytes = 0;
+      uploadFileState.uploadedBytes = 0;
+      uploadFileState.files = {};
+      files.forEach(f => {
+        uploadFileState.totalBytes += Number(f.size);
+        uploadFileState.files[f.id] = {
+          size: f.size,
+          uploaded: 0,
+          percent: 0,
+          completed: false
+        };
+      });
+      uploadFileState.lastBytes = 0;
+      uploadFileState.lastTime = Date.now();
+      uploadFileState.speed = 0;
+      uploadFileState.completedFiles = 0;
+      uploadFileState.totalFiles = files.length;
+      console.log(uploadFileState);
+    }
+
+    const UploadState = {
+      IDLE: "idle",
+      UPLOADING: "uploading",
+      PAUSED: "paused",
+      CANCELLED: "cancelled",
+      COMPLETED: "completed",
+      ERROR: "error"
+    };
+    let uploadState = UploadState.IDLE;
+
+    function renderFileManager(tree) {
+      const container = document.getElementById('fileBody');
+      container.innerHTML = '';
+      Object.entries(tree).forEach(([folder, files]) => {
+        const folderRow = document.createElement('div');
+        folderRow.className = 'row folder';
+        folderRow.innerHTML = `
+          <span> ${folder.split('/').pop()}</span>
+          <span>${files.length} files</span>
+          <span>—</span>
+        `;
+        const filesWrapper = document.createElement('div');
+        filesWrapper.className = 'files';
+        files.forEach(file => {
+          console.log(file);
+          const fileRow = document.createElement('div');
+          fileRow.className = 'row file';
+          fileRow.innerHTML = `
+            <span>${file.relativePath}</span>
+            <span class="file-size-text">${(file.size/1024/1024).toFixed(1)} MB</span>
+            <span class="status">Uploading</span>
+          `;
+          filesWrapper.appendChild(fileRow);
+        });
+        folderRow.onclick = () => {
+          filesWrapper.style.display = filesWrapper.style.display === 'flex' ? 'none' : 'flex';
+        };
+        container.appendChild(folderRow);
+        container.appendChild(filesWrapper);
+      });
+    }
+
+    function renderSessions(data) {
+      const grid = document.getElementById("session-grid");
+      const sess = document.getElementById("fileList");
+      sess.innerHTML = "";
+      grid.innerHTML = "";
+      data?.forEach(session => {
+        const card = document.createElement("div");
+        card.className = "card session-card";
+        card.onclick = () => onSessionClick(session);
+        card.innerHTML = `
+          <div class="session-time">${formatTime(session.createdAt)}</div>
+          <div class="session-size">${formatSize(session.totalSize)}</div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function updateSpeedGauge(speedBytesPerSec) {
+      const arc = document.querySelector(".progress-arc");
+      const needle = document.querySelector(".needle");
+      const meter = document.getElementById('speed-meter');
+      if (!arc || !needle) return;
+      const MAX_SPEED = 50 * 1024 * 1024;
+      const ARC_LENGTH = 346;
+      meter.textContent = (speedBytesPerSec / MAX_SPEED * 50).toFixed(1);
+      const clamped = Math.min(speedBytesPerSec, MAX_SPEED);
+      const progress = clamped / MAX_SPEED;
+      const dashOffset = ARC_LENGTH * (1 - progress);
+      arc.style.strokeDashoffset = dashOffset;
+      const angle = -90 + progress * 180;
+      needle.style.transform = `rotate(${angle}deg)`;
+      needle.style.transformOrigin = "135px 130px";
+    }
+
+    async function pauseupload(a) {
+      stopLoader(a);
+      if (a == 1) {
+        document.getElementById("video-pause").style.display = "none";
+        document.getElementById("video-resume").style.display = "block";
+      } else {
+        document.getElementById("folder-pause").style.display = "none";
+        document.getElementById("folder-resume").style.display = "block";
+      }
+      const session_Id = localStorage.getItem("session-id");
+      const res = await fetch(`${API_BASE_URL}/upload/session/${session_Id}/pause`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+        }
+      });
+      pauseUpload();
+    }
+
+    function cancelAllUploads() {
+      const fileWrappers = document.querySelectorAll('[data-fileid]');
+      fileWrappers.forEach(wrapper => {
+        const status = wrapper.querySelector('.status');
+        if (!status) return;
+        if (status.textContent === 'Completed') return;
+        status.textContent = 'Cancelled';
+        status.style.color = '#B42318';
+        status.style.fontWeight = '600';
+        const progressRow = wrapper.querySelector('.progress-row');
+        if (progressRow) { progressRow.remove(); }
+      });
+    }
+
+    function cancelUpload() {
+      if (uploadAbortController) {
+        uploadState = UploadState.CANCELLED;
+        uploadAbortController.abort();
+        cancelAllUploads();
+      }
+    }
+
+    function onUploadFinished(status, error = null) {
+      switch (status) {
+        case "completed":
+          alert("✅ Upload fully completed");
+          videofile = [];
+          folderfile = [];
+          document.getElementById("button-submit").style.display = 'flex';
+          document.getElementById("videocontainer").style.display = 'none';
+          document.getElementById("button-submit-folder").style.display = 'flex';
+          document.getElementById("foldercontainer").style.display = 'none';
+          break;
+        case "paused":
+          break;
+        case "cancelled":
+          videofile = [];
+          folderfile = [];
+          alert("❌ Upload cancelled");
+          document.getElementById("button-submit").style.display = 'flex';
+          document.getElementById("videocontainer").style.display = 'none';
+          document.getElementById("button-submit-folder").style.display = 'flex';
+          document.getElementById("foldercontainer").style.display = 'none';
+          break;
+        case "error":
+          alert("💥 Upload failed");
+          document.getElementById("button-submit").style.display = 'flex';
+          document.getElementById("videocontainer").style.display = 'none';
+          document.getElementById("button-submit-folder").style.display = 'flex';
+          document.getElementById("foldercontainer").style.display = 'none';
+          break;
+      }
+    }
+
+    function pauseUpload() {
+      if (uploadAbortController && uploadState === UploadState.UPLOADING) {
+        uploadState = UploadState.PAUSED;
+        uploadAbortController.abort();
+      }
+    }
+
+    async function resumeupload(a) {
+      console.log('resuime');
+      showLoader(a);
+      if (a == 1) {
+        document.getElementById("video-pause").style.display = "block";
+        document.getElementById("video-resume").style.display = "none";
+      } else {
+        document.getElementById("folder-pause").style.display = "block";
+        document.getElementById("folder-resume").style.display = "none";
+      }
+      try {
+        const session_Id = localStorage.getItem("session-id");
+        const response = await fetch(`${API_BASE_URL}/dashboard/sessions/${session_Id}/files`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+          },
+        });
+        const datas = await response.json();
+        console.log(datas);
+        resumeVideo(datas, a);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+
+    async function cancelupload(a) {
+      stopLoader(a);
+      cancelUpload();
+      document.getElementById("selected-files").textContent = `0 Selected`;
+      document.getElementById("completed-files").textContent = `0 Completed`;
+      if (a == 1) {
+        document.getElementById("button-submit").style.display = 'flex';
+        document.getElementById("videocontainer").style.display = 'none';
+      } else {
+        document.getElementById("button-submit-folder").style.display = 'flex';
+        document.getElementById("foldercontainer").style.display = 'none';
+      }
+      const session_Id = localStorage.getItem("session-id");
+      console.log(session_Id);
+      const response = await fetch(`${API_BASE_URL}/dashboard/sessions/${session_Id}/files`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+        },
+      });
+      console.log(response);
+      const datas = await response.json();
+      console.log(datas);
+      for (let i = 0; i < datas.length; i++) {
+        const res = await fetch(`${API_BASE_URL}/upload/file/${datas[i].id}/cancel`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+          }
+        });
+      }
+    }
+
+    async function dashboardLoad() {
+      console.log("Dashboard Load Called");
+      const detail = JSON.parse(localStorage.getItem("match"));
+      const sessionId = localStorage.getItem("session-id");
+      console.log(detail, sessionId);
+      const res = await fetch(`${API_BASE_URL}/dashboard/sessions/${sessionId}/files`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+        },
+      });
+      const data = await res.json();
+      console.log(data);
+      const tree = buildFileTree(data);
+      originalTree = tree;
+      currentTree = originalTree;
+      const container = document.getElementById('fileBody');
+      container.innerHTML = '';
+      renderTree(tree, container);
+      initUploadState(data);
+      console.log(uploadFileState);
+      const details = JSON.parse(localStorage.getItem("selectedMatch"));
+    }
+
+    function buildFileTree(files) {
+      const root = { files: [], folders: {} };
+      files.forEach(file => {
+        const parts = file.s3Key.split('/');
+        const folders = parts.slice(2, -1);
+        const fileName = file.relativePath;
+        if (folders.length === 0) {
+          root.files.push(file);
+        } else {
+          let current = root.folders;
+          folders.forEach((folder, index) => {
+            current[folder] ??= { files: [], folders: {} };
+            if (index === folders.length - 1) {
+              current[folder].files.push(file);
+            }
+            current = current[folder].folders;
+          });
+        }
+      });
+      return root;
+    }
+
+    let selectedFolder = null;
+
+    function renderTree(node, container, indent = 0) {
+      console.log(node);
+      Object.entries(node.folders).forEach(([folderName, folderNode]) => {
+        const folderRow = document.createElement('div');
+        folderRow.className = 'row folder';
+        folderRow.style.paddingLeft = `${24 + indent}px`;
+        folderRow.innerHTML = `
+          <span style="display:flex;align-items:center;gap:8px;">${folderSVG}<span class="filename">${folderName}</span></span>
+          <span class="file-size-text">${folderNode.files.length} files</span>
+          <span>—</span>
+        `;
+        const children = document.createElement('div');
+        children.style.display = 'none';
+        folderRow.onclick = () => {
+          children.style.display = children.style.display === 'none' ? 'block' : 'none';
+        };
+        container.appendChild(folderRow);
+        container.appendChild(children);
+        renderTree(folderNode, children, indent + 24);
+      });
+
+      node.files.forEach(file => {
+        const wrapper = document.createElement('div');
+        wrapper.dataset.fileid = file.id;
+        const state = uploadFileState.files[file.id];
+        const percent = state ? state.percent : 0;
+        const status = state ? state.status : "Uploading";
+        console.log(file);
+        wrapper.innerHTML = `
+          <div class="row file" data-s3key="${encodeURIComponent(file.s3Key)}" style="padding-left:${24 + indent}px">
+            <span style="display:flex;align-items:center;gap:8px;">
+              ${fileSVG}
+              <span class="filename">${file.relativePath}</span>
+            </span>
+            <span class="file-size-text">${(file.size/1024/1024).toFixed(1)} MB</span>
+            <span class="status">${status}</span>
+          </div>
+          <div class="progress-row" style="padding-left:${24 + indent}px">
+            <div class="progress-line">
+              <div class="progress-fill" style="width:${percent}%"></div>
+            </div>
+          </div>
+        `;
+        container.appendChild(wrapper);
+        const filenameSpan = wrapper.querySelector('.filename');
+        filenameSpan.addEventListener('click', () => playVideo(file.s3Key));
+      });
+    }
+
+    function getStatusColor(status) {
+      switch (status) {
+        case "completed": return "green";
+        case "uploading": return "orange";
+        case "failed": return "red";
+        case "orphaned": return "red";
+        case "missing": return "darkred";
+        case "pending": return "blue";
+        default: return "gray";
+      }
+    }
+
+    function renderFiles(folder) {
+      const content = document.getElementById("files");
+      content.innerHTML = "";
+      for (const item of folder.children) {
+        if (item.type !== "file") continue;
+        const div = document.createElement("div");
+        div.className = `file ${item.status}`;
+        div.innerHTML = `🎬 ${item.name}<span style="float:right;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;font-size:14px;">${formatSize(item.size)}</span>`;
+        content.appendChild(div);
+      }
+    }
+
+    async function SaveUpload(etag, fileId, file, single, signal) {
+      console.log(etag);
+      const res = await fetch(`${API_BASE_URL}/upload/part`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+        },
+        body: JSON.stringify({ "fileId": fileId, "partNumber": 1, "etag": etag, "size": file.size }),
+        signal: signal
+      });
+      console.log(res);
+      const response = await fetch(`${API_BASE_URL}/upload/complete`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+        },
+        body: JSON.stringify({ "fileId": fileId }),
+        signal: signal
+      });
+      console.log(res);
+      if (res.statusText == 'OK') { return true; }
+      return true;
+    }
+
+    function UploadToS3(data, fileId, file, signal) {
+      console.log('called');
+      return new Promise(async (resolve, reject) => {
+        console.log(file, fileId, data);
+        const buffer = await window.electron.readFile(file.path);
+        const xhr = new XMLHttpRequest();
+        if (signal) {
+          if (signal.aborted) { xhr.abort(); return; }
+          signal.addEventListener("abort", () => { console.log("Abort signal received for", fileId); xhr.abort(); }, { once: true });
+        }
+        xhr.open("PUT", data.url);
+        xhr.setRequestHeader("Content-Type", file.type);
+        xhr.upload.onprogress = (e) => {
+          if (!e.lengthComputable) return;
+          console.log(uploadFileState);
+          const state = uploadFileState.files[fileId];
+          console.log(state);
+          const prev = state.uploaded;
+          const delta = Math.max(0, e.loaded - prev);
+          state.uploaded = e.loaded;
+          state.percent = Math.round((e.loaded / state.size) * 100);
+          uploadFileState.uploadedBytes += delta;
+          const now = Date.now();
+          const deltaBytes = uploadFileState.uploadedBytes - uploadFileState.lastBytes;
+          const deltaTime = (now - uploadFileState.lastTime) / 1000;
+          if (deltaTime > 0) { uploadFileState.speed = deltaBytes / deltaTime; }
+          uploadFileState.lastBytes = uploadFileState.uploadedBytes;
+          uploadFileState.lastTime = now;
+          updateSpeedGauge(uploadFileState.speed);
+          updateFileUI(fileId, state.percent);
+        };
+        xhr.onload = async () => {
+          if (xhr.status === 200) {
+            const state = uploadFileState.files[fileId];
+            if (!state.completed) {
+              state.completed = true;
+              uploadFileState.completedFiles++;
+              document.getElementById('completed-files').textContent = `${uploadFileState.completedFiles} Completed`;
+            }
+            const etag = xhr.getResponseHeader("ETag");
+            await SaveUpload(etag, fileId, file, "1", signal);
+            resolve(true);
+          } else {
+            const wrapper = document.querySelector(`[data-fileid="${fileId}"]`);
+            const status = wrapper.querySelector(".status");
+            if (status) {
+              status.textContent = "Failed";
+              status.style.color = "#D32F2F";
+              status.style.fontFamily = "'Plus Jakarta Sans', sans-serif";
+              status.style.fontWeight = "700";
+              status.style.fontSize = "14px";
+              status.style.lineHeight = "1";
+            }
+            uploadState = UploadState.ERROR;
+            console.log(error);
+            reject(new Error("Upload failed"));
+          }
+        };
+        xhr.onerror = () => {
+          const wrapper = document.querySelector(`[data-fileid="${fileId}"]`);
+          console.log('hhhhhh', wrapper);
+          if (wrapper) {
+            const status = wrapper.querySelector(".status");
+            if (status) {
+              status.textContent = "Failed";
+              status.style.color = "#D32F2F";
+              status.style.fontFamily = "'Plus Jakarta Sans', sans-serif";
+              status.style.fontWeight = "700";
+              status.style.fontSize = "14px";
+              status.style.lineHeight = "1";
+            }
+            uploadState = UploadState.ERROR;
+          }
+          reject(new Error("Network error during upload"));
+        };
+        xhr.send(buffer);
+      });
+    }
+
+    function updateFileUI(fileId, percent) {
+      const el = document.getElementById(`progress-${fileId}`);
+      if (el) el.style.width = percent + "%";
+    }
+
+    function updateFileUI(fileId, percent) {
+      const wrapper = document.querySelector(`[data-fileid="${fileId}"]`);
+      if (!wrapper) return;
+      const bar = wrapper.querySelector(".progress-fill");
+      if (bar) bar.style.width = percent + "%";
+      if (percent >= 100) {
+        const status = wrapper.querySelector(".status");
+        if (status) {
+          status.textContent = "Completed";
+          status.style.color = "#0B9410";
+          status.style.fontFamily = "'Plus Jakarta Sans', sans-serif";
+          status.style.fontWeight = "700";
+          status.style.fontSize = "14px";
+          status.style.lineHeight = "1";
+        }
+        const progressRow = wrapper.querySelector(".progress-row");
+        if (progressRow) { setTimeout(() => progressRow.remove(), 500); }
+      }
+    }
+
+    async function SingleSignedUrl(id, fileId, file, signal) {
+      try {
+        const res = await fetch(`${API_BASE_URL}/upload/sign`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+          },
+          body: JSON.stringify({ fileId: fileId, partNumber: "1" }),
+          signal: signal
+        });
+        console.log(res);
+        const data = await res.json();
+        console.log("Server response:", data);
+        await UploadToS3(data, fileId, file, signal);
+        return true;
+      } catch (err) {
+        console.log(err);
+      }
+    }
+
+    async function multipart(fileid, file, signal) {
+      console.log(fileid);
+      const res = await fetch(`${API_BASE_URL}/upload/init`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+        },
+        body: JSON.stringify({ fileId: fileid, type: file.type }),
+        signal: signal
+      });
+      console.log(res);
+      const data = await res.json();
+      console.log("Server response:", data);
+      if (data.totalParts == 1) {
+        await SingleSignedUrl(data.uploadId, fileid, file, signal);
+      } else {
+        await MultiSignedUrl(data.uploadId, fileid, data.totalParts, file, signal);
+      }
+      return true;
+    }
+
+    document.getElementById("retryAllBtn").addEventListener("click", () => {
+      document.getElementById("button-submit-folder").style.display = 'none';
+      document.getElementById("foldercontainer").style.display = 'flex';
+      resumeupload("2");
+    });
+
+    async function MultiSignedUrl(id, fileId, parts, file, signal) {
+      const arr = Array.from({ length: parts }, (_, i) => i + 1);
+      const res = await fetch(`${API_BASE_URL}/upload/batch-sign`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+        },
+        body: JSON.stringify({ fileId: fileId, partNumbers: arr }),
+        signal: signal
+      });
+      console.log(res);
+      const data = await res.json();
+      console.log("Server response:", data);
+      await UploadToMultiS3(data, fileId, parts, file, signal);
+      return true;
+    }
+
+    async function UploadToMultiS3(data, fileId, parts, file, signal) {
+      console.log(data, fileId, parts, file);
+      console.log(file, CHUNK_SIZE);
+      const uploadPromises = [];
+      const etags = [];
+      for (let partNumber = 1; partNumber <= parts; partNumber++) {
+        const start = (partNumber - 1) * CHUNK_SIZE * 1024 * 1024;
+        const end = Math.min(start + CHUNK_SIZE * 1024 * 1024, file.size);
+        console.log(start, end);
+        const uploadPromise = window.electron.uploadChunk({
+          presignedUrl: data[partNumber - 1].url,
+          filePath: file.path,
+          start, end, partNumber,
+          type: file.type
+        }).then(etag => {
+          etags.push({ PartNumber: partNumber, ETag: etag, chunkSize: end - start });
+        });
+        uploadPromises.push(uploadPromise);
+      }
+      try {
+        await Promise.all(uploadPromises);
+        console.log("All parts uploaded successfully!");
+        console.log(etags);
+        await SaveMultiUpload(etags, fileId, signal);
+      } catch (error) {
+        console.error("Upload failed:", error);
+        uploadState = UploadState.ERROR;
+      }
+      return true;
+    }
+
+    async function uploadSession(size, detail, signal) {
+      console.log(detail);
+      const res = await fetch(`${API_BASE_URL}/upload/session`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+        },
+        body: JSON.stringify({ "totalSize": size, "match_id": detail.id }),
+        signal: signal
+      });
+      console.log(res);
+      const sizes = formatSize(size);
+      const [value, unit] = sizes.split(" ");
+      document.getElementById('size-inNumber').textContent = value;
+      document.getElementById('size-unit').textContent = unit;
+      const data = await res.json();
+      status.textContent = "✅ Upload successful";
+      console.log("Server response:", data.id);
+      return data.id;
+      if (!res.ok) { throw new Error("Upload failed"); }
+    }
+
+    async function SaveMultiUpload(tag, fileId, signal) {
+      for (const item of tag) {
+        try {
+          console.log(item);
+          const res = await fetch(`${API_BASE_URL}/upload/part`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+            },
+            body: JSON.stringify({
+              fileId: fileId,
+              partNumber: item.PartNumber,
+              etag: item.ETag,
+              size: item.chunkSize,
+            }),
+            signal: signal
+          });
+          console.log(`Response for part ${item.PartNumber}:`, res);
+          if (!res.ok) { console.error(`Failed to save part ${item.PartNumber}`); }
+          else { console.log(`Saved part ${item.PartNumber} metadata`); }
+        } catch (error) {
+          console.error(`Error saving part ${item.PartNumber}:`, error);
+        }
+      }
+      try {
+        const response = await fetch(`${API_BASE_URL}/upload/complete`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+          },
+          body: JSON.stringify({ fileId: fileId }),
+          signal: signal
+        });
+        console.log("Complete upload response:", response);
+        if (!response.ok) { console.error("Failed to complete multipart upload"); }
+        else {
+          document.getElementById("loader").style.display = "none";
+          document.getElementById("button-submit").style.display = "block";
+          console.log("Multipart upload completed successfully");
+        }
+      } catch (error) {
+        console.error("Error completing multipart upload:", error);
+      }
+      return true;
+    }
+
+    function filterValidVideos(files) {
+      return files.filter(file => file.type.startsWith('video/') && file.size > 0);
+    }
+
+    async function retryUpload() {
+      const session_Id = localStorage.getItem("session-id");
+      const token = localStorage.getItem("token") || "";
+      console.log(session_Id, token);
+      const file = folderfile.length != 0 ? folderfile : videofile;
+      if (file.length == 0) return;
+      window.electron.notifyQuit(file, session_Id, token, JSON.parse(localStorage.getItem("selectedMatch")).id);
+    }
+
+    function convertFilesForIPC(files) {
+      return files.map(file => ([
+        file.lastModified, file.lastModifiedDate,
+        file.name, file.size, file.type, file.webkitRelativePath
+      ]));
+    }
+
+    function createLimiter(limit) {
+      let active = 0;
+      const queue = [];
+      const next = () => {
+        if (active >= limit || queue.length === 0) return;
+        active++;
+        const { fn, resolve, reject } = queue.shift();
+        fn().then(resolve).catch(reject).finally(() => { active--; next(); });
+      };
+      return (fn) => new Promise((resolve, reject) => {
+        queue.push({ fn, resolve, reject });
+        next();
+      });
+    }
+
+    function filterTree(node, query) {
+      const q = query.toLowerCase();
+      const filtered = { folders: {}, files: [] };
+      node.files.forEach(file => {
+        if (file.relativePath.toLowerCase().includes(q)) { filtered.files.push(file); }
+      });
+      Object.entries(node.folders).forEach(([name, folderNode]) => {
+        const folderMatches = name.toLowerCase().includes(q);
+        const childFiltered = filterTree(folderNode, query);
+        if (folderMatches || Object.keys(childFiltered.folders).length > 0 || childFiltered.files.length > 0) {
+          filtered.folders[name] = childFiltered;
+        }
+      });
+      return filtered;
+    }
+
+    window.addEventListener("beforeunload", onAppExit);
+
+    function getRootFolderName(files) {
+      if (!files || files.length === 0) return "";
+      const firstPath = files[0].path || files[0];
+      const parts = firstPath.replace(/\\/g, "/").split("/");
+      return parts[parts.length - 2];
+    }
+
+    function getRelativePathWithRoot(file, rootFolder) {
+      const fullPath = file.path.replace(/\\/g, "/");
+      const parts = fullPath.split("/");
+      const rootIndex = parts.lastIndexOf(rootFolder);
+      return parts.slice(rootIndex).join("/");
+    }
+
+    async function uploadVideo(a) {
+      console.log('upload video called');
+      if (uploadState === UploadState.UPLOADING) return;
+      try {
+        console.log(folderfile, videofile, folderfile?.length);
+        const file = folderfile?.length != 0 ? folderfile : videofile;
+        console.log(file);
+        const folder_count = getFolderCount(file);
+        if (file.length == 0) { alert("Please select a video first"); return; }
+        console.log(file);
+        uploadAbortController = new AbortController();
+        const signal = uploadAbortController.signal;
+        uploadState = UploadState.UPLOADING;
+        const detail = JSON.parse(localStorage.getItem("selectedMatch"));
+        console.log(detail, JSON.parse(localStorage.getItem("selectedMatch")));
+        console.log(file);
+        showLoader(a);
+        document.getElementById("selected-files").textContent = `${file.length} Selected`;
+        document.getElementById("completed-files").textContent = `0 Completed`;
+        if (a == 1) {
+          console.log('ggggg');
+          document.getElementById("button-submit").style.display = 'none';
+          document.getElementById("videocontainer").style.display = 'flex';
+        } else {
+          document.getElementById("button-submit-folder").style.display = 'none';
+          document.getElementById("foldercontainer").style.display = 'flex';
+        }
+        console.log(file);
+        const files = filterValidVideos(Array.from(file));
+        console.log(files);
+        console.log(files);
+        const totalSize = files.reduce((acc, file) => acc + file.size, 0);
+        const sessionKey = await uploadSession(totalSize, detail, signal);
+        localStorage.setItem("session-id", sessionKey);
+        console.log(localStorage.getItem("session-id"));
+        const fileTasks = [];
+        console.log(files);
+        const rootFolder = folderfile.length !== 0 ? getRootFolderName(files) : "";
+        for (const file of files) {
+          const res = await fetch(`${API_BASE_URL}/upload/files`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+            },
+            body: JSON.stringify({
+              files: [{
+                sessionId: sessionKey,
+                relativePath: file.name,
+                size: file.size,
+                s3Key: folderfile.length !== 0
+                  ? `matches/${detail.id}/${getRelativePathWithRoot(file, rootFolder)}`
+                  : `matches/${detail.id}/${file.name}`
+              }]
+            }),
+            signal
+          });
+          if (!res.ok) throw new Error("Upload failed");
+          const data = await res.json();
+          fileTasks.push({ file, fileId: data.files[0].fileId });
+        }
+        await dashboardLoad();
+        const FILE_CONCURRENCY = 6;
+        const limitFile = createLimiter(FILE_CONCURRENCY);
+        const uploadPromises = fileTasks.map(({ file, fileId }) =>
+          limitFile(() => multipart(fileId, file, signal))
+        );
+        await Promise.all(uploadPromises);
+        stopLoader(a);
+        console.log('ffffffff');
+        console.log('gggggg');
+        if (uploadState === UploadState.UPLOADING) {
+          uploadState = UploadState.COMPLETED;
+          onUploadFinished("completed");
+        }
+        if (uploadState === UploadState.CANCELLED) { console.log('gggggggggg'); onUploadFinished("cancelled"); return; }
+        if (uploadState === UploadState.PAUSED) { onUploadFinished("paused"); return; }
+        if (uploadState === UploadState.ERROR) { onUploadFinished("error", 'error'); }
+        console.log(a);
+        if (a == 1) {
+          console.log('sv');
+          document.getElementById("button-submit").style.display = 'flex';
+          document.getElementById("videocontainer").style.display = 'none';
+        } else {
+          console.log('jhhhh');
+          document.getElementById("button-submit-folder").style.display = 'flex';
+          document.getElementById("foldercontainer").style.display = 'none';
+        }
+      } catch (err) {
+        console.log(err);
+        stopLoader(a);
+        if (err.name === "AbortError") {
+          console.log('gggggggggg');
+          if (uploadState === UploadState.PAUSED) { console.log('gggggggggg'); onUploadFinished("paused"); }
+          else if (uploadState === UploadState.CANCELLED) { console.log('gggggggggg'); onUploadFinished("cancelled"); }
+        } else {
+          console.log('gggggggggg');
+          if (a == 1) {
+            console.log('ggggg');
+            document.getElementById("button-submit").style.display = 'flex';
+            document.getElementById("videocontainer").style.display = 'none';
+          } else {
+            document.getElementById("button-submit-folder").style.display = 'flex';
+            document.getElementById("foldercontainer").style.display = 'none';
+          }
+          uploadState = UploadState.ERROR;
+          onUploadFinished("error", err);
+        }
+      } finally {
+        console.log('hhhh');
+        uploadAbortController = null;
+      }
+    }
+
+    function getFolderCount(files) {
+      if (!Array.isArray(files)) return 0;
+      const folders = new Set(
+        files.filter(f => f.path).map(f => f.path.substring(0, f.path.lastIndexOf('/')))
+      );
+      return folders.size;
+    }
+
+    function showLoader(a) {
+      if (a == 1) {
+        console.log('ggggg');
+        const icon = document.querySelector(".upload-video-icon");
+        console.log(icon);
+        icon.classList.add("uploading");
+        document.getElementById("video-loader").style.display = "none";
+        document.getElementById("video-uploading-text").style.display = "block";
+      } else {
+        const icons = document.querySelector(".upload-folder-icon");
+        icons.classList.add("uploading");
+        document.getElementById("folder-loader").style.display = "none";
+        document.getElementById("folder-uploading-text").style.display = "block";
+      }
+    }
+
+    function stopLoader(a) {
+      if (a == 1) {
+        console.log('ggggg');
+        const icon = document.querySelector(".upload-video-icon");
+        console.log(icon);
+        icon.classList.remove("uploading");
+        document.getElementById("video-loader").style.display = "flex";
+        document.getElementById("video-uploading-text").style.display = "none";
+      } else {
+        const icons = document.querySelector(".upload-folder-icon");
+        icons.classList.remove("uploading");
+        document.getElementById("folder-loader").style.display = "flex";
+        document.getElementById("folder-uploading-text").style.display = "none";
+      }
+    }
+
+    function sortByCreatedAt(items, order = "asc") {
+      return [...items].sort((a, b) => {
+        const timeA = new Date(a.createdAt).getTime();
+        const timeB = new Date(b.createdAt).getTime();
+        return order === "asc" ? timeA - timeB : timeB - timeA;
+      });
+    }
+
+    function onAppExit() {
+      console.log("App / page is exiting");
+    }
+
+    async function resumeVideo(datas, a) {
+      console.log(datas, a);
+      try {
+        uploadAbortController = new AbortController();
+        const signal = uploadAbortController.signal;
+        uploadState = UploadState.UPLOADING;
+        const file = folderfile.length != 0 ? folderfile : videofile;
+        const detail = JSON.parse(localStorage.getItem("selectedMatch"));
+        console.log(detail, JSON.parse(localStorage.getItem("selectedMatch")));
+        console.log(file);
+        if (file.length == 0) { alert("Please select a video first"); return; }
+        console.log(file);
+        const files = filterValidVideos(Array.from(file));
+        console.log(files, datas);
+        const totalSize = files.reduce((acc, file) => acc + file.size, 0);
+        const sessionKey = localStorage.getItem("session-id");
+        let currentFileIndex = 0;
+        console.log(localStorage.getItem("session-id"));
+        console.log(datas);
+        datas = sortByCreatedAt(datas);
+        console.log(datas, files);
+        const FILE_CONCURRENCY = 6;
+        const limitFile = createLimiter(FILE_CONCURRENCY);
+        const uploadPromises = datas.map((file, index) =>
+          limitFile(async () => {
+            if (file.status === "completed") { return true; }
+            const res = await fetch(`${API_BASE_URL}/upload/init`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+              },
+              body: JSON.stringify({ fileId: file.id, type: files[index].type }),
+              signal
+            });
+            if (!res.ok) { throw new Error("Resume init failed"); }
+            const data = await res.json();
+            if (data.totalParts === 1) {
+              return SingleSignedUrl(data.uploadId, file.id, files[index], signal);
+            } else {
+              return MultiSignedUrl(data.uploadId, file.id, data.totalParts, files[index], signal);
+            }
+          })
+        );
+        await Promise.all(uploadPromises);
+        stopLoader(a);
+        if (uploadState === UploadState.UPLOADING) {
+          uploadState = UploadState.COMPLETED;
+          onUploadFinished("completed");
+        }
+        if (uploadState === UploadState.CANCELLED) { onUploadFinished("cancelled"); return; }
+        if (uploadState === UploadState.PAUSED) { onUploadFinished("paused"); return; }
+        if (a == 1) {
+          console.log('sv');
+          document.getElementById("button-submit").style.display = 'flex';
+          document.getElementById("videocontainer").style.display = 'none';
+        } else {
+          console.log('jhhhh');
+          document.getElementById("button-submit-folder").style.display = 'flex';
+          document.getElementById("foldercontainer").style.display = 'none';
+        }
+      } catch (err) {
+        console.log(err);
+        if (err.name === "AbortError") {
+          if (uploadState === UploadState.PAUSED) { onUploadFinished("paused"); }
+          else if (uploadState === UploadState.CANCELLED) { onUploadFinished("cancelled"); }
+        } else {
+          if (a == 1) {
+            console.log('sv');
+            document.getElementById("button-submit").style.display = 'block';
+          } else {
+            console.log('jhhhh');
+            document.getElementById("controls2").classList.add("hidden");
+          }
+          uploadState = UploadState.ERROR;
+          onUploadFinished("error", err);
+        }
+      } finally {
+        console.log('hhhh');
+        uploadAbortController = null;
+      }
+    }
+
+    function setupDropZone(elementId, type) {
+      const box = document.getElementById(elementId);
+      box.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        box.style.borderColor = '#1a6edf';
+        box.style.background = '#e8f2ff';
+      });
+      box.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        box.style.borderColor = '#4B70C3';
+        box.style.background = '#FCFDFF';
+      });
+      box.addEventListener('drop', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        box.style.borderColor = '#4B70C3';
+        box.style.background = '#FCFDFF';
+        const paths = Array.from(e.dataTransfer.files)
+          .map(f => f.path || f.webkitRelativePath || f.name)
+          .filter(Boolean);
+        console.log('jbnnn', paths);
+        if (paths.length === 0) return;
+        console.log('dropped paths:', paths);
+        const metadata = await window.electron.resolveDrop(paths);
+        console.log('resolved metadata:', metadata);
+        if (metadata.length === 0) { alert('No valid video files found'); return; }
+        if (type === 'video') { videofile = metadata; }
+        else { folderfile = metadata; }
+        console.log(`${type} drop: ${metadata.length} file(s) ready`);
+      });
+    }
+
+    setupDropZone('selectVideosBtn', 'video');
+    setupDropZone('selectFoldersBtn', 'folder');
+
+    // window.addEventListener("DOMContentLoaded", dashboardLoad());
+  </script>
+  <script src="config.js"></script>
+
+</body>
+</html>
