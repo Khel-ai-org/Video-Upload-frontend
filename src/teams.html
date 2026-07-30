@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Teams</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Roboto+Condensed:wght@600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Plus Jakarta Sans", sans-serif; background: #ffffff; }
+    .top-bar { padding: 35px 40px; display: flex; justify-content: space-between; align-items: center; }
+    
+    /* Breadcrumbs */
+    .breadcrumb { padding: 0 40px; display: flex; align-items: center; gap: 10px; color: #83878D; font-size: 14px; font-weight: 500; margin-bottom: 20px; cursor: pointer; }
+    .breadcrumb span:last-child { color: #4B70C3; }
+
+    /* Toggle Buttons */
+    .toggle-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; }
+    .toggle-btn { padding: 10px 30px; border-radius: 8px; border: 1px solid #E5F0FF; background: #fff; font-weight: 600; cursor: pointer; }
+    .toggle-btn.active { background: #4B70C3; color: white; border: none; }
+
+    /* Main Content */
+    .main-container { padding: 0 40px; }
+    .teams-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .teams-title { font-size: 20px; font-weight: 600; color: #1F2022; }
+    .add-teams-btn { background: #4B70C3; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+
+    /* Grid */
+    .team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; margin-bottom: 50px; }
+    .team-card { border: 1px solid #E5F0FF; padding: 20px; border-radius: 12px; text-align: center; }
+    .team-logo { width: 60px; height: 60px; border-radius: 50%; margin-bottom: 10px; }
+    .team-id { font-size: 11px; color: #83878D; }
+    .team-name { font-weight: 600; font-size: 14px; }
+
+    /* Footer Action */
+    .footer-action { text-align: center; margin: 40px 0; }
+    .generate-btn { background: #4B70C3; color: white; padding: 15px 100px; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+    <div style="display: flex; align-items: center; gap: 16px;">
+        <img src="./assets/Logo.png" height="30"/>
+        <span style="font-size:22px; font-weight:700;">Khel.ai</span>
+    </div>
+</div>
+
+<div class="breadcrumb" onclick="window.history.back()">
+    <img src="./assets/back-arrow.svg" width="16" />
+    <span>Tournaments</span> > <span>Teams</span>
+</div>
+
+<div class="toggle-container">
+    <button class="toggle-btn active">Group Tournament</button>
+    <button class="toggle-btn">League Tournament</button>
+</div>
+
+<div class="main-container">
+    <div class="teams-header">
+        <h2 class="teams-title" id="tournamentNameTitle">Teams of Tournament</h2>
+        <div style="display: flex; gap: 12px;">
+            <!-- View Matches Button -->
+            <button 
+                onclick="window.location.href='matches.html'" 
+                style="background: transparent; color: #4B70C3; border: 1px solid #4B70C3; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                View Matches
+            </button>
+            <button class="add-teams-btn">+ Add Teams</button>
+        </div>
+    </div>
+
+    <div class="team-grid" id="teamGrid">
+        <!-- Teams will be injected here -->
+        <p>Loading teams...</p>
+    </div>
+
+    <div class="footer-action">
+        <button class="generate-btn">Generate Fixture</button>
+    </div>
+</div>
+
+<script src="config.js"></script>
+<script>
+    const tournament = JSON.parse(localStorage.getItem("selectedTournament"));
+    
+    // Set Title
+    document.getElementById("tournamentNameTitle").textContent = `Teams of ${tournament ? tournament.name : 'Tournament'}`;
+
+    async function loadTeams() {
+        if (!tournament) return;
+        
+        try {
+            // Replace with your actual API endpoint for getting teams in a tournament
+            const res = await fetch(`${API_BASE_URL}/tournaments/${tournament.id}/teams`, {
+                headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
+            });
+            const teams = await res.json();
+            
+            const grid = document.getElementById("teamGrid");
+            if (!teams.length) {
+                grid.innerHTML = "<p>No teams added yet.</p>";
+                return;
+            }
+
+            grid.innerHTML = teams.map(team => `
+                <div class="team-card">
+                    <div class="team-id">Team ID - ${team.id.slice(-6)}</div>
+                    <img src="${team.logo_url || './assets/default_team.png'}" class="team-logo" />
+                    <div class="team-name">${team.name}</div>
+                </div>
+            `).join("");
+        } catch (e) {
+            document.getElementById("teamGrid").innerHTML = "<p>Error loading teams.</p>";
+        }
+    }
+
+    loadTeams();
+</script>
+</body>
+</html>
