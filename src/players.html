@@ -6,297 +6,903 @@
   <title>Khel.ai - Players</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Roboto+Condensed:wght@600&display=swap" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0; padding: 0;
-      font-family: "Plus Jakarta Sans", sans-serif;
-      background-color: #ffffff;
-      color: #1F2022;
-    }
+  * {
+    box-sizing: border-box;
+  }
 
-    /* Top Bar */
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: "Plus Jakarta Sans", sans-serif;
+    background-color: #ffffff;
+    color: #1F2022;
+  }
+
+  /* ========================================
+     TOP BAR
+  ======================================== */
+
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 35px 40px;
+  }
+
+  .logo-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-shrink: 0;
+  }
+
+  .search-container {
+    display: flex;
+    width: 100%;
+    max-width: 600px;
+    padding: 10px 16px;
+    align-items: center;
+    gap: 12px;
+    border-radius: 12px;
+    border: 1px solid #E5F0FF;
+    background: #fcfcfc;
+    margin: 0 40px;
+  }
+
+  .search-input {
+    border: none;
+    outline: none;
+    flex: 1;
+    font-size: 14px;
+    color: #1F2022;
+    background: transparent;
+  }
+
+  /* ========================================
+     USER PROFILE & DROPDOWN
+  ======================================== */
+
+  .user-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .user-text {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+  }
+
+  .user-name {
+    font-weight: 700;
+    font-size: 14px;
+    color: #1F2022;
+  }
+
+  .user-email {
+    font-size: 12px;
+    color: #83878D;
+  }
+
+  .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .dropdown {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    background: white;
+    border: 1px solid #E5F0FF;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    display: none;
+    flex-direction: column;
+    min-width: 150px;
+    z-index: 3000;
+    overflow: hidden;
+  }
+
+  .dropdown.show {
+    display: flex;
+  }
+
+  .dropdown-item {
+    padding: 12px 20px;
+    font-size: 14px;
+    color: #1F2022;
+    cursor: pointer;
+    transition: background 0.2s;
+    text-align: left;
+  }
+
+  .dropdown-item:hover {
+    background: #f5f8ff;
+    color: #4B70C3;
+  }
+
+  /* ========================================
+     TABS
+  ======================================== */
+
+  .tabs-container {
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    border-bottom: 1px solid #F0F0F0;
+  }
+
+  .tab {
+    padding: 15px 40px;
+    font-weight: 600;
+    cursor: pointer;
+    color: #83878D;
+    transition: color 0.3s;
+  }
+
+  .tab.active {
+    color: #4B70C3;
+    border-bottom: 3px solid #4B70C3;
+  }
+
+  /* ========================================
+     MAIN CONTENT
+  ======================================== */
+
+  .main-content {
+    padding: 40px;
+  }
+
+  .header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+  }
+
+  .title {
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  .create-btn {
+    background: #4B70C3;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ========================================
+     STATS OVERVIEW CARD
+  ======================================== */
+
+  .stats-card-container {
+    border: 1px solid #E5F0FF;
+    border-radius: 24px;
+    padding: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    background: #ffffff;
+  }
+
+  .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex: 1;
+    padding: 0 20px;
+    border-right: 1px solid #E5F0FF;
+  }
+
+  .stat-item:last-child {
+    border-right: none;
+  }
+
+  .stat-icon-circle {
+    width: 55px;
+    height: 55px;
+    background: #F0F5FF;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .stat-meta {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .stat-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1F2022;
+  }
+
+  .stat-description {
+    font-size: 13px;
+    color: #83878D;
+    font-weight: 500;
+  }
+
+  /* ========================================
+     TABLE SECTION
+  ======================================== */
+
+  .table-container {
+    border: 1px solid #E5F0FF;
+    border-radius: 24px;
+    background: #ffffff;
+    position: relative;
+  }
+
+  .table-header-title {
+    font-size: 18px;
+    font-weight: 700;
+    padding: 24px 30px 10px 30px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+  }
+
+  th {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #83878D;
+    font-weight: 700;
+    padding: 16px 30px;
+    background: #FAFBFF;
+    border-bottom: 1px solid #E5F0FF;
+  }
+
+  td {
+    padding: 18px 30px;
+    font-size: 14px;
+    border-bottom: 1px solid #F5F8FF;
+    color: #1F2022;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  .player-cell {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .player-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .player-info {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .player-name {
+    font-weight: 700;
+    font-size: 14px;
+    color: #1F2022;
+  }
+
+  .player-id {
+    font-size: 12px;
+    color: #83878D;
+  }
+
+  /* ========================================
+     PAGINATION
+  ======================================== */
+
+  .pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    padding: 24px;
+  }
+
+  .page-btn {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid #E5F0FF;
+    background: white;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    color: #83878D;
+  }
+
+  .page-btn.active {
+    background: #4B70C3;
+    color: white;
+    border-color: #4B70C3;
+  }
+
+  /* ========================================
+     MODAL OVERLAY
+     
+     IMPORTANT:
+     Scrolling is handled by the overlay,
+     NOT the modal-content.
+  ======================================== */
+
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    background: rgba(0, 0, 0, 0.4);
+
+    display: none;
+    justify-content: center;
+    align-items: center;
+
+    z-index: 10000;
+
+    /*
+      Important:
+      Allow the complete modal to scroll on
+      smaller screens without clipping dropdowns.
+    */
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    padding: 20px;
+  }
+
+  /* ========================================
+     MODAL CONTENT
+     
+     IMPORTANT:
+     overflow must be visible so dropdowns
+     can appear outside the form area.
+  ======================================== */
+
+  .modal-content {
+    background: white;
+
+    width: 100%;
+    max-width: 540px;
+
+    /*
+      Do NOT use overflow-y:auto here.
+      It will clip the dropdown.
+    */
+    overflow: visible;
+
+    padding: 35px;
+
+    border-radius: 24px;
+
+    text-align: center;
+
+    position: relative;
+
+    margin: auto;
+
+    z-index: 10001;
+  }
+
+  /* ========================================
+     MODAL CLOSE BUTTON
+  ======================================== */
+
+  .modal-close-btn {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+
+    background: transparent;
+    border: none;
+
+    cursor: pointer;
+
+    color: #83878D;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 4px;
+
+    transition: color 0.2s;
+  }
+
+  .modal-close-btn:hover {
+    color: #1F2022;
+  }
+
+  /* ========================================
+     MODAL ICON
+  ======================================== */
+
+  .icon-circle {
+    width: 60px;
+    height: 60px;
+
+    background: #F0F5FF;
+
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 0 auto 12px;
+  }
+
+  .icon-circle img {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+  }
+
+  .modal-content h2 {
+    margin: 0 0 25px 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1F2022;
+  }
+
+  /* ========================================
+     FORM ROW
+  ======================================== */
+
+  .form-row {
+    display: flex;
+    gap: 16px;
+  }
+
+  .form-row .form-group {
+    flex: 1;
+  }
+
+  /* ========================================
+     FORM GROUP
+  ======================================== */
+
+  .form-group {
+    text-align: left;
+    margin-bottom: 16px;
+
+    position: relative;
+
+    /*
+      Required so dropdown appears above
+      neighboring form fields.
+    */
+    z-index: 100;
+  }
+
+  label {
+    display: block;
+
+    font-weight: 600;
+    font-size: 13px;
+
+    margin-bottom: 8px;
+
+    color: #1F2022;
+  }
+
+  /* ========================================
+     INPUT
+  ======================================== */
+
+  .player-input {
+    width: 100%;
+
+    padding: 14px 16px;
+
+    border: 1px solid #E5F0FF;
+
+    border-radius: 12px;
+
+    background: #FAFBFF;
+
+    outline: none;
+
+    font-family: inherit;
+
+    font-size: 14px;
+
+    color: #1F2022;
+
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .player-input:focus {
+    border-color: #4B70C3;
+    box-shadow: 0 0 0 3px rgba(75, 112, 195, 0.08);
+  }
+
+  .player-input::placeholder {
+    color: #B0B4B9;
+  }
+
+  /* ========================================
+     CUSTOM DROPDOWN TRIGGER
+  ======================================== */
+
+  .custom-select-trigger {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    cursor: pointer;
+
+    position: relative;
+
+    z-index: 101;
+
+    user-select: none;
+  }
+
+  .custom-select-trigger span {
+    color: #B0B4B9;
+  }
+
+  .custom-select-trigger.selected span {
+    color: #1F2022;
+  }
+
+  /* ========================================
+     DROPDOWN CONTAINERS
+  ======================================== */
+
+  #seasonContainer,
+  #districtContainer,
+  #clubContainer {
+    position: relative;
+    z-index: 500;
+  }
+
+  /*
+    Make the dropdown containers even higher
+    when they are opened.
+  */
+
+  #seasonContainer:has(.custom-dropdown-menu.show),
+  #districtContainer:has(.custom-dropdown-menu.show),
+  #clubContainer:has(.custom-dropdown-menu.show) {
+    z-index: 99999;
+  }
+
+  /* ========================================
+     CUSTOM DROPDOWN MENU
+  ======================================== */
+
+  .custom-dropdown-menu {
+    display: none;
+
+    position: absolute;
+
+    /*
+      Put menu directly below trigger.
+    */
+    top: calc(100% + 6px);
+
+    left: 0;
+
+    width: 100%;
+
+    background: #ffffff;
+
+    border: 1px solid #E5F0FF;
+
+    border-radius: 12px;
+
+    box-shadow:
+      0 10px 25px rgba(0, 0, 0, 0.10),
+      0 4px 10px rgba(0, 0, 0, 0.04);
+
+    /*
+      Very high z-index so it appears
+      above other form fields.
+    */
+    z-index: 999999;
+
+    margin: 0;
+
+    /*
+      Dropdown itself can scroll if many
+      options exist.
+    */
+    max-height: 200px;
+
+    overflow-y: auto;
+
+    overflow-x: hidden;
+  }
+
+  .custom-dropdown-menu.show {
+    display: block;
+  }
+
+  /* ========================================
+     DROPDOWN ITEM
+  ======================================== */
+
+  .custom-dropdown-item {
+    padding: 12px 16px;
+
+    font-size: 14px;
+
+    color: #1F2022;
+
+    cursor: pointer;
+
+    text-align: left;
+
+    background: #ffffff;
+
+    transition:
+      background 0.2s ease,
+      color 0.2s ease;
+  }
+
+  .custom-dropdown-item:first-child {
+    border-radius: 12px 12px 0 0;
+  }
+
+  .custom-dropdown-item:last-child {
+    border-radius: 0 0 12px 12px;
+  }
+
+  .custom-dropdown-item:hover {
+    background: #f5f8ff;
+    color: #4B70C3;
+  }
+
+  /* ========================================
+     CHEVRON
+  ======================================== */
+
+  .transition-transform {
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .rotate-180 {
+    transform: rotate(180deg);
+  }
+
+  /* ========================================
+     SAVE BUTTON
+  ======================================== */
+
+  .save-btn {
+    width: 100%;
+
+    padding: 16px;
+
+    border-radius: 12px;
+
+    border: none;
+
+    background: #4B70C3;
+
+    color: white;
+
+    cursor: pointer;
+
+    font-weight: 700;
+
+    font-family: inherit;
+
+    font-size: 15px;
+
+    margin-top: 10px;
+
+    transition:
+      background 0.2s ease,
+      transform 0.1s ease;
+  }
+
+  .save-btn:hover {
+    background: #3F63B1;
+  }
+
+  .save-btn:active {
+    transform: scale(0.99);
+  }
+
+  /* ========================================
+     ERROR MESSAGE
+  ======================================== */
+
+  #errorMessage {
+    color: #e63946;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    margin-bottom: 15px;
+
+    display: none;
+  }
+
+  .error-text {
+    color: #e63946;
+
+    font-size: 11px;
+
+    font-weight: 500;
+
+    margin-top: 4px;
+
+    display: none;
+  }
+
+  .player-input.invalid {
+    border-color: #e63946;
+  }
+
+  /* ========================================
+     RESPONSIVE
+  ======================================== */
+
+  @media (max-width: 900px) {
+
     .top-bar {
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center;
-      padding: 35px 40px; 
-    }
-
-    .logo-section { 
-      display: flex; 
-      align-items: center; 
-      gap: 15px; 
-      flex-shrink: 0;
+      padding: 25px;
     }
 
     .search-container {
-      display: flex;
-      width: 100%;
-      max-width: 600px;
-      padding: 10px 16px;
-      align-items: center;
-      gap: 12px;
-      border-radius: 12px;
-      border: 1px solid #E5F0FF;
-      background: #fcfcfc;
-      margin: 0 40px;
+      margin: 0 20px;
     }
 
-    .search-input {
-      border: none; outline: none; flex: 1; font-size: 14px;
-      color: #1F2022; background: transparent;
+    .main-content {
+      padding: 25px;
     }
 
-    /* User Profile & Dropdown */
-    .user-profile { 
-      display: flex; 
-      align-items: center; 
-      gap: 12px; 
-      cursor: pointer; 
-      flex-shrink: 0; 
-      position: relative; 
-    }
-    .user-text { display: flex; flex-direction: column; text-align: left; }
-    .user-name { font-weight: 700; font-size: 14px; color: #1F2022; }
-    .user-email { font-size: 12px; color: #83878D; }
-    .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
-
-    .dropdown {
-      position: absolute;
-      top: 50px;
-      right: 0;
-      background: white;
-      border: 1px solid #E5F0FF;
-      border-radius: 12px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-      display: none; 
-      flex-direction: column;
-      min-width: 150px;
-      z-index: 3000;
-      overflow: hidden;
-    }
-    .dropdown.show { display: flex; }
-    .dropdown-item {
-      padding: 12px 20px;
-      font-size: 14px;
-      color: #1F2022;
-      cursor: pointer;
-      transition: background 0.2s;
-      text-align: left;
-    }
-    .dropdown-item:hover { background: #f5f8ff; color: #4B70C3; }
-
-    /* Tabs */
-    .tabs-container { display: flex; justify-content: center; gap: 60px; border-bottom: 1px solid #F0F0F0; }
-    .tab { padding: 15px 40px; font-weight: 600; cursor: pointer; color: #83878D; transition: color 0.3s; }
-    .tab.active { color: #4B70C3; border-bottom: 3px solid #4B70C3; }
-
-    /* Main Content */
-    .main-content { padding: 40px; }
-    .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-    .title { font-size: 24px; font-weight: 700; }
-    .create-btn {
-      background: #4B70C3; color: white; border: none; padding: 12px 24px;
-      border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;
-    }
-
-    /* Stats Overview Card */
     .stats-card-container {
-      border: 1px solid #E5F0FF;
-      border-radius: 24px;
-      padding: 30px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 40px;
-      background: #ffffff;
+      padding: 20px;
     }
+
     .stat-item {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      flex: 1;
-      padding: 0 20px;
-      border-right: 1px solid #E5F0FF;
+      padding: 0 12px;
     }
-    .stat-item:last-child { border-right: none; }
-    .stat-icon-circle {
-      width: 55px; height: 55px; background: #F0F5FF; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-    }
-    .stat-meta { display: flex; flex-direction: column; }
-    .stat-value { font-size: 22px; font-weight: 700; color: #1F2022; }
-    .stat-description { font-size: 13px; color: #83878D; font-weight: 500; }
+  }
 
-    /* Table Section */
-    .table-container {
-      border: 1px solid #E5F0FF;
-      border-radius: 24px;
-      overflow: hidden;
-      background: #ffffff;
+  @media (max-width: 700px) {
+
+    .top-bar {
+      flex-wrap: wrap;
+      gap: 20px;
     }
-    .table-header-title {
-      font-size: 18px;
-      font-weight: 700;
-      padding: 24px 30px 10px 30px;
-    }
-    table {
+
+    .search-container {
+      order: 3;
       width: 100%;
-      border-collapse: collapse;
-      text-align: left;
+      max-width: none;
+      margin: 0;
     }
-    th {
-      font-size: 11px;
-      text-transform: uppercase;
-      color: #83878D;
-      font-weight: 700;
-      padding: 16px 30px;
-      background: #FAFBFF;
-      border-bottom: 1px solid #E5F0FF;
+
+    .tabs-container {
+      gap: 10px;
+      overflow-x: auto;
+      justify-content: flex-start;
     }
-    td {
-      padding: 18px 30px;
-      font-size: 14px;
-      border-bottom: 1px solid #F5F8FF;
-      color: #1F2022;
+
+    .tab {
+      padding: 15px 20px;
+      white-space: nowrap;
     }
-    tr:last-child td { border-bottom: none; }
-    
-    .player-cell {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-    .player-avatar {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-    .player-info {
-      display: flex;
+
+    .header-row {
       flex-direction: column;
-    }
-    .player-name { font-weight: 700; font-size: 14px; color: #1F2022; }
-    .player-id { font-size: 12px; color: #83878D; }
-
-    /* Pagination */
-    .pagination-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 8px;
-      padding: 24px;
-    }
-    .page-btn {
-      padding: 8px 14px;
-      border-radius: 8px;
-      border: 1px solid #E5F0FF;
-      background: white;
-      font-weight: 600;
-      font-size: 13px;
-      cursor: pointer;
-      color: #83878D;
-    }
-    .page-btn.active {
-      background: #4B70C3;
-      color: white;
-      border-color: #4B70C3;
+      align-items: flex-start;
+      gap: 15px;
     }
 
-    /* Modal Styles */
+    .stats-card-container {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 20px;
+    }
+
+    .stat-item {
+      border-right: none;
+      border-bottom: 1px solid #E5F0FF;
+      padding: 0 0 20px 0;
+    }
+
+    .stat-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      min-width: 700px;
+    }
+
+    /* Modal */
+
     .modal-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.4); display: none; justify-content: center; align-items: center; z-index: 1000;
+      align-items: flex-start;
+      padding: 15px;
     }
+
     .modal-content {
-      background: white; width: 100%; max-width: 540px; max-height: 90vh; overflow-y: auto;
-      padding: 35px; border-radius: 24px; text-align: center; position: relative;
+      max-width: 100%;
+      padding: 30px 20px;
+      margin: 20px auto;
     }
 
-    /* Close Cross Icon */
+    .form-row {
+      flex-direction: column;
+      gap: 0;
+    }
+  }
+
+  @media (max-width: 480px) {
+
+    .main-content {
+      padding: 15px;
+    }
+
+    .top-bar {
+      padding: 20px 15px;
+    }
+
+    .user-text {
+      display: none;
+    }
+
+    .modal-overlay {
+      padding: 10px;
+    }
+
+    .modal-content {
+      padding: 25px 16px;
+      border-radius: 18px;
+    }
+
+    .modal-content h2 {
+      font-size: 20px;
+    }
+
     .modal-close-btn {
-      position: absolute;
-      top: 24px;
-      right: 24px;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      color: #83878D;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 4px;
-      transition: color 0.2s;
+      top: 16px;
+      right: 16px;
     }
-    .modal-close-btn:hover {
-      color: #1F2022;
-    }
-    
-    .icon-circle {
-      width: 60px; height: 60px; background: #F0F5FF; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;
-    }
-    .icon-circle img { width: 30px; height: 30px; object-fit: contain; }
-
-    .modal-content h2 { margin: 0 0 25px 0; font-size: 22px; font-weight: 700; color: #1F2022; }
-
-    .form-row { display: flex; gap: 16px; }
-    .form-row .form-group { flex: 1; }
-
-    .form-group { text-align: left; margin-bottom: 16px; position: relative; }
-    label { display: block; font-weight: 600; font-size: 13px; margin-bottom: 8px; color: #1F2022; }
-    
-    .player-input {
-      width: 100%; padding: 14px 16px; border: 1px solid #E5F0FF; border-radius: 12px;
-      background: #FAFBFF; outline: none; font-family: inherit; font-size: 14px; color: #1F2022;
-    }
-    .player-input::placeholder { color: #B0B4B9; }
-
-    /* Custom Dropdown Styles (kept only for Season if needed, converted District & Club to text inputs) */
-    .custom-select-trigger {
-      display: flex; justify-content: space-between; align-items: center; cursor: pointer;
-    }
-    .custom-select-trigger span { color: #B0B4B9; }
-    .custom-select-trigger.selected span { color: #1F2022; }
-
-    .custom-dropdown-menu {
-      display: none; position: absolute; top: 100%; left: 0; width: 100%;
-      background: white; border: 1px solid #E5F0FF; border-radius: 12px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 9999; margin-top: 6px; overflow: hidden;
-    }
-    .custom-dropdown-menu.show { display: block; }
-    .custom-dropdown-item {
-      padding: 12px 16px; font-size: 14px; color: #1F2022; cursor: pointer; text-align: left;
-    }
-    .custom-dropdown-item:hover { background: #f5f8ff; color: #4B70C3; }
-
-    .rotate-180 { transform: rotate(180deg); }
-    .transition-transform { transition: transform 0.2s ease; }
-
-    .save-btn { 
-      width: 100%; padding: 16px; border-radius: 12px; border: none; 
-      background: #4B70C3; color: white; cursor: pointer; font-weight: 700; font-family: inherit; font-size: 15px; margin-top: 10px;
-    }
-
-    #errorMessage {
-      color: #e63946;
-      font-size: 13px;
-      font-weight: 600;
-      margin-bottom: 15px;
-      display: none;
-    }
-    .error-text {
-      color: #e63946;
-      font-size: 11px;
-      font-weight: 500;
-      margin-top: 4px;
-      display: none;
-    }
-    .player-input.invalid {
-      border-color: #e63946;
-    }
-  </style>
+  }
+</style>
 </head>
 <body>
 
@@ -348,44 +954,81 @@
     </div>
 
     <!-- Stats Overview Cards -->
-    <div class="stats-card-container">
-      <div class="stat-item">
-        <div class="stat-icon-circle">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4B70C3" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-        </div>
-        <div class="stat-meta">
-          <span class="stat-value">128</span>
-          <span class="stat-description">Total Players</span>
-        </div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-icon-circle">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4B70C3" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-        </div>
-        <div class="stat-meta">
-          <span class="stat-value">12</span>
-          <span class="stat-description">Local Players</span>
-        </div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-icon-circle">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4B70C3" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
-        </div>
-        <div class="stat-meta">
-          <span class="stat-value">05</span>
-          <span class="stat-description">Season Renewals</span>
-        </div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-icon-circle">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4B70C3" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
-        </div>
-        <div class="stat-meta">
-          <span class="stat-value">85%</span>
-          <span class="stat-description">Guest Player</span>
-        </div>
-      </div>
+    <!-- Stats Overview Cards -->
+<div class="stats-card-container">
+
+  <!-- Total Players -->
+  <div class="stat-item">
+    <div class="stat-icon-circle">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+        stroke="#4B70C3" stroke-width="2">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+        <circle cx="9" cy="7" r="4"></circle>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+      </svg>
     </div>
+
+    <div class="stat-meta">
+      <span class="stat-value" id="totalPlayersVal">0</span>
+      <span class="stat-description">Total Players</span>
+    </div>
+  </div>
+
+
+  <!-- Local Players -->
+  <div class="stat-item">
+    <div class="stat-icon-circle">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+        stroke="#4B70C3" stroke-width="2">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+        <circle cx="12" cy="7" r="4"></circle>
+      </svg>
+    </div>
+
+    <div class="stat-meta">
+      <span class="stat-value" id="localPlayersVal">0</span>
+      <span class="stat-description">Local Players</span>
+    </div>
+  </div>
+
+
+  <!-- Season Renewals -->
+  <div class="stat-item">
+    <div class="stat-icon-circle">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+        stroke="#4B70C3" stroke-width="2">
+        <polyline points="23 4 23 10 17 10"></polyline>
+        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+      </svg>
+    </div>
+
+    <div class="stat-meta">
+      <span class="stat-value" id="seasonRenewalsVal">0</span>
+      <span class="stat-description">Season Renewals</span>
+    </div>
+  </div>
+
+
+  <!-- Guest Players -->
+  <div class="stat-item">
+    <div class="stat-icon-circle">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+        stroke="#4B70C3" stroke-width="2">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+        <circle cx="8.5" cy="7" r="4"></circle>
+        <line x1="20" y1="8" x2="20" y2="14"></line>
+        <line x1="23" y1="11" x2="17" y2="11"></line>
+      </svg>
+    </div>
+
+    <div class="stat-meta">
+      <span class="stat-value" id="guestPlayersVal">0</span>
+      <span class="stat-description">Guest Player</span>
+    </div>
+  </div>
+
+</div>
 
     <!-- Players Table Section -->
     <div class="table-container">
@@ -401,31 +1044,16 @@
         </thead>
         <tbody id="playersTableBody">
           <tr>
-            <td>
-              <div class="player-cell">
-                <img src="./assets/default_image.jpeg" class="player-avatar" />
-                <div class="player-info">
-                  <span class="player-name">Rahul Sharma</span>
-                  <span class="player-id">ID - C251B55684..</span>
-                </div>
-              </div>
-            </td>
-            <td>Mysore</td>
-            <td>Chamundi Hills CC</td>
-            <td>Renewal/ Primary</td>
+            <td colspan="4" style="text-align: center; color: #83878D;">Loading players...</td>
           </tr>
         </tbody>
       </table>
 
       <!-- Pagination -->
-      <div class="pagination-container">
-        <button class="page-btn">‹ Back</button>
-        <button class="page-btn active">1</button>
-        <button class="page-btn">2</button>
-        <button class="page-btn">3</button>
-        <button class="page-btn">4</button>
-        <button class="page-btn">5</button>
-        <button class="page-btn">Next ›</button>
+      <div class="pagination-container" id="paginationContainer">
+        <button class="page-btn" id="prevPageBtn">‹ Back</button>
+        <div id="pageNumbersContainer" style="display: flex; gap: 8px;"></div>
+        <button class="page-btn" id="nextPageBtn">Next ›</button>
       </div>
     </div>
   </div>
@@ -433,7 +1061,6 @@
   <!-- Modal -->
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal-content">
-      <!-- Close Cross Icon -->
       <button class="modal-close-btn" id="closeModalCrossBtn">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -468,7 +1095,7 @@
       <div class="form-row">
         <div class="form-group">
           <label>Date of Birth</label>
-          <input type="text" id="dob" class="player-input" placeholder="dd/mm/yyyy">
+          <input type="text" id="dob" class="player-input" placeholder="yyyy-mm-dd">
           <span class="error-text" id="error-dob">Required</span>
         </div>
         <div class="form-group">
@@ -488,25 +1115,38 @@
           </svg>
         </div>
         <input type="hidden" id="seasonValue">
-        <div id="seasonMenu" class="custom-dropdown-menu">
-          <div class="custom-dropdown-item" onclick="selectOption('seasonValue', 'selectedSeasonText', 'Season 2026', 'seasonMenu', 'seasonChevron', 'seasonContainer')">Season 2026</div>
-          <div class="custom-dropdown-item" onclick="selectOption('seasonValue', 'selectedSeasonText', 'Season 2025', 'seasonMenu', 'seasonChevron', 'seasonContainer')">Season 2025</div>
-        </div>
+        <div id="seasonMenu" class="custom-dropdown-menu"></div>
         <span class="error-text" id="error-season">Select a season</span>
       </div>
 
       <div class="form-row">
-        <!-- Home District Input Field -->
-        <div class="form-group">
+        <!-- Home District Dropdown -->
+        <div class="form-group" id="districtContainer">
           <label>Home District</label>
-          <input type="text" id="homeDistrict" class="player-input" placeholder="Enter Home District">
+          <div id="districtTrigger" class="player-input custom-select-trigger" onclick="toggleDropdown('districtMenu', 'districtChevron')">
+            <span id="selectedDistrictText">Select Home District</span>
+            <svg id="districtChevron" class="transition-transform" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#83878D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+          <input type="hidden" id="homeDistrictValue">
+          <div id="districtMenu" class="custom-dropdown-menu"></div>
           <span class="error-text" id="error-homeDistrict">Required</span>
         </div>
 
-        <!-- Home Club Input Field -->
-        <div class="form-group">
+        <!-- Home Club Dropdown -->
+        <div class="form-group" id="clubContainer">
           <label>Home Club</label>
-          <input type="text" id="homeClub" class="player-input" placeholder="Enter Home Club">
+          <div id="clubTrigger" class="player-input custom-select-trigger" onclick="toggleDropdown('clubMenu', 'clubChevron')">
+            <span id="selectedClubText">Select Home Club</span>
+            <svg id="clubChevron" class="transition-transform" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#83878D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+          <input type="hidden" id="homeClubValue">
+          <div id="clubMenu" class="custom-dropdown-menu">
+            <div class="custom-dropdown-item" style="color: #83878D;">Select district first</div>
+          </div>
           <span class="error-text" id="error-homeClub">Required</span>
         </div>
       </div>
@@ -519,6 +1159,8 @@
 
   <script src="config.js"></script>
   <script>
+    let seasons = [];
+let activeSeason = null;
     const modal = document.getElementById('modalOverlay');
     const openModalBtn = document.getElementById('openModalBtn');
     const closeModalCrossBtn = document.getElementById('closeModalCrossBtn');
@@ -529,9 +1171,26 @@
     const userDropdown = document.getElementById("userDropdown");
     const logoutBtn = document.getElementById("logoutBtn");
 
+    let currentPage = 1;
+    const limit = 10;
+    let totalPages = 1;
+    let searchTimeout = null;
+
+    const apiBase = `${SCORING_API_BASE_URL}/api/v1/kca`;
+    console.log(
+    "SCORING_API_BASE_URL:",
+    typeof SCORING_API_BASE_URL !== "undefined"
+      ? SCORING_API_BASE_URL
+      : "UNDEFINED"
+  );
+   
+
     document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('userHeaderName').textContent = localStorage.getItem('name') || 'User';
       document.getElementById('userHeaderEmail').textContent = localStorage.getItem('email') || '';
+      loadPlayers();
+      loadSeasons();
+      loadDistricts();
     });
 
     profileTrigger.onclick = (e) => {
@@ -564,21 +1223,29 @@
       document.getElementById('email').value = '';
       document.getElementById('dob').value = '';
       document.getElementById('mobile').value = '';
-      document.getElementById('homeDistrict').value = '';
-      document.getElementById('homeClub').value = '';
       
       resetDropdown('seasonValue', 'selectedSeasonText', 'Select Season', 'seasonContainer');
+      resetDropdown('homeDistrictValue', 'selectedDistrictText', 'Select Home District', 'districtContainer');
+      resetDropdown('homeClubValue', 'selectedClubText', 'Select Home Club', 'clubContainer');
+      document.getElementById('clubMenu').innerHTML = '<div class="custom-dropdown-item" style="color: #83878D;">Select district first</div>';
     }
 
     function toggleDropdown(menuId, iconId) {
+      document.querySelectorAll('.custom-dropdown-menu').forEach(menu => {
+        if (menu.id !== menuId) menu.classList.remove('show');
+      });
+      document.querySelectorAll('.transition-transform').forEach(icon => {
+        if (icon.id !== iconId) icon.classList.remove('rotate-180');
+      });
+
       const menu = document.getElementById(menuId);
       const icon = document.getElementById(iconId);
       menu.classList.toggle('show');
       icon.classList.toggle('rotate-180');
     }
 
-    function selectOption(hiddenId, textId, value, menuId, iconId, containerId) {
-      document.getElementById(hiddenId).value = value;
+    function selectOption(hiddenId, textId, value, idVal, menuId, iconId, containerId) {
+      document.getElementById(hiddenId).value = idVal;
       const textSpan = document.getElementById(textId);
       textSpan.innerText = value;
       
@@ -593,55 +1260,469 @@
       const textSpan = document.getElementById(textId);
       textSpan.innerText = defaultText;
       const trigger = document.getElementById(containerId).querySelector('.custom-select-trigger');
-      trigger.classList.remove('selected');
+      if (trigger) trigger.classList.remove('selected');
     }
 
-    // Close dropdowns when clicking outside
     document.addEventListener('click', function(event) {
-      const container = document.getElementById('seasonContainer');
-      const menu = document.getElementById('seasonMenu');
-      const icon = document.getElementById('seasonChevron');
-      if (container && !container.contains(event.target)) {
-        menu.classList.remove('show');
-        icon.classList.remove('rotate-180');
+      ['seasonContainer', 'districtContainer', 'clubContainer'].forEach(contId => {
+        const container = document.getElementById(contId);
+        if (container && !container.contains(event.target)) {
+          const menu = container.querySelector('.custom-dropdown-menu');
+          const icon = container.querySelector('.transition-transform');
+          if (menu) menu.classList.remove('show');
+          if (icon) icon.classList.remove('rotate-180');
+        }
+      });
+    });
+
+    async function loadSeasons() {
+  try {
+    const res = await fetch(
+      `${SCORING_API_BASE_URL}/api/v1/kca/seasons`,
+      {
+        headers: {
+          "ngrok-skip-browser-warning": "true"
+        }
       }
+    );
+
+    if (!res.ok) {
+      throw new Error(`Failed to load seasons: ${res.status}`);
+    }
+
+    const seasons = await res.json();
+
+    console.log('Seasons loaded:', seasons);
+
+    // Find active season
+    activeSeason = seasons.find(s => s.isActive);
+
+    console.log('Active Season:', activeSeason);
+
+    // Load dashboard using active season
+    if (activeSeason) {
+      await loadDashboard();
+    } else {
+      console.warn('No active season found');
+    }
+
+    // Load season dropdown
+    const menu = document.getElementById('seasonMenu');
+
+    if (!menu) {
+      console.error('seasonMenu element not found');
+      return;
+    }
+
+    menu.innerHTML = '';
+
+    seasons.forEach(s => {
+      const item = document.createElement('div');
+
+      item.className = 'custom-dropdown-item';
+
+      item.innerText =
+        s.name ||
+        s.year ||
+        `Season ${s.id}`;
+
+      item.onclick = () => {
+        selectOption(
+          'seasonValue',
+          'selectedSeasonText',
+          item.innerText,
+          s.id,
+          'seasonMenu',
+          'seasonChevron',
+          'seasonContainer'
+        );
+      };
+
+      menu.appendChild(item);
+    });
+
+  } catch (err) {
+    console.error('Failed to load seasons:', err);
+  }
+}
+
+    async function loadDistricts() {
+      try {
+        const res = await fetch(`${apiBase}/districts`, {
+      headers: { "ngrok-skip-browser-warning": "true" }
+    });;
+        const districts = await res.json();
+        const menu = document.getElementById('districtMenu');
+        menu.innerHTML = '';
+        districts.forEach(d => {
+          const item = document.createElement('div');
+          item.className = 'custom-dropdown-item';
+          item.innerText = d.name;
+          item.onclick = () => {
+            selectOption('homeDistrictValue', 'selectedDistrictText', d.name, d.id, 'districtMenu', 'districtChevron', 'districtContainer');
+            loadClubs(d.id);
+            resetDropdown('homeClubValue', 'selectedClubText', 'Select Home Club', 'clubContainer');
+          };
+          menu.appendChild(item);
+        });
+      } catch (err) {
+        console.error('Failed to load districts', err);
+      }
+    }
+
+    async function loadClubs(districtId) {
+      try {
+        const res = await fetch(`${apiBase}/clubs?districtId=${districtId}`, {
+      headers: { "ngrok-skip-browser-warning": "true" }
+    });
+        const clubs = await res.json();
+        const menu = document.getElementById('clubMenu');
+        menu.innerHTML = '';
+        if (clubs.length === 0) {
+          menu.innerHTML = '<div class="custom-dropdown-item" style="color: #83878D;">No clubs available</div>';
+          return;
+        }
+        clubs.forEach(c => {
+          const item = document.createElement('div');
+          item.className = 'custom-dropdown-item';
+          item.innerText = c.name;
+          item.onclick = () => selectOption('homeClubValue', 'selectedClubText', c.name, c.id, 'clubMenu', 'clubChevron', 'clubContainer');
+          menu.appendChild(item);
+        });
+      } catch (err) {
+        console.error('Failed to load clubs', err);
+      }
+    }
+
+
+    async function loadDashboard() {
+  try {
+    if (!activeSeason) {
+      console.log('No active season found');
+      return;
+    }
+
+    console.log('Loading dashboard for season:', activeSeason);
+
+    const response = await fetch(
+      `${SCORING_API_BASE_URL}/api/v1/kca/dashboard/${activeSeason.id}`,
+      {
+        headers: {
+          "ngrok-skip-browser-warning": "true"
+        }
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Dashboard API failed: ${response.status}`);
+    }
+
+    const stats = await response.json();
+
+    console.log('Dashboard stats:', stats);
+
+    // Total Players
+    document.getElementById('totalPlayersVal').textContent =
+      stats.totalPlayers ?? 0;
+
+    // Local Players
+    document.getElementById('localPlayersVal').textContent =
+      stats.seasonRegistrations?.primary ?? 0;
+
+    // Season Renewals
+    document.getElementById('seasonRenewalsVal').textContent =
+      stats.seasonRegistrations?.renewal ?? 0;
+
+    // Guest Players
+    document.getElementById('guestPlayersVal').textContent =
+      stats.seasonRegistrations?.guest ?? 0;
+
+  } catch (error) {
+    console.error('Failed to load dashboard:', error);
+
+    document.getElementById('totalPlayersVal').textContent = '0';
+    document.getElementById('localPlayersVal').textContent = '0';
+    document.getElementById('seasonRenewalsVal').textContent = '0';
+    document.getElementById('guestPlayersVal').textContent = '0';
+  }
+}
+    async function loadPlayers(page = 1, search = '') {
+      try {
+        let url = `${apiBase}/players?page=${page}&limit=${limit}`;
+        if (search) url += `&search=${encodeURIComponent(search)}`;
+        const res = await fetch(url, {
+      headers: {
+        "ngrok-skip-browser-warning": "true"
+      }
+    });
+        const data = await res.json();
+        console.log('Players data:', data);
+        
+        const tbody = document.getElementById('playersTableBody');
+        tbody.innerHTML = '';
+
+        let playersList = [];
+        if (Array.isArray(data)) {
+          playersList = data;
+          totalPages = 1;
+        } else {
+          playersList = data.data || data.players || [];
+          totalPages = data.totalPages || Math.ceil((data.total || playersList.length) / limit) || 1;
+          if (data.total) document.getElementById('totalPlayersVal').textContent = data.total;
+        }
+
+        if (playersList.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #83878D;">No players found</td></tr>`;
+          renderPagination(page, 1);
+          return;
+        }
+
+        playersList.forEach(p => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>
+              <div class="player-cell">
+                <img src="${p.avatar || './assets/default_image.jpeg'}" class="player-avatar" />
+                <div class="player-info">
+                  <span class="player-name">${p.firstName || ''} ${p.lastName || ''}</span>
+                  <span class="player-id">ID - ${p.id ? p.id.substring(0, 12).toUpperCase() : 'N/A'}...</span>
+                </div>
+              </div>
+            </td>
+            <td>${p.homeDistrict?.name || p.homeDistrict || 'N/A'}</td>
+            <td>${p.homeClub?.name || p.homeClub || 'N/A'}</td>
+           <td>
+  ${
+    p.registrations?.length
+      ? p.registrations
+          .map(r => r.type)
+          .join(', ')
+      : 'Primary'
+  }
+</td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        renderPagination(page, totalPages);
+      } catch (err) {
+        console.error('Failed to load players', err);
+      }
+    }
+
+    function renderPagination(page, total) {
+      currentPage = page;
+      totalPages = total;
+      const numbersContainer = document.getElementById('pageNumbersContainer');
+      numbersContainer.innerHTML = '';
+
+      for (let i = 1; i <= total; i++) {
+        const btn = document.createElement('button');
+        btn.className = `page-btn ${i === page ? 'active' : ''}`;
+        btn.textContent = i;
+        btn.onclick = () => loadPlayers(i, document.getElementById('playerSearchInput').value.trim());
+        numbersContainer.appendChild(btn);
+      }
+
+      document.getElementById('prevPageBtn').onclick = () => {
+        if (currentPage > 1) loadPlayers(currentPage - 1, document.getElementById('playerSearchInput').value.trim());
+      };
+      document.getElementById('nextPageBtn').onclick = () => {
+        if (currentPage < totalPages) loadPlayers(currentPage + 1, document.getElementById('playerSearchInput').value.trim());
+      };
+    }
+
+    document.getElementById('playerSearchInput').addEventListener('input', (e) => {
+      clearTimeout(searchTimeout);
+      const query = e.target.value.trim();
+      searchTimeout = setTimeout(() => {
+        loadPlayers(1, query);
+      }, 300);
     });
 
     submitBtn.addEventListener('click', async () => {
-      document.querySelectorAll('.error-text').forEach(el => el.style.display = 'none');
-      document.querySelectorAll('.player-input').forEach(el => el.classList.remove('invalid'));
+  // Clear previous errors
+  document.querySelectorAll('.error-text').forEach(el => {
+    el.style.display = 'none';
+  });
 
-      const fName = document.getElementById('firstName').value.trim();
-      const lName = document.getElementById('lastName').value.trim();
-      const email = document.getElementById('email').value.trim();
-      const dob = document.getElementById('dob').value.trim();
-      const mobile = document.getElementById('mobile').value.trim();
-      const season = document.getElementById('seasonValue').value;
-      const district = document.getElementById('homeDistrict').value.trim();
-      const club = document.getElementById('homeClub').value.trim();
+  document.querySelectorAll('.player-input').forEach(el => {
+    el.classList.remove('invalid');
+  });
 
-      let isValid = true;
+  errorMessage.style.display = 'none';
+  errorMessage.textContent = '';
 
-      if (!fName) { showError('firstName'); isValid = false; }
-      if (!lName) { showError('lastName'); isValid = false; }
-      if (!email) { showError('email'); isValid = false; }
-      if (!dob) { showError('dob'); isValid = false; }
-      if (!mobile) { showError('mobile'); isValid = false; }
-      if (!season) { document.getElementById('error-season').style.display = 'block'; isValid = false; }
-      if (!district) { showError('homeDistrict'); isValid = false; }
-      if (!club) { showError('homeClub'); isValid = false; }
+  // Get form values
+  const firstName = document.getElementById('firstName').value.trim();
+  const lastName = document.getElementById('lastName').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const dateOfBirth = document.getElementById('dob').value.trim();
 
-      if (!isValid) return;
+  // HTML input is still id="mobile", but API field is "phone"
+  const phone = document.getElementById('mobile').value.trim();
 
-      submitBtn.disabled = true;
-      submitBtn.textContent = "Registering...";
+  const seasonId = document.getElementById('seasonValue').value;
+  const homeDistrictId = document.getElementById('homeDistrictValue').value;
+  const homeClubId = document.getElementById('homeClubValue').value;
 
-      setTimeout(() => {
-        closeModal();
-        submitBtn.disabled = false;
-        submitBtn.textContent = "Register Player";
-      }, 500);
-    });
+  let isValid = true;
+
+  // -----------------------------
+  // Validation
+  // -----------------------------
+
+  if (!firstName) {
+    showError('firstName');
+    isValid = false;
+  }
+
+  if (!lastName) {
+    showError('lastName');
+    isValid = false;
+  }
+
+  if (!email) {
+    showError('email');
+    isValid = false;
+  }
+
+  if (!dateOfBirth) {
+    showError('dob');
+    isValid = false;
+  }
+
+  if (!phone) {
+    showError('mobile');
+    isValid = false;
+  }
+
+  if (!seasonId) {
+    document.getElementById('error-season').style.display = 'block';
+    isValid = false;
+  }
+
+  if (!homeDistrictId) {
+    showError('homeDistrict');
+    isValid = false;
+  }
+
+  if (!homeClubId) {
+    showError('homeClub');
+    isValid = false;
+  }
+
+  // Stop if validation fails
+  if (!isValid) {
+    return;
+  }
+
+  // -----------------------------
+  // Disable button
+  // -----------------------------
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Registering...";
+
+  try {
+
+    // -----------------------------
+    // API Request
+    // -----------------------------
+
+    const response = await fetch(
+      `${apiBase}/register/first-time`,
+      {
+        method: 'POST',
+
+        headers: {
+          'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true'
+        },
+
+        body: JSON.stringify({
+          firstName: firstName,
+          lastName: lastName,
+          email: email,
+          dateOfBirth: dateOfBirth,
+
+          // IMPORTANT:
+          // Backend receives "phone", not "mobile"
+          phone: phone,
+
+          seasonId: seasonId,
+          homeDistrictId: homeDistrictId,
+          homeClubId: homeClubId
+        })
+      }
+    );
+
+    // -----------------------------
+    // Handle API Error
+    // -----------------------------
+
+    if (!response.ok) {
+
+      let errData = {};
+
+      try {
+        errData = await response.json();
+      } catch (jsonError) {
+        console.error(
+          'Could not parse error response:',
+          jsonError
+        );
+      }
+
+      console.error(
+        'Registration failed:',
+        response.status,
+        errData
+      );
+
+      throw new Error(
+        errData.message ||
+        errData.error ||
+        `Registration failed (${response.status})`
+      );
+    }
+
+    // -----------------------------
+    // Success
+    // -----------------------------
+
+    const data = await response.json();
+
+    console.log(
+      'Player registered successfully:',
+      data
+    );
+
+    // Close registration modal
+    closeModal();
+
+    // Reload players from page 1
+    await loadPlayers(1);
+
+  } catch (err) {
+
+    console.error(
+      'Player registration error:',
+      err
+    );
+
+    errorMessage.textContent =
+      err.message || 'Registration failed';
+
+    errorMessage.style.display = 'block';
+
+  } finally {
+
+    // Enable button again
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Register Player";
+  }
+});
 
     function showError(fieldId) {
       document.getElementById(`error-${fieldId}`).style.display = 'block';

@@ -192,6 +192,7 @@
             referee: document.getElementById('referee').value,
             third_umpire: document.getElementById('thirdUmpire').value
         };
+        console.log("Submitting Schedule Payload:", payload);
         
         const tournamentId = JSON.parse(localStorage.getItem("selectedTournament")).externalTournamentId;
         await fetch(`${SCORING_API_BASE_URL}/api/v1/tournaments/${tournamentId}/matches/${currentMatchId}`, {
