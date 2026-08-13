@@ -182,11 +182,12 @@
         currentMatchId = matchId;
         document.getElementById('scheduleModal').style.display = 'flex';
     }
+    console.log("Current Match ID:", currentMatchId);
 
     async function submitSchedule() {
         const payload = {
             scheduled_date: document.getElementById('scheduleDate').value,
-            ground_id: document.getElementById('selectedGroundId').value,
+            venue_id: document.getElementById('selectedGroundId').value,
             umpire1: document.getElementById('umpire1').value,
             umpire2: document.getElementById('umpire2').value,
             referee: document.getElementById('referee').value,
@@ -200,7 +201,7 @@
             headers: { 'Content-Type': 'application/json', "Authorization": `Bearer ${localStorage.getItem("token")}` },
             body: JSON.stringify(payload)
         });
-        window.location.reload();
+        //window.location.reload();
     }
     // 2. Fetch Logic
     async function fetchFixtures(tournamentId) {
@@ -255,7 +256,15 @@
 
                 <div><span class="status-pill ${statusClass}">${statusText}</span></div>
                 
-                <div>${match.venue ? match.venue : `<a href="#" onclick="openScheduleModal('${match.id}'); return false;" style="color:#4B70C3; text-decoration:none;">Schedule Match →</a>`}</div>
+                <div>
+    ${
+        match.match_id
+            ? `<span style="color:#22A447; font-weight:600;">Already Scheduled</span>`
+            : match.venue
+                ? match.venue
+                : `<a href="#" onclick="openScheduleModal('${match.id}'); return false;" style="color:#4B70C3; text-decoration:none;">Schedule Match →</a>`
+    }
+</div>
             `;
             container.appendChild(row);
         } catch (err) {
