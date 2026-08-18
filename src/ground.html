@@ -441,10 +441,7 @@
     const alphaRegex = /^[A-Za-z\s]+$/;
     const numericRegex = /^\d+$/;
 
-    if (!gName || !alphaRegex.test(gName)) {
-        showError('groundName');
-        isValid = false;
-    }
+    
     if (!gLoc || !alphaRegex.test(gLoc)) {
         showError('location');
         isValid = false;

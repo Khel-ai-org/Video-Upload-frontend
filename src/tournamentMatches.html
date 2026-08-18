@@ -201,7 +201,7 @@
             headers: { 'Content-Type': 'application/json', "Authorization": `Bearer ${localStorage.getItem("token")}` },
             body: JSON.stringify(payload)
         });
-        //window.location.reload();
+        window.location.reload();
     }
     // 2. Fetch Logic
     async function fetchFixtures(tournamentId) {
