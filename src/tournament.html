@@ -142,6 +142,7 @@ body { margin: 0; padding: 0; font-family: "Plus Jakarta Sans", sans-serif; back
 </div>
 
 <div class="tabs-container">
+  <div class="tab" onclick="window.location.href='players.html'">Players</div>
     <div class="tab" onclick="window.location.href='ground.html'">Grounds</div>
     <div class="tab active" onclick="window.location.href='tournament.html'">Tournament</div>
 </div>
@@ -208,10 +209,30 @@ body { margin: 0; padding: 0; font-family: "Plus Jakarta Sans", sans-serif; back
         <input class="modal-input" type="text" id="category" placeholder="e.g. T20 Professional, U-19 Open, Corporate League" />
         <span class="error-text" id="error-category">Category is required</span>
       </div>
-      <div class="modal-field">
+     <div class="modal-field">
         <label class="modal-label">Team Count</label>
-        <input class="modal-input" type="number" id="teamCount" placeholder="Number of teams" />
-        <span class="error-text" id="error-teamCount">Must be a valid number</span>
+        <input 
+          class="modal-input" 
+          type="number" 
+          id="teamCount" 
+          min="1" 
+          placeholder="Number of teams" 
+          onkeydown="return event.key !== '-' && event.key !== '+' && event.key !== 'e' && event.key !== 'E'"
+        />
+        <span class="error-text" id="error-teamCount">Must be a valid number greater than 0</span>
+      </div>
+      <!-- NEW: Overs Per Match -->
+      <div class="modal-field">
+        <label class="modal-label">Overs Per Match</label>
+        <input 
+          class="modal-input" 
+          type="number" 
+          id="oversPerMatch" 
+          min="1" 
+          placeholder="e.g. 20" 
+          onkeydown="return event.key !== '-' && event.key !== '+' && event.key !== 'e' && event.key !== 'E'"
+        />
+        <span class="error-text" id="error-oversPerMatch">Must be a valid number greater than 0</span>
       </div>
       <div style="display: flex; gap: 10px;">
           <div class="modal-field" style="flex:1;">
@@ -294,7 +315,8 @@ body { margin: 0; padding: 0; font-family: "Plus Jakarta Sans", sans-serif; back
         const tournament = currentTournaments.find(t => t.id == id);
         if (tournament) {
           localStorage.setItem("selectedTournament", JSON.stringify(tournament));
-          window.location.href = "matches.html";
+          //window.location.href = "matches.html";
+          window.location.href = "teams.html";
         }
       }
     });
@@ -388,7 +410,9 @@ body { margin: 0; padding: 0; font-family: "Plus Jakarta Sans", sans-serif; back
     const name = document.getElementById("name").value.trim();
     const location = document.getElementById("location").value.trim();
     const category = document.getElementById("category").value.trim();
+     // Get value
     const teamCount = document.getElementById("teamCount").value.trim();
+    const oversPerMatch = document.getElementById("oversPerMatch").value.trim();
     const startDateVal = document.getElementById("startDate").value;
     const endDateVal = document.getElementById("endDate").value;
     const selectedGroundCheckboxes = document.querySelectorAll('input[name="groundIds"]:checked');
@@ -407,6 +431,10 @@ body { margin: 0; padding: 0; font-family: "Plus Jakarta Sans", sans-serif; back
         showError('groundIds');
         isValid = false;
     }
+    if (!oversPerMatch || isNaN(oversPerMatch) || parseInt(oversPerMatch) <= 0) {
+        showError('oversPerMatch');
+        isValid = false;
+      }
     if (!category) {
         showError('category');
         isValid = false;
@@ -452,6 +480,7 @@ body { margin: 0; padding: 0; font-family: "Plus Jakarta Sans", sans-serif; back
       location, 
       category, 
       teamCount: parseInt(teamCount), 
+      oversPerMatch: parseInt(oversPerMatch),
       startDate: startDateVal, // Using the correct variable
       endDate: endDateVal,     // Using the correct variable
       groundIds 

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fixture | Khel.ai</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Roboto+Condensed:wght@600&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: "Plus Jakarta Sans", sans-serif; background: #ffffff; }
+
+        /* Top Bar Styles */
+        .top-bar { padding: 20px 40px; border-bottom: 1px solid #E5F0FF; }
+        .top-header { display: flex; justify-content: space-between; align-items: center; }
+        .left-header { display: flex; align-items: center; gap: 30px; }
+        .logo-box { display: flex; align-items: center; gap: 15px; }
+        .search-container { display: flex; align-items: center; gap: 10px; background: #F8FAFC; padding: 10px 15px; border-radius: 12px; border: 1px solid #E5F0FF; width: 350px; }
+        .search-input { border: none; background: transparent; outline: none; width: 100%; }
+        
+        .user-profile { display: flex; align-items: center; gap: 10px; cursor: pointer; position: relative; }
+        .dropdown { display: none; position: absolute; top: 50px; right: 0; background: white; border: 1px solid #E5F0FF; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 120px; z-index: 1000; }
+        .dropdown.show { display: block; }
+        .dropdown-item { padding: 10px; cursor: pointer; }
+        .dropdown-item:hover { background: #F8FAFC; }
+
+        /* Fixture Table Styles */
+        .fixture-table-container { background: #fff; border: 1px solid #E5F0FF; border-radius: 16px; padding: 20px; margin: 20px 40px; }
+        .fixture-row { display: grid; grid-template-columns: 2fr 2fr 1fr 1fr; align-items: center; padding: 20px 10px; border-bottom: 1px solid #F0F4F8; }
+        .table-header { color: #83878D; font-size: 12px; font-weight: 600; text-transform: uppercase; padding-bottom: 10px; }
+        
+        .status-pill { padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; text-align: center; display: inline-block; }
+        .status-completed { background: #E6F7F0; color: #00A854; }
+        .status-live { background: #FFEBEE; color: #E53935; }
+        .status-scheduled { background: #F3F4F6; color: #6B7280; }
+
+        .matchup-container { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+        .team-avatar-small { width: 28px; height: 28px; border-radius: 50%; background: #4B70C3; color: white; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; }
+        /* Modal Styles */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 2000; }
+        .modal { background: #fff; padding: 30px; border-radius: 20px; width: 450px; position: relative; }
+        .modal-close { position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 20px; color: #83878D; }
+        .form-group { text-align: left; margin-top: 15px; }
+        .input-field { width: 100%; padding: 12px; border: 1px solid #E5F0FF; border-radius: 8px; margin-top: 5px; }
+        .register-btn { width: 100%; padding: 15px; background: #4B70C3; color: white; border: none; border-radius: 10px; margin-top: 25px; cursor: pointer; }
+
+        /* Custom Dropdown */
+        .custom-dropdown { position: relative; cursor: pointer; }
+        .custom-dropdown-trigger { width: 100%; padding: 12px; border: 1px solid #E5F0FF; border-radius: 8px; background: #fff; display: flex; justify-content: space-between; align-items: center; margin-top: 5px; }
+        .custom-options { display: none; position: absolute; top: 100%; left: 0; width: 100%; background: white; border: 1px solid #E5F0FF; border-radius: 8px; max-height: 150px; overflow-y: auto; z-index: 10; }
+        .custom-option-item { padding: 10px; cursor: pointer; }
+        .custom-option-item:hover { background: #f0f4f8; }
+    </style>
+</head>
+<body>
+
+<div class="top-bar">
+   <div class="top-header">
+     <div class="left-header">
+      <div class="logo-box">
+        <img onclick="goBack()" style='width: 36px; height: 36px; cursor: pointer;' src="./assets/back-arrow.svg"/>
+           <div class="logo">
+            <img src="./assets/Logo.png" height="30"/>
+            <span style="font-size:22px; font-weight:700; font-family: Roboto Condensed;">
+              <span style="color: #022775;">Khel.</span><span style="color: #00CDFF;">ai</span>
+            </span>
+           </div>
+      </div>
+       <div class="search-container">
+          <img src="./assets/search-icon.svg"/>
+          <input type="text" id="searchInput" class="search-input" placeholder="Type to search matches..."/>
+       </div>
+     </div>
+     
+     <div class="user-profile" id="profileTrigger">
+          <img src="./assets/default_image.jpeg" style="width: 40px; height: 40px; border-radius: 50%;" />
+          <div style="display: flex; flex-direction: column;">
+            <span class="name" id="userHeaderName">User</span>
+            <span class="email" id="userHeaderEmail"></span>
+          </div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" fill="none">
+            <path d="M0.75 0.750019L5.75 6.75002L10.75 0.750019" stroke="#83878D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <div class="dropdown" id="userDropdown">
+            <div class="dropdown-item logout" id="logoutBtn">Logout</div>
+          </div>
+     </div>
+   </div>
+</div>
+
+<div class="fixture-table-container">
+    <div class="fixture-row table-header">
+        <div>Match Details</div>
+        <div>Matchup</div>
+       
+        <div>Status</div>
+        <div>Action</div>
+    </div>
+    <div id="fixtureDataContainer">
+        <p style="padding: 20px;">Loading fixtures...</p>
+    </div>
+</div>
+
+<div class="modal-overlay" id="scheduleModal">
+    <div class="modal">
+        <span class="modal-close" onclick="document.getElementById('scheduleModal').style.display='none'">✕</span>
+        <img src="./assets/Logo.png" height="50" style="margin-bottom:15px;"/>
+        <h2>Schedule Match</h2>
+        <div class="form-group" style="text-align: left; margin-top: 15px;">
+            <label>Schedule Date</label>
+            <input type="date" class="input-field" id="scheduleDate">
+        </div>
+        <div class="form-group" style="text-align: left; margin-top: 15px;">
+            <label>Ground</label>
+            <div class="custom-dropdown">
+                <div class="custom-dropdown-trigger" id="groundTrigger" onclick="toggleGroundDropdown()">Select Ground</div>
+                <div class="custom-options" id="groundOptions"></div>
+            </div>
+            <input type="hidden" id="selectedGroundId">
+        </div>
+        <button class="register-btn" onclick="submitSchedule()">Schedule Match</button>
+    </div>
+</div>
+
+<script src="config.js"></script>
+<script>
+    let allMatches = [];
+    let currentMatchId = null; // Store data for search filtering
+
+    // 1. Initialize
+    window.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('userHeaderName').textContent = localStorage.getItem('name') || 'User';
+        document.getElementById('userHeaderEmail').textContent = localStorage.getItem('email') || '';
+        
+        const storedTournament = JSON.parse(localStorage.getItem("selectedTournament"));
+        if (storedTournament) {
+            fetchFixtures(storedTournament.externalTournamentId);
+            loadGroundsForTournament(storedTournament.id);
+        }
+    });
+
+    async function loadGroundsForTournament(tournamentId) {
+        const container = document.getElementById('groundOptions');
+        try {
+            const res = await fetch(`${API_BASE_URL}/tournaments`, {
+                headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
+            });
+            const allTournaments = await res.json();
+            const fresh = allTournaments.find(t => t.id === tournamentId);
+
+            if (fresh?.grounds?.length > 0) {
+                container.innerHTML = fresh.grounds.map(g => 
+                    `<div class="custom-option-item" data-value="${g.id}" onclick="selectGroundOption('${g.id}', '${g.name}')">${g.name}</div>`
+                ).join('');
+            } else {
+                container.innerHTML = '<div class="custom-option-item">No grounds registered</div>';
+            }
+        } catch (err) { container.innerHTML = '<div class="custom-option-item">Error fetching grounds</div>'; }
+    }
+
+    function toggleGroundDropdown() {
+        const options = document.getElementById('groundOptions');
+        options.style.display = options.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function selectGroundOption(id, name) {
+        document.getElementById('groundTrigger').innerText = name;
+        document.getElementById('selectedGroundId').value = id;
+        document.getElementById('groundOptions').style.display = 'none';
+    }
+
+    // Modal Logic
+    function openScheduleModal(matchId) {
+        currentMatchId = matchId;
+        document.getElementById('scheduleModal').style.display = 'flex';
+    }
+    console.log("Current Match ID:", currentMatchId);
+
+    async function submitSchedule() {
+        const payload = {
+            scheduled_date: document.getElementById('scheduleDate').value,
+            venue_id: document.getElementById('selectedGroundId').value
+        };
+        console.log("Submitting Schedule Payload:", payload);
+        
+        const tournamentId = JSON.parse(localStorage.getItem("selectedTournament")).externalTournamentId;
+        await fetch(`${SCORING_API_BASE_URL}/api/v1/tournaments/${tournamentId}/matches/${currentMatchId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', "Authorization": `Bearer ${localStorage.getItem("token")}` },
+            body: JSON.stringify(payload)
+        });
+        window.location.reload();
+    }
+    // 2. Fetch Logic
+    async function fetchFixtures(tournamentId) {
+        try {
+            const res = await fetch(`${SCORING_API_BASE_URL}/api/v1/tournaments/${tournamentId}/matches`, {
+                headers: { "ngrok-skip-browser-warning": "true" }
+            });
+            allMatches = await res.json();
+            console.log("Fetched Matches:", allMatches);
+            renderFixtures(allMatches);
+        } catch (e) {
+            document.getElementById('fixtureDataContainer').innerHTML = "<p>Error loading matches.</p>";
+        }
+    }
+
+    // 3. Render Logic
+    function renderFixtures(matches) {
+    const container = document.getElementById('fixtureDataContainer');
+    container.innerHTML = ''; 
+
+    if (!matches || matches.length === 0) {
+        container.innerHTML = '<p style="padding: 20px;">No fixtures found.</p>';
+        return;
+    }
+
+    matches.forEach((match, index) => {
+        try {
+            // Determine Status CSS
+            let statusClass = 'status-scheduled';
+            let statusText = match.status ? match.status.toUpperCase() : 'SCHEDULED';
+            if(match.status === 'completed') statusClass = 'status-completed';
+            if(match.status === 'live') statusClass = 'status-live';
+
+            // Extract names safely
+            const homeName = match.home_team?.short_name || 'TBD';
+            const awayName = match.away_team?.short_name || 'TBD';
+            const groupName = match.group?.name || 'N/A';
+
+            const row = document.createElement('div');
+            row.className = 'fixture-row';
+            row.innerHTML = `
+                <div style="font-weight:600;">
+                    Match ${match.match_number || (index + 1)} 
+                    <span style="color:#83878D">(${groupName})</span>
+                </div>
+                
+                <div class="matchup-container">
+                    <div class="team-avatar-small">${homeName}</div>
+                    <span>vs</span>
+                    <div class="team-avatar-small" style="background:#FFC107; color:#000;">${awayName}</div>
+                </div>
+
+                <div><span class="status-pill ${statusClass}">${statusText}</span></div>
+                
+                <div>
+    ${
+        match.match_id
+            ? `<span style="color:#22A447; font-weight:600;">Already Scheduled</span>`
+            : match.venue
+                ? match.venue
+                : `<a href="#" onclick="openScheduleModal('${match.id}'); return false;" style="color:#4B70C3; text-decoration:none;">Schedule Match →</a>`
+    }
+</div>
+            `;
+            container.appendChild(row);
+        } catch (err) {
+            console.error("Error rendering match row:", err);
+        }
+    });
+}
+
+    // 4. Search Logic
+    const searchInput = document.getElementById("searchInput");
+    searchInput.addEventListener("input", (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        const filtered = allMatches.filter(m => 
+            m.home_team.name.toLowerCase().includes(query) || 
+            m.away_team.name.toLowerCase().includes(query)
+        );
+        renderFixtures(filtered);
+    });
+
+    // 5. UI Logic (Logout/Dropdown)
+    const profileTrigger = document.getElementById("profileTrigger");
+    const userDropdown = document.getElementById("userDropdown");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    profileTrigger.onclick = (e) => { e.stopPropagation(); userDropdown.classList.toggle("show"); };
+    window.onclick = () => { userDropdown.classList.remove("show"); };
+    logoutBtn.onclick = (e) => { e.stopPropagation(); localStorage.clear(); window.location.href = "index.html"; };
+    
+    function goBack() { window.history.back(); }
+</script>
+
+</body>
+</html>

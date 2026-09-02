@@ -236,6 +236,7 @@
   </div>
 
   <div class="tabs-container">
+    <div class="tab" onclick="window.location.href='players.html'">Players</div>
     <div class="tab active">Grounds</div>
     <div class="tab" onclick="window.location.href='tournament.html'">Tournament</div>
   </div>
@@ -440,10 +441,7 @@
     const alphaRegex = /^[A-Za-z\s]+$/;
     const numericRegex = /^\d+$/;
 
-    if (!gName || !alphaRegex.test(gName)) {
-        showError('groundName');
-        isValid = false;
-    }
+    
     if (!gLoc || !alphaRegex.test(gLoc)) {
         showError('location');
         isValid = false;
