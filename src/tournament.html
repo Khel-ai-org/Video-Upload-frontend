@@ -209,16 +209,30 @@ body { margin: 0; padding: 0; font-family: "Plus Jakarta Sans", sans-serif; back
         <input class="modal-input" type="text" id="category" placeholder="e.g. T20 Professional, U-19 Open, Corporate League" />
         <span class="error-text" id="error-category">Category is required</span>
       </div>
-      <div class="modal-field">
+     <div class="modal-field">
         <label class="modal-label">Team Count</label>
-        <input class="modal-input" type="number" id="teamCount" placeholder="Number of teams" />
-        <span class="error-text" id="error-teamCount">Must be a valid number</span>
+        <input 
+          class="modal-input" 
+          type="number" 
+          id="teamCount" 
+          min="1" 
+          placeholder="Number of teams" 
+          onkeydown="return event.key !== '-' && event.key !== '+' && event.key !== 'e' && event.key !== 'E'"
+        />
+        <span class="error-text" id="error-teamCount">Must be a valid number greater than 0</span>
       </div>
       <!-- NEW: Overs Per Match -->
       <div class="modal-field">
         <label class="modal-label">Overs Per Match</label>
-        <input class="modal-input" type="number" id="oversPerMatch" placeholder="e.g. 20" />
-        <span class="error-text" id="error-oversPerMatch">Must be a valid number</span>
+        <input 
+          class="modal-input" 
+          type="number" 
+          id="oversPerMatch" 
+          min="1" 
+          placeholder="e.g. 20" 
+          onkeydown="return event.key !== '-' && event.key !== '+' && event.key !== 'e' && event.key !== 'E'"
+        />
+        <span class="error-text" id="error-oversPerMatch">Must be a valid number greater than 0</span>
       </div>
       <div style="display: flex; gap: 10px;">
           <div class="modal-field" style="flex:1;">

@@ -253,7 +253,7 @@
         
         <div style="text-align: center; margin-bottom: 20px;">
             <div style="font-size: 40px;">🏆</div>
-            <h2 style="margin: 5px 0;">Generate Tournament Fixtures</h2>
+            <h2 style="margin: 5px 0;" id="fixtureModalTitle">Generate Tournament Fixtures</h2>
             <p style="color: #83878D; font-size: 14px;">Configure your tournament structure and generate fixtures</p>
         </div>
         
@@ -266,7 +266,7 @@
                 </div>
                 <div class="col" id="groupCountContainer" style="display:none;">
                     <label class="label">No. Groups</label>
-                    <input type="number" class="input-field" placeholder="e.g. 2" id="numGroups" oninput="generateGroupBuckets()">
+                    <input type="number" class="input-field" placeholder="e.g. 2" id="numGroups" min="1" onkeydown="return event.key !== '-' && event.key !== '+' && event.key !== 'e' && event.key !== 'E'" oninput="generateGroupBuckets()">
                 </div>
             </div>
 
@@ -278,53 +278,6 @@
                     <option>4 Teams</option>
                 </select>
             </div>
-
-            <!-- Row 3: Participating Teams -->
-            <!-- <div class="form-group">
-                <label class="label">Select Participating Teams</label>
-                <div class="input-field dropdown-trigger" onclick="toggleFixtureDropdown('fixtureTeamList')">
-                    <span id="selectedTeamsDisplay">Click to select teams...</span>
-                    <span>▼</span>
-                </div>
-                <div id="fixtureTeamList" class="scrollable-section" style="display:none; width: 100%;">
-                    <div id="fixtureTeamSelectionList">Loading...</div>
-                </div>
-            </div> -->
-
-            <!-- Inside Generate Fixture Modal -->
-<!-- Update the Participating Teams section -->
-<!-- Updated Participating Teams Section -->
-<div class="form-group">
-    <label class="label">Select Participating Teams</label>
-    
-    <!-- Updated Input Field with Flexbox and Icon -->
-    <div class="input-field"
-     style="min-height:45px;
-            cursor:pointer;
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
-            padding:0 15px;"
-     onclick="toggleFixtureDropdown('fixtureTeamList')">
-
-    <!-- Left Side -->
-    <div class="pill-container"
-         id="mainPills"
-         style="display:flex;align-items:center;gap:6px;flex:1;flex-wrap:wrap;">
-        <span id="mainPlaceholder" style="color:#000;font-size:13px;">
-            Select teams...
-        </span>
-    </div>
-
-    <!-- Right Side -->
-    <span style="font-size:10px;margin-left:10px;">▼</span>
-
-</div>
-    
-    <div id="fixtureTeamList" class="scrollable-section" style="display:none; width: 100%; border: 1px solid #E5F0FF; background: white; z-index: 100;">
-        <div id="fixtureTeamSelectionList">Loading...</div>
-    </div>
-</div>
 
             <!-- Dynamic Group Buckets -->
             <div id="groupBucketsContainer" style="display:none; margin-top: 20px;">
@@ -378,18 +331,6 @@
         }
     }
 }
-
-    // function addInputRow() {
-    //     const container = document.getElementById('teamInputContainer');
-    //     const div = document.createElement('div');
-    //     div.className = 'team-input-row';
-    //     div.innerHTML = `
-    //         <input type="text" class="team-input" placeholder="Team Name">
-    //         <button class="icon-btn btn-add" onclick="addInputRow()">+</button>
-    //         <button class="icon-btn btn-remove" onclick="this.parentElement.remove()">-</button>
-    //     `;
-    //     container.appendChild(div);
-    // }
 
 function handleFileUpload(event) {
     const file = event.target.files[0];
@@ -607,6 +548,7 @@ function addInputRow(teamName = "") {
 function updatePills(containerId, pillContainerId) {
     const container = document.getElementById(containerId);
     const pillContainer = document.getElementById(pillContainerId);
+    if (!pillContainer) return;
     pillContainer.innerHTML = ''; // Clear existing
 
     const checkedInputs = container.querySelectorAll('input[type="checkbox"]:checked');
@@ -623,6 +565,11 @@ function updatePills(containerId, pillContainerId) {
         `;
         pillContainer.appendChild(pill);
     });
+
+    // If it's part of the group buckets, refresh other group dropdowns to handle team exclusivity across groups
+    if (containerId.startsWith('groupDropdown')) {
+        updateGroupDropdowns();
+    }
 }
 
 // 2. Remove pill functionality
@@ -636,12 +583,15 @@ function removePill(teamId, containerId, pillContainerId) {
 }
     // 2. Fetch Teams using your provided API
     async function fetchFixtureTeams() {
-    const container = document.getElementById('fixtureTeamSelectionList');
+    const numGroupsInput = document.getElementById('numGroups');
+    if (numGroupsInput) numGroupsInput.value = '';
+    const bucketContainer = document.getElementById('groupBuckets');
+    if (bucketContainer) bucketContainer.innerHTML = '';
+
     console.log("Fetching fixture teams for ID:", currentTournamentId);
     
     // Check if ID is missing
     if (!currentTournamentId) {
-        container.innerHTML = "<p>Error: Tournament ID missing.</p>";
         return;
     }
 
@@ -666,18 +616,8 @@ function removePill(teamId, containerId, pillContainerId) {
         // Update the Total Teams input field automatically
         document.getElementById('totalTeams').value = teams.length;
 
-        container.innerHTML = teams.map(t => `
-            <div class="team-checkbox-item">
-                <!-- IMPORTANT: Add onchange listener here -->
-                <input type="checkbox" value="${t.id}" data-name="${t.name}" 
-                       onchange="updatePills('fixtureTeamSelectionList', 'mainPills')">
-                <label>${t.name}</label>
-            </div>
-        `).join('');
-
     } catch (e) {
         console.error("Fixture Fetch Error:", e);
-        container.innerHTML = `<p>Error loading teams: ${e.message}</p>`;
     }
 }
 
@@ -687,9 +627,16 @@ function removePill(teamId, containerId, pillContainerId) {
         list.style.display = list.style.display === 'block' ? 'none' : 'block';
     }
 
-    // 4. Generate Dynamic Group UI
+    // 4. Generate Dynamic Group Buckets
     function generateGroupBuckets() {
-    const count = parseInt(document.getElementById('numGroups').value) || 0;
+    let countInput = document.getElementById('numGroups');
+    let count = parseInt(countInput.value);
+
+    if (isNaN(count) || count < 1) {
+        countInput.value = '';
+        count = 0;
+    }
+
     const container = document.getElementById('groupBuckets');
     container.innerHTML = '';
 
@@ -702,6 +649,12 @@ function removePill(teamId, containerId, pillContainerId) {
 
         const dropdownId = `groupDropdown${i}`;
         const pillContainerId = `groupPills${i}`;
+
+        // If it's Group A (i === 0) and count === 1, auto-select all teams
+        let initialCheckedIds = [];
+        if (count === 1 && i === 0) {
+            initialCheckedIds = allTournamentTeams.map(t => t.id);
+        }
 
         bucket.innerHTML = `
             <label class="label">Group ${groupName}</label>
@@ -716,29 +669,81 @@ function removePill(teamId, containerId, pillContainerId) {
 
     <!-- Left side -->
     <div class="pill-container" id="${pillContainerId}">
-        <span class="placeholder-text">Select teams...</span>
+        <span class="placeholder-text" style="color:#000;font-size:13px;">Select teams...</span>
     </div>
 
     <!-- Right side -->
-    <span style="font-size:12px;">▼</span>
+    <span style="font-size:10px;margin-left:10px;">▼</span>
 
 </div>
 
-            <div id="${dropdownId}" class="group-dropdown">
-                ${allTournamentTeams.map(t => `
+            <div id="${dropdownId}" class="scrollable-section" style="display:none; width: 100%; border: 1px solid #E5F0FF; background: white; z-index: 100;">
+                ${allTournamentTeams.map(t => {
+                    const isChecked = initialCheckedIds.includes(t.id);
+                    return `
                     <div class="team-checkbox-item">
                         <input
                             type="checkbox"
                             value="${t.id}"
                             data-name="${t.name}"
+                            ${isChecked ? 'checked' : ''}
                             onchange="updatePills('${dropdownId}', '${pillContainerId}')">
                         <label>${t.name}</label>
                     </div>
-                `).join('')}
+                `;
+                }).join('')}
             </div>
         `;
 
         container.appendChild(bucket);
+
+        if (initialCheckedIds.length > 0) {
+            updatePills(dropdownId, pillContainerId);
+        }
+    }
+    
+    // Trigger update in case multiple groups were populated
+    updateGroupDropdowns();
+}
+
+// Function to prevent teams selected in previous groups from showing up/being selected in subsequent groups
+function updateGroupDropdowns() {
+    const countInput = document.getElementById('numGroups');
+    const count = parseInt(countInput.value) || 0;
+    if (count <= 1) return; // Only needed if there are multiple groups
+
+    // Collect all team IDs selected in ANY group
+    const selectedTeamIds = new Set();
+    for (let i = 0; i < count; i++) {
+        const dropdownId = `groupDropdown${i}`;
+        const container = document.getElementById(dropdownId);
+        if (container) {
+            const checked = container.querySelectorAll('input[type="checkbox"]:checked');
+            checked.forEach(cb => selectedTeamIds.add(cb.value));
+        }
+    }
+
+    // Now update each group's checkboxes: disable or hide items that are selected in OTHER groups
+    for (let i = 0; i < count; i++) {
+        const dropdownId = `groupDropdown${i}`;
+        const container = document.getElementById(dropdownId);
+        if (!container) continue;
+
+        const items = container.querySelectorAll('.team-checkbox-item');
+        items.forEach(item => {
+            const cb = item.querySelector('input[type="checkbox"]');
+            if (!cb) return;
+
+            const teamId = cb.value;
+            const isCheckedInThisGroup = cb.checked;
+            const isSelectedElseWhere = selectedTeamIds.has(teamId) && !isCheckedInThisGroup;
+
+            if (isSelectedElseWhere) {
+                item.style.display = 'none'; // Hide team if already assigned to another group
+            } else {
+                item.style.display = 'flex'; // Show team otherwise
+            }
+        });
     }
 }
 
@@ -765,8 +770,21 @@ function removePill(teamId, containerId, pillContainerId) {
     // 2. Prepare Payload
     const isGroup = document.querySelector('.toggle-btn.active').textContent.includes('Group');
     
+    let teamIdsList = [];
+    if (isGroup) {
+        const buckets = document.querySelectorAll('.group-bucket');
+        buckets.forEach(bucket => {
+            const checked = bucket.querySelectorAll('input[type="checkbox"]:checked');
+            checked.forEach(c => {
+                if (!teamIdsList.includes(c.value)) teamIdsList.push(c.value);
+            });
+        });
+    } else {
+        teamIdsList = allTournamentTeams.map(t => t.id);
+    }
+
     const payload = {
-        team_ids: Array.from(document.querySelectorAll('#fixtureTeamSelectionList input:checked')).map(cb => cb.value),
+        team_ids: teamIdsList,
         group_configuration: isGroup ? getGroupConfiguration() : null,
         start_date: tournament.startDate || new Date().toISOString(), // Fallback to current date if missing
         venues: null,

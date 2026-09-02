@@ -39,8 +39,7 @@
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 2000; }
         .modal { background: #fff; padding: 30px; border-radius: 20px; width: 450px; position: relative; }
         .modal-close { position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 20px; color: #83878D; }
-        .form-row { display: flex; gap: 15px; margin-top: 15px; }
-        .form-group { flex: 1; text-align: left; }
+        .form-group { text-align: left; margin-top: 15px; }
         .input-field { width: 100%; padding: 12px; border: 1px solid #E5F0FF; border-radius: 8px; margin-top: 5px; }
         .register-btn { width: 100%; padding: 15px; background: #4B70C3; color: white; border: none; border-radius: 10px; margin-top: 25px; cursor: pointer; }
 
@@ -118,14 +117,6 @@
             </div>
             <input type="hidden" id="selectedGroundId">
         </div>
-        <div class="form-row">
-            <div class="form-group"><label>Umpire 1</label><input type="text" class="input-field" id="umpire1" placeholder="Name"></div>
-            <div class="form-group"><label>Umpire 2</label><input type="text" class="input-field" id="umpire2" placeholder="Name"></div>
-        </div>
-        <div class="form-row">
-            <div class="form-group"><label>Referee</label><input type="text" class="input-field" id="referee" placeholder="Name"></div>
-            <div class="form-group"><label>3rd Umpire</label><input type="text" class="input-field" id="thirdUmpire" placeholder="Name"></div>
-        </div>
         <button class="register-btn" onclick="submitSchedule()">Schedule Match</button>
     </div>
 </div>
@@ -187,11 +178,7 @@
     async function submitSchedule() {
         const payload = {
             scheduled_date: document.getElementById('scheduleDate').value,
-            venue_id: document.getElementById('selectedGroundId').value,
-            umpire1: document.getElementById('umpire1').value,
-            umpire2: document.getElementById('umpire2').value,
-            referee: document.getElementById('referee').value,
-            third_umpire: document.getElementById('thirdUmpire').value
+            venue_id: document.getElementById('selectedGroundId').value
         };
         console.log("Submitting Schedule Payload:", payload);
         
@@ -272,27 +259,6 @@
         }
     });
 }
-
-// function openScheduleModal(matchId) {
-//         currentMatchId = matchId;
-//         document.getElementById('scheduleModal').style.display = 'flex';
-//     }
-
-//     async function submitSchedule() {
-//         const date = document.getElementById('scheduleDate').value;
-//         const payload = { scheduled_date: date };
-        
-//         const tournamentId = JSON.parse(localStorage.getItem("selectedTournament")).externalTournamentId;
-        
-//         await fetch(`${SCORING_API_BASE_URL}/api/v1/tournaments/${tournamentId}/matches/${currentMatchId}`, {
-//             method: 'PATCH',
-//             headers: { 'Content-Type': 'application/json' },
-//             body: JSON.stringify(payload)
-//         });
-        
-//         document.getElementById('scheduleModal').style.display = 'none';
-//         window.location.reload();
-//     }
 
     // 4. Search Logic
     const searchInput = document.getElementById("searchInput");
