@@ -5,7 +5,7 @@
   "description": "Video Upload Desktop Application",
   "main": "src/index.js",
   "scripts": {
-    "start": "electron-forge start",
+    "start": "electron-forge start -- --no-sandbox",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish"
@@ -34,7 +34,10 @@
   "forge": {
     "packagerConfig": {
       "name": "video_upload_system",
-      "executableName": "video_upload_system"
+      "executableName": "video_upload_system",
+      "extraResource": [
+        "resources/cricket-watcher"
+      ]
     },
     "makers": [
       {

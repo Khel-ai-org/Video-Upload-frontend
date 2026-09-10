@@ -1,0 +1,470 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Ball Videos</title>
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src *; media-src * file: blob: data:"
+    />
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font: 14px/1.5 -apple-system, "Segoe UI", Roboto, sans-serif;
+        color: #1f2430;
+        background: #f5f6f8;
+      }
+      header {
+        display: flex; align-items: center; gap: 16px;
+        padding: 14px 20px; background: #fff; border-bottom: 1px solid #e3e6ec;
+      }
+      header h1 { font-size: 16px; margin: 0; font-weight: 600; }
+      .spacer { flex: 1; }
+      button {
+        font: inherit; padding: 7px 13px; border-radius: 7px;
+        border: 1px solid #cdd2db; background: #fff; cursor: pointer;
+      }
+      button:hover:not(:disabled) { background: #f0f2f6; }
+      button:disabled { opacity: .5; cursor: default; }
+      button.primary { background: #4b70c3; border-color: #4b70c3; color: #fff; }
+      button.primary:hover:not(:disabled) { background: #4162b0; }
+      select {
+        font: inherit; padding: 7px 9px; border-radius: 7px;
+        border: 1px solid #cdd2db; background: #fff; max-width: 320px;
+      }
+      main { padding: 20px; max-width: 1000px; }
+      .card {
+        background: #fff; border: 1px solid #e3e6ec;
+        border-radius: 10px; padding: 16px; margin-bottom: 14px;
+      }
+      .ball-head {
+        display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+      }
+      .ball-head h2 { font-size: 15px; margin: 0; font-weight: 600; }
+      .muted { color: #8a92a1; font-size: 12px; }
+      .cams { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+      .cam {
+        display: flex; align-items: center; gap: 8px;
+        border: 1px solid #e3e6ec; border-radius: 8px; padding: 7px 10px;
+      }
+      .cam b { font-weight: 600; font-size: 13px; }
+      .pill {
+        display: inline-block; padding: 1px 8px; border-radius: 20px;
+        font-size: 11px; font-weight: 600;
+      }
+      .pill.uploaded { background: #e4f5ec; color: #1c7a52; }
+      .pill.pending  { background: #f1f2f5; color: #767d8b; }
+      .empty { color: #8a92a1; padding: 12px 0; }
+      .warn {
+        background: #fdf6e6; border: 1px solid #f0dfb5; color: #7a5c14;
+        border-radius: 8px; padding: 10px 12px; margin-bottom: 14px;
+      }
+      /* Player sits over the page so picking a camera never loses your place
+         in a long ball list. */
+      .overlay {
+        position: fixed; inset: 0; background: rgba(20, 24, 33, .72);
+        display: none; align-items: center; justify-content: center; padding: 24px;
+      }
+      .overlay.open { display: flex; }
+      .player {
+        background: #11141b; border-radius: 12px; overflow: hidden;
+        max-width: 1000px; width: 100%;
+      }
+      .player video { width: 100%; max-height: 72vh; display: block; background: #000; }
+      .player-bar {
+        display: flex; align-items: center; gap: 12px;
+        padding: 10px 14px; color: #e7eaf0; font-size: 13px;
+      }
+      .player-bar .note { color: #7f8ba0; font-size: 11.5px; white-space: nowrap; }
+      .player-bar .path {
+        font-family: ui-monospace, monospace; font-size: 11.5px;
+        color: #9aa3b2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1 id="headline">Ball videos</h1>
+      <div class="spacer"></div>
+      <select id="match-select" title="Which match to browse"></select>
+      <button id="refresh-btn">Refresh</button>
+      <button id="upload-btn">Auto upload</button>
+    </header>
+
+    <main>
+      <div class="warn" id="warn" style="display: none"></div>
+      <div id="balls"><div class="empty">Loading…</div></div>
+    </main>
+
+    <div class="overlay" id="overlay">
+      <div class="player">
+        <video id="player" controls playsinline></video>
+        <div class="player-bar">
+          <b id="player-title">—</b>
+          <span class="path" id="player-path"></span>
+          <span class="note" id="player-note"></span>
+          <div class="spacer"></div>
+          <button id="close-btn">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+      // =====================================================================
+      // Ball video browser.
+      //
+      // Balls, not rows: scoring writes one ball_videos row per delivery-type
+      // POST, so a single ball routinely has several rows pointing at the same
+      // footage. Those rows become the entries of one ball's dropdown, and the
+      // selected entry's cameras become the view buttons.
+      // =====================================================================
+      const token = () => localStorage.getItem("token") || "";
+      const scoringHeaders = {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      };
+
+      const state = {
+        matchId: null,
+        rows: [],
+        // ball_id -> which of that ball's rows the dropdown has selected.
+        chosen: new Map(),
+      };
+
+      const el = (id) => document.getElementById(id);
+      const isPlainObject = (v) => v && typeof v === "object" && !Array.isArray(v);
+      const escapeHtml = (t) =>
+        String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+      function log(message) {
+        console.log(message);
+      }
+
+      function warn(message) {
+        const box = el("warn");
+        if (!message) { box.style.display = "none"; return; }
+        box.style.display = "block";
+        box.textContent = message;
+      }
+
+      // Scoring nests video_id as {"ball1": {"camera1": path}} but older rows
+      // are flat; s3_keys mirrors whichever shape its row used.
+      function flattenCameras(videoId) {
+        const out = [];
+        if (!isPlainObject(videoId)) return out;
+        for (const [outerKey, value] of Object.entries(videoId)) {
+          if (typeof value === "string") {
+            if (value.trim()) out.push({ group: "", camera: outerKey, relativePath: value });
+          } else if (isPlainObject(value)) {
+            for (const [camera, relativePath] of Object.entries(value)) {
+              if (typeof relativePath === "string" && relativePath.trim()) {
+                out.push({ group: outerKey, camera, relativePath });
+              }
+            }
+          }
+        }
+        return out;
+      }
+
+      function storedKey(s3Keys, group, camera) {
+        if (!isPlainObject(s3Keys)) return null;
+        if (group && isPlainObject(s3Keys[group]) && s3Keys[group][camera]) {
+          return s3Keys[group][camera];
+        }
+        return typeof s3Keys[camera] === "string" ? s3Keys[camera] : null;
+      }
+
+      // Where the uploader puts a file: matches/<scoring match uuid>/<watcher
+      // path>. Used when s3_keys has no entry yet — the object may well be in
+      // the bucket even though the write-back never recorded it.
+      function derivedKey(matchId, relativePath) {
+        const tail = String(relativePath)
+          .replace(/\\/g, "/")
+          .replace(/^\.?\/+/, "")
+          .trim();
+        return matchId ? `matches/${matchId}/${tail}` : tail;
+      }
+
+      // ---------------------------------------------------------------------
+      // Data
+      // ---------------------------------------------------------------------
+      async function loadMatches() {
+        const res = await fetch(`${SCORING_API_BASE_URL}/api/v1/matches`, {
+          headers: scoringHeaders,
+        });
+        if (!res.ok) throw new Error(`scoring /matches HTTP ${res.status}`);
+        const matches = (await res.json()).matches || [];
+
+        // Most recently touched first: the match someone wants to watch is
+        // almost always the one just played.
+        matches.sort(
+          (a, b) =>
+            new Date(b.updatedAt || b.createdAt || 0).getTime() -
+            new Date(a.updatedAt || a.createdAt || 0).getTime(),
+        );
+
+        el("match-select").innerHTML = matches
+          .map((m) => {
+            const when = new Date(m.updatedAt || m.createdAt).toLocaleString();
+            return `<option value="${m.matchId}">${escapeHtml(m.homeTeam)} vs ${escapeHtml(
+              m.awayTeam,
+            )} — ${when}</option>`;
+          })
+          .join("");
+        return matches;
+      }
+
+      async function loadRows(matchId) {
+        const res = await fetch(
+          `${SCORING_API_BASE_URL}/api/v1/matches/${matchId}/video-upload/status`,
+          { headers: scoringHeaders },
+        );
+        if (!res.ok) throw new Error(`status HTTP ${res.status}`);
+        const payload = await res.json();
+        return payload.data || [];
+      }
+
+      // ---------------------------------------------------------------------
+      // Rendering
+      // ---------------------------------------------------------------------
+      // One card per ball. A ball with several rows gets a dropdown listing
+      // them; a ball with one row shows the row inline, since a one-option
+      // dropdown is just a label wearing a costume.
+      function render() {
+        const box = el("balls");
+        if (state.rows.length === 0) {
+          box.innerHTML = '<div class="card"><div class="empty">No ball videos for this match.</div></div>';
+          return;
+        }
+
+        const byBall = new Map();
+        for (const row of state.rows) {
+          const ballKey = row.ball_id === null || row.ball_id === undefined ? "pending" : row.ball_id;
+          const list = byBall.get(ballKey) || [];
+          list.push(row);
+          byBall.set(ballKey, list);
+        }
+
+        // Newest ball first — the tail of the innings is what gets rewatched.
+        const balls = [...byBall.entries()].sort((a, b) => {
+          if (a[0] === "pending") return -1;
+          if (b[0] === "pending") return 1;
+          return Number(b[0]) - Number(a[0]);
+        });
+
+        box.innerHTML = balls
+          .map(([ballKey, rows]) => {
+            const selectedId = state.chosen.get(ballKey) ?? rows[0].id;
+            const row = rows.find((r) => r.id === selectedId) || rows[0];
+            const label =
+              ballKey === "pending" ? "Not yet linked to a ball" : `Ball ${ballKey}`;
+
+            const picker =
+              rows.length > 1
+                ? `<select class="entry-select" data-ball="${ballKey}">${rows
+                    .map(
+                      (r) =>
+                        `<option value="${r.id}"${r.id === row.id ? " selected" : ""}>#${
+                          r.id
+                        } · ${escapeHtml(r.delivery_type || "—")} · ${escapeHtml(
+                          r.upload_status,
+                        )}</option>`,
+                    )
+                    .join("")}</select>
+                   <span class="muted">${rows.length} entries</span>`
+                : `<span class="muted">#${row.id} · ${escapeHtml(
+                    row.delivery_type || "—",
+                  )}</span>`;
+
+            const cameras = flattenCameras(row.video_id);
+            const cams = cameras.length
+              ? cameras
+                  .map(({ group, camera, relativePath }) => {
+                    const key = storedKey(row.s3_keys, group, camera);
+                    const uploaded = Boolean(key);
+                    return `<div class="cam">
+                      <b>${escapeHtml(group ? group + "/" + camera : camera)}</b>
+                      <span class="pill ${uploaded ? "uploaded" : "pending"}">${
+                        uploaded ? "uploaded" : "not uploaded"
+                      }</span>
+                      <button class="view-btn"
+                        data-key="${escapeHtml(key || derivedKey(state.matchId, relativePath))}"
+                        data-title="${escapeHtml(label + " · " + camera)}"
+                        data-path="${escapeHtml(relativePath)}"
+                        ${uploaded ? "" : 'data-unconfirmed="1"'}>View</button>
+                    </div>`;
+                  })
+                  .join("")
+              : '<div class="empty">This entry has no camera paths.</div>';
+
+            return `<div class="card">
+              <div class="ball-head">
+                <h2>${label}</h2>
+                ${picker}
+                <div class="spacer"></div>
+                <span class="muted">${escapeHtml(row.over_number || "—")} · innings ${escapeHtml(
+                  row.innings ?? "—",
+                )} · tag ${escapeHtml(row.tag || "—")}</span>
+              </div>
+              <div class="cams">${cams}</div>
+            </div>`;
+          })
+          .join("");
+      }
+
+      // ---------------------------------------------------------------------
+      // Playback
+      // ---------------------------------------------------------------------
+      // s3_keys is the record of what was uploaded, but a key can be missing
+      // while the object exists — the write-back is a separate call that can
+      // fail on its own. So an unconfirmed camera is still offered, and the
+      // storage service gets the final say by either presigning it or not.
+      async function play(s3Key, title, path, unconfirmed) {
+        warn(null);
+        el("player-title").textContent = title;
+        el("player-path").textContent = s3Key;
+        el("player-note").textContent = "";
+        el("overlay").classList.add("open");
+
+        try {
+          const res = await fetch(`${API_BASE_URL}/matches/files/video-url`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token()}`,
+            },
+            body: JSON.stringify({ s3Key }),
+          });
+          if (!res.ok) throw new Error(`video-url HTTP ${res.status}`);
+
+          const { videoUrl } = await res.json();
+          if (!videoUrl) throw new Error("no videoUrl in response");
+
+          // The rig records H.265. Chromium only decodes it with hardware
+          // support, so the main process probes the stream and hands back a
+          // transcoded H.264 preview when — and only when — it has to.
+          let source = videoUrl;
+          const preview = await window.electron.previewVideo(videoUrl, s3Key);
+
+          if (preview.status === "ready") {
+            source = `file://${preview.path}`;
+            el("player-note").textContent = preview.cached
+              ? "H.264 preview (cached)"
+              : "H.264 preview";
+          } else if (preview.status === "no-ffmpeg") {
+            el("player-note").textContent = "ffmpeg not found";
+          } else if (preview.status === "error") {
+            el("player-note").textContent = "preview failed";
+            log(`Preview failed for ${path}: ${preview.error}`);
+          }
+
+          const video = el("player");
+
+          // Without this a decode failure is invisible: the element keeps its
+          // black frame and reports no problem, so an unplayable codec looks
+          // exactly like a video that has not started yet.
+          video.onerror = () => {
+            const code = video.error ? video.error.code : 0;
+            closePlayer();
+            warn(
+              code === 3 || code === 4
+                ? `${path} cannot be decoded here. These clips are HEVC (H.265), which ` +
+                  `Chromium only plays with hardware decoding. A transcoded preview is ` +
+                  `made automatically when ffmpeg is available — check the note in the ` +
+                  `player bar and the Activity log for why that did not happen.`
+                : `Playback of ${path} failed (media error ${code}).`,
+            );
+          };
+
+          // The preview, when one was needed — not the raw HEVC URL.
+          video.src = source;
+          video.load();
+          video.play().catch(() => {
+            /* autoplay refusal is not an error — the controls still work */
+          });
+        } catch (err) {
+          closePlayer();
+          warn(
+            `Could not play ${path}: ${err.message || err}` +
+              (unconfirmed
+                ? " — scoring has no s3_key for this camera, so it may never have been uploaded."
+                : ""),
+          );
+        }
+      }
+
+      function closePlayer() {
+        const video = el("player");
+        video.onerror = null;
+        video.pause();
+        video.removeAttribute("src");
+        video.load();
+        el("overlay").classList.remove("open");
+      }
+
+      // ---------------------------------------------------------------------
+      // Wiring
+      // ---------------------------------------------------------------------
+      el("balls").addEventListener("click", (e) => {
+        const btn = e.target.closest(".view-btn");
+        if (!btn) return;
+        play(btn.dataset.key, btn.dataset.title, btn.dataset.path, btn.dataset.unconfirmed);
+      });
+
+      el("balls").addEventListener("change", (e) => {
+        const select = e.target.closest(".entry-select");
+        if (!select) return;
+        const ball = select.dataset.ball;
+        state.chosen.set(ball === "pending" ? "pending" : Number(ball), Number(select.value));
+        render();
+      });
+
+      el("match-select").onchange = async (e) => {
+        state.matchId = e.target.value;
+        state.chosen.clear();
+        await refresh();
+      };
+
+      el("refresh-btn").onclick = () => refresh();
+      el("upload-btn").onclick = () => { window.location.href = "auto-upload.html"; };
+      el("close-btn").onclick = () => closePlayer();
+      el("overlay").onclick = (e) => { if (e.target === el("overlay")) closePlayer(); };
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closePlayer();
+      });
+
+      async function refresh() {
+        if (!state.matchId) return;
+        el("balls").innerHTML = '<div class="empty">Loading…</div>';
+        try {
+          state.rows = await loadRows(state.matchId);
+          warn(null);
+          render();
+        } catch (err) {
+          el("balls").innerHTML = '<div class="card"><div class="empty">Could not load.</div></div>';
+          warn(err.message || String(err));
+        }
+      }
+
+      (async function init() {
+        if (!token()) {
+          warn("No auth token found — sign in first. Videos cannot be played without one.");
+        }
+        try {
+          const matches = await loadMatches();
+          if (matches.length === 0) {
+            el("balls").innerHTML = '<div class="card"><div class="empty">No matches in scoring.</div></div>';
+            return;
+          }
+          state.matchId = el("match-select").value || matches[0].matchId;
+          await refresh();
+        } catch (err) {
+          el("balls").innerHTML = "";
+          warn(err.message || String(err));
+        }
+      })();
+    </script>
+  </body>
+</html>

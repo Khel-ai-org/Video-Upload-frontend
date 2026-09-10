@@ -707,6 +707,79 @@
         height: 16px;
         vertical-align: middle;
       }
+
+
+       /* Scoring write-back failure panel — only visible when something failed */
+      #scoring-sync-panel {
+        display: none;
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        z-index: 9999;
+        width: 340px;
+        max-height: 320px;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-left: 4px solid #e63946;
+        border-radius: 10px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+        font-family: inherit;
+        overflow: hidden;
+      }
+      #scoring-sync-panel .scoring-sync-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 10px 12px;
+        border-bottom: 1px solid #f1f1f1;
+      }
+      #scoring-sync-count {
+        font-size: 13px;
+        font-weight: 600;
+        color: #b3242f;
+      }
+      #scoring-sync-panel button {
+        border: none;
+        border-radius: 6px;
+        padding: 5px 10px;
+        font-size: 12px;
+        cursor: pointer;
+        background: #4b70c3;
+        color: #fff;
+      }
+      #scoring-sync-panel button:disabled {
+        opacity: 0.6;
+        cursor: default;
+      }
+      #scoring-sync-panel .scoring-sync-dismiss {
+        background: transparent;
+        color: #6b7280;
+        font-size: 16px;
+        padding: 2px 6px;
+      }
+      #scoring-sync-list {
+        max-height: 240px;
+        overflow-y: auto;
+        padding: 6px 12px 12px;
+      }
+      .scoring-sync-row {
+        padding: 7px 0;
+        border-bottom: 1px solid #f6f6f6;
+      }
+      .scoring-sync-row:last-child {
+        border-bottom: none;
+      }
+      .scoring-sync-name {
+        font-size: 12px;
+        color: #111827;
+        word-break: break-all;
+      }
+      .scoring-sync-err {
+        font-size: 11px;
+        color: #9ca3af;
+        margin-top: 2px;
+      }
     </style>
   </head>
 
@@ -1246,6 +1319,13 @@ document.addEventListener('DOMContentLoaded', populateHeaderFromStorage);
         document.querySelector(".name").textContent = username || "—";
 
         document.querySelector(".email").textContent = email || "";
+
+
+
+         // Surface failures left over from a previous run, then give them one
+        // automatic attempt — scoring is often just back up by now.
+        renderScoringSyncPanel();
+        retryScoringSyncQueue();
       });
 
       // Logout action
@@ -1432,8 +1512,39 @@ document.addEventListener('DOMContentLoaded', populateHeaderFromStorage);
 
         const { videoUrl } = await res.json();
 
+
+       
+        // The rig records H.265, which Chromium only decodes where the platform
+        // has hardware HEVC — without it the container parses, the audio plays
+        // and the picture stays black. The main process probes the stream and
+        // hands back a transcoded H.264 preview only when it has to.
+        let source = videoUrl;
+        try {
+          const preview = await window.electron.previewVideo(videoUrl, s3Key);
+          if (preview && preview.status === "ready") {
+            source = `file://${preview.path}`;
+          } else if (preview && preview.status !== "passthrough") {
+            console.warn("No H.264 preview for", s3Key, preview);
+          }
+        } catch (err) {
+          // An old main process with no preview handler must not stop playback
+          // of the files that do decode natively.
+          console.warn("preview-video unavailable:", err && err.message);
+        }
+
         const video = document.getElementById("videoPlayer");
-        video.src = videoUrl;
+        video.onerror = () => {
+          const code = video.error ? video.error.code : 0;
+          console.error(`Cannot decode ${s3Key} (media error ${code})`);
+          alert(
+            code === 3 || code === 4
+              ? "This clip cannot be decoded here. It is HEVC (H.265) and no H.264 " +
+                "preview could be made — check that ffmpeg is installed and that the " +
+                "app has been fully restarted."
+              : `Playback failed (media error ${code}).`,
+          );
+        };
+        video.src = source;
         video.load();
         video.play();
         video.addEventListener(
@@ -3189,6 +3300,353 @@ function resetUploadBoxLabels() {
         return true;
       }
 
+
+
+
+       // =====================================================================
+      // Scoring write-back
+      //
+      // After a file lands in S3 we tell the scoring backend which S3 key now
+      // holds the footage the watcher recorded as a local path, so ball_videos
+      // can flip 'pending' -> 'uploaded'.
+      //
+      // Two hard rules, both because uploads matter more than bookkeeping:
+      //   1. This never throws into the upload path. A scoring outage must not
+      //      stop or fail an upload that already succeeded.
+      //   2. Anything that fails after its retries is persisted, so it survives
+      //      an app restart and can be re-sent from the sync panel.
+      // =====================================================================
+
+      const SCORING_SYNC_QUEUE_KEY = "scoring-sync-failures";
+      const SCORING_SYNC_RETRY_DELAYS = [1000, 3000, 9000];
+
+      // ---------------------------------------------------------------------
+      // Scoring manifest
+      //
+      // Read the match's video_id paths from scoring BEFORE writing anything
+      // back. A folder routinely holds footage the watcher never tagged (full
+      // innings recordings, stray takes, wrong-camera files) — those are
+      // "extra" and must be uploaded to S3 but never written back to scoring.
+      //
+      // Matching locally also means we send the exact ball_video_id + camera
+      // instead of a path for the server to guess from.
+      // ---------------------------------------------------------------------
+
+      // Must stay behaviourally identical to normalisePath() in
+      // scoring-backend/src/routes/v1/ball-videos.router.ts.
+      function normaliseVideoPath(p) {
+        if (typeof p !== "string") return "";
+        return p.replace(/\\/g, "/").replace(/^\.?\//, "").trim().toLowerCase();
+      }
+
+      // Watcher paths and upload paths only agree on the tail, so one must end
+      // with the other. The '/' boundary stops "cam1.mp4" matching "xcam1.mp4".
+      function videoPathsMatch(a, b) {
+        const x = normaliseVideoPath(a);
+        const y = normaliseVideoPath(b);
+        if (!x || !y) return false;
+        if (x === y) return true;
+        return x.endsWith("/" + y) || y.endsWith("/" + x);
+      }
+
+      // Bucket manifest entries by filename so lookup is a small-bucket scan
+      // rather than a walk over every camera of every ball.
+      function buildScoringManifest(rows) {
+        const byBasename = new Map();
+        let entryCount = 0;
+
+        // Scoring writes video_id as {"ball1": {"camera1": "path", ...}} — the
+        // outer key groups one pull's cameras. Older rows are flat
+        // ({"camera1": "path"}), so both are read here; s3_keys mirrors
+        // whichever shape its row used.
+        const isPlainObject = (v) => v && typeof v === "object" && !Array.isArray(v);
+        const cameraSlots = (videoId) => {
+          const out = [];
+          if (!isPlainObject(videoId)) return out;
+          for (const [outerKey, value] of Object.entries(videoId)) {
+            if (typeof value === "string") {
+              out.push({ group: "", camera: outerKey, rawPath: value });
+            } else if (isPlainObject(value)) {
+              for (const [camera, rawPath] of Object.entries(value)) {
+                out.push({ group: outerKey, camera, rawPath });
+              }
+            }
+          }
+          return out;
+        };
+        const hasKey = (s3Keys, group, camera) => {
+          if (!isPlainObject(s3Keys)) return false;
+          if (group && isPlainObject(s3Keys[group]) && s3Keys[group][camera]) return true;
+          return Boolean(s3Keys[camera]);
+        };
+
+        for (const row of rows || []) {
+          for (const { group, camera, rawPath } of cameraSlots(row.video_id)) {
+            if (typeof rawPath !== "string" || !rawPath.trim()) continue;
+            const normalised = normaliseVideoPath(rawPath);
+            const basename = normalised.split("/").pop();
+            if (!basename) continue;
+
+            const entry = {
+              ballVideoId: row.id,
+              ballId: row.ball_id,
+              group,
+              camera,
+              path: normalised,
+              // Already has an S3 key -> prefer an unfilled slot instead.
+              alreadyUploaded: hasKey(row.s3_keys, group, camera),
+            };
+
+            if (!byBasename.has(basename)) byBasename.set(basename, []);
+            byBasename.get(basename).push(entry);
+            entryCount++;
+          }
+        }
+
+        return { byBasename, entryCount };
+      }
+
+      // Resolve one local file against the manifest. Returns null for an
+      // "extra" video that scoring knows nothing about.
+      function resolveInScoringManifest(manifest, relativePath) {
+        if (!manifest || manifest.entryCount === 0) return null;
+
+        const normalised = normaliseVideoPath(relativePath);
+        const basename = normalised.split("/").pop();
+        const bucket = manifest.byBasename.get(basename);
+        if (!bucket || bucket.length === 0) return null;
+
+        const hits = bucket.filter((e) => videoPathsMatch(e.path, normalised));
+        if (hits.length === 0) return null;
+
+        // Fill a camera slot that has no key yet before overwriting one that
+        // does; keeps a re-upload from clobbering a good earlier record.
+        return hits.find((e) => !e.alreadyUploaded) || hits[0];
+      }
+
+      async function loadScoringManifest(scoringMatchId) {
+        if (!scoringMatchId) return null;
+        try {
+          const res = await fetch(
+            `${SCORING_API_BASE_URL}/api/v1/matches/${scoringMatchId}/video-upload/status`,
+            { headers: { "ngrok-skip-browser-warning": "true" } },
+          );
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const payload = await res.json();
+          const manifest = buildScoringManifest(payload.data);
+          console.log(
+            `Scoring manifest: ${payload.count} ball_video row(s), ${manifest.entryCount} camera path(s)`,
+          );
+          return manifest;
+        } catch (err) {
+          // Manifest unavailable -> fall back to letting the server resolve by
+          // path. Worse (it can only guess), but better than skipping writes.
+          console.error("Could not load scoring manifest:", err);
+          return null;
+        }
+      }
+
+      function readScoringSyncQueue() {
+        try {
+          const raw = localStorage.getItem(SCORING_SYNC_QUEUE_KEY);
+          const parsed = raw ? JSON.parse(raw) : [];
+          return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+          // Corrupt entry shouldn't wedge the panel forever.
+          return [];
+        }
+      }
+
+      function writeScoringSyncQueue(queue) {
+        try {
+          localStorage.setItem(SCORING_SYNC_QUEUE_KEY, JSON.stringify(queue));
+        } catch (e) {
+          console.error("Could not persist scoring sync queue:", e);
+        }
+        renderScoringSyncPanel();
+      }
+
+      function queueScoringSyncFailure(entry, errorMessage) {
+        const queue = readScoringSyncQueue();
+        // Same file + same key retried later should update in place, not pile up.
+        const existing = queue.findIndex(
+          (q) =>
+            q.scoringMatchId === entry.scoringMatchId &&
+            q.relativePath === entry.relativePath &&
+            q.s3Key === entry.s3Key,
+        );
+        const row = {
+          ...entry,
+          error: errorMessage,
+          attempts: (existing !== -1 ? queue[existing].attempts || 0 : 0) + 1,
+          lastTriedAt: new Date().toISOString(),
+        };
+        if (existing !== -1) queue[existing] = row;
+        else queue.push(row);
+        writeScoringSyncQueue(queue);
+      }
+
+      function dequeueScoringSyncFailure(entry) {
+        const queue = readScoringSyncQueue().filter(
+          (q) =>
+            !(
+              q.scoringMatchId === entry.scoringMatchId &&
+              q.relativePath === entry.relativePath &&
+              q.s3Key === entry.s3Key
+            ),
+        );
+        writeScoringSyncQueue(queue);
+      }
+
+      async function postScoringUpload(entry) {
+        const res = await fetch(
+          `${SCORING_API_BASE_URL}/api/v1/matches/${entry.scoringMatchId}/video-upload`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "ngrok-skip-browser-warning": "true",
+            },
+            body: JSON.stringify({
+              relative_path: entry.relativePath,
+              s3_key: entry.s3Key,
+              // Present when the manifest resolved this file locally, so the
+              // server updates exactly this row/camera instead of matching by
+              // path. Omitted only in the manifest-unavailable fallback.
+              ball_video_id: entry.ballVideoId,
+              camera: entry.camera,
+            }),
+            // Deliberately no abort signal: cancelling an upload must not
+            // cancel the write-back for files that already finished.
+          },
+        );
+
+        if (!res.ok) {
+          const detail = await res.text().catch(() => "");
+          const err = new Error(`HTTP ${res.status}${detail ? `: ${detail}` : ""}`);
+          err.status = res.status;
+          throw err;
+        }
+        return res.json().catch(() => ({}));
+      }
+
+      const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+      // A 404 means no ball_videos row references this path — normal for footage
+      // the watcher never tagged (full-match recordings, stray files). Not an
+      // error, and not something a retry will ever fix, so don't surface it.
+      function isRetryableSyncError(err) {
+        const status = err && err.status;
+        if (!status) return true; // network / DNS / offline -> worth retrying
+        if (status === 408 || status === 429) return true;
+        return status >= 500;
+      }
+
+      async function syncScoringUpload(entry, manifest) {
+        if (!entry.scoringMatchId) {
+          // Match was never linked to scoring; nothing to write back to.
+          return { skipped: "no-scoring-match-id" };
+        }
+
+        // Manifest present means we can be certain: either this file is one of
+        // the paths scoring recorded in video_id, or it is an extra video that
+        // belongs in S3 but not in ball_videos. Only the former is written back.
+        if (manifest) {
+          const hit = resolveInScoringManifest(manifest, entry.relativePath);
+          if (!hit) {
+            console.log("Extra video, not in scoring video_id:", entry.relativePath);
+            return { skipped: "extra-video" };
+          }
+          entry.ballVideoId = hit.ballVideoId;
+          entry.camera = hit.camera;
+          // Claim the slot so two files in one batch can't both take it.
+          hit.alreadyUploaded = true;
+        }
+
+        for (let attempt = 0; attempt <= SCORING_SYNC_RETRY_DELAYS.length; attempt++) {
+          try {
+            const data = await postScoringUpload(entry);
+            dequeueScoringSyncFailure(entry);
+            console.log("Scoring write-back ok:", entry.relativePath, data);
+            return data;
+          } catch (err) {
+            if (err.status === 404) {
+              console.log(
+                "Scoring write-back skipped (no matching ball_video):",
+                entry.relativePath,
+              );
+              return { skipped: "no-matching-ball-video" };
+            }
+
+            const canRetry =
+              isRetryableSyncError(err) && attempt < SCORING_SYNC_RETRY_DELAYS.length;
+
+            if (!canRetry) {
+              console.error("Scoring write-back failed:", entry.relativePath, err);
+              queueScoringSyncFailure(entry, err.message || String(err));
+              return { failed: true };
+            }
+
+            await sleep(SCORING_SYNC_RETRY_DELAYS[attempt]);
+          }
+        }
+        return { failed: true };
+      }
+
+      // Drains the persisted queue. Used by the panel's Retry button and on
+      // dashboard load, so a failure from a previous run gets another chance.
+      async function retryScoringSyncQueue() {
+        const queue = readScoringSyncQueue();
+        if (queue.length === 0) return;
+
+        const btn = document.getElementById("scoring-sync-retry");
+        if (btn) {
+          btn.disabled = true;
+          btn.textContent = "Retrying...";
+        }
+
+        for (const entry of queue) {
+          // No manifest needed: a queued entry already carries the
+          // ball_video_id/camera it resolved to, so the retry targets the same
+          // row. Entries queued during a manifest outage fall back to
+          // server-side path matching, exactly as they did the first time.
+          await syncScoringUpload(entry);
+        }
+
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = "Retry all";
+        }
+        renderScoringSyncPanel();
+      }
+
+      function renderScoringSyncPanel() {
+        const panel = document.getElementById("scoring-sync-panel");
+        if (!panel) return;
+
+        const queue = readScoringSyncQueue();
+        if (queue.length === 0) {
+          panel.style.display = "none";
+          return;
+        }
+
+        panel.style.display = "block";
+        document.getElementById("scoring-sync-count").textContent =
+          `${queue.length} scoring update${queue.length === 1 ? "" : "s"} failed`;
+
+        document.getElementById("scoring-sync-list").innerHTML = queue
+          .map(
+            (q) => `
+              <div class="scoring-sync-row">
+                <div class="scoring-sync-name" title="${q.relativePath}">${q.relativePath}</div>
+                <div class="scoring-sync-err">${q.error || "unknown error"} · ${q.attempts || 1} attempt(s)</div>
+              </div>`,
+          )
+          .join("");
+      }
+
+
+
       function filterValidVideos(files) {
         return files.filter((file) => {
           // Check if file type starts with 'video/' and size is greater than 0
@@ -3651,6 +4109,17 @@ function resetUploadBoxLabels() {
 
     const fileTasks = [];
     for (const file of files) {
+
+        // One folder per match, keyed by scoring's match uuid so this screen and
+      // the auto-uploader write the same layout into the bucket. Falls back to
+      // the upload system's own id for a match that has no scoring link — its
+      // footage still has to land somewhere.
+      const matchFolder = detail.scoring_match_id || detail.id;
+      const s3Key = folderfile.length !== 0
+        ? `matches/${matchFolder}/${file.webkitRelativePath}`
+        : `matches/${matchFolder}/match_0${currentInning}/${file.name}`;
+
+
       const res = await fetch(`${API_BASE_URL}/upload/files`, {
         method: "POST",
         headers: {
@@ -3664,9 +4133,7 @@ function resetUploadBoxLabels() {
               relativePath: file.name,
               size: file.size,
               // We ensure the S3 path matches our current tab to keep the database clean
-              s3Key: folderfile.length !== 0
-                ? `matches/${detail.id}/${file.webkitRelativePath}`
-                : `matches/${detail.id}/match_0${currentInning}/${file.name}`,
+              s3Key: s3Key,
             },
           ],
         }),
@@ -3679,16 +4146,35 @@ function resetUploadBoxLabels() {
       fileTasks.push({
         file,
         fileId: data.files[0].fileId,
+         // Kept so the scoring write-back can report the exact key we stored,
+        // instead of recomputing it and risking drift.
+        s3Key,
       });
     }
 
     await dashboardLoad();
 
+      // Fetched once per session, before any write-back, so every file is
+    // checked against the video_id paths scoring actually holds.
+    const scoringManifest = await loadScoringManifest(detail.scoring_match_id);
+
     const FILE_CONCURRENCY = 6;
     const limitFile = createLimiter(FILE_CONCURRENCY);
 
-    const uploadPromises = fileTasks.map(({ file, fileId }) =>
-      limitFile(() => multipart(fileId, file, signal)),
+   const uploadPromises = fileTasks.map(({ file, fileId, s3Key }) =>
+      limitFile(() =>
+        multipart(fileId, file, signal).then((result) =>
+          // Per-file write-back. syncScoringUpload never rejects, so a scoring
+          // outage cannot fail an upload that already succeeded — failures land
+          // in the sync panel to be retried.
+          syncScoringUpload({
+            scoringMatchId: detail.scoring_match_id,
+            relativePath: file.webkitRelativePath || file.name,
+            s3Key,
+            name: file.name,
+          }, scoringManifest).then(() => result),
+        ),
+      ),
     );
 
     await Promise.all(uploadPromises);
@@ -4074,5 +4560,19 @@ function resetUploadBoxLabels() {
       // window.addEventListener("DOMContentLoaded", showuploaded());
     </script>
     <script src="config.js"></script>
+     <div id="scoring-sync-panel">
+      <div class="scoring-sync-head">
+        <span id="scoring-sync-count"></span>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <button id="scoring-sync-retry" onclick="retryScoringSyncQueue()">Retry all</button>
+          <button
+            class="scoring-sync-dismiss"
+            title="Hide (failures are kept and retried on next load)"
+            onclick="document.getElementById('scoring-sync-panel').style.display='none'"
+          >&times;</button>
+        </div>
+      </div>
+      <div id="scoring-sync-list"></div>
+    </div>
   </body>
 </html>
