@@ -36,7 +36,8 @@
       "name": "video_upload_system",
       "executableName": "video_upload_system",
       "extraResource": [
-        "resources/cricket-watcher"
+        "resources/cricket-watcher",
+        "resources/scoring-build"
       ]
     },
     "makers": [

@@ -31,6 +31,9 @@ contextBridge.exposeInMainWorld("electron", {
   pickWatcherBinary: () => ipcRenderer.invoke("pick-watcher-binary"),
   onWatcherLog: (handler) =>
     ipcRenderer.on("watcher-log", (_event, payload) => handler(payload)),
+  // Scoring integration
+  openScoring: () => ipcRenderer.invoke("open-scoring"),
+
   onWatcherExit: (handler) =>
     ipcRenderer.on("watcher-exit", (_event, payload) => handler(payload))
 });

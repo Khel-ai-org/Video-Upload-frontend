@@ -143,8 +143,9 @@ body { margin: 0; padding: 0; font-family: "Plus Jakarta Sans", sans-serif; back
 
 <div class="tabs-container">
   <div class="tab" onclick="window.location.href='players.html'">Players</div>
-    <div class="tab" onclick="window.location.href='ground.html'">Grounds</div>
-    <div class="tab active" onclick="window.location.href='tournament.html'">Tournament</div>
+  <div class="tab" onclick="window.location.href='ground.html'">Grounds</div>
+  <div class="tab active" onclick="window.location.href='tournament.html'">Tournament</div>
+  <div class="tab" style="color:#F95320; font-weight:700;" onclick="if(window.electron && window.electron.openScoring) window.electron.openScoring(); else window.open('http://localhost:3001','_blank');">Use Scoring 🏏</div>
 </div>
 
 <div class="header">

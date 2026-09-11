@@ -2,6 +2,8 @@ const { app, BrowserWindow  ,  dialog , Menu } = require('electron');
 const path = require('node:path');
 const fs = require("fs");
 const fsp = require('fs').promises;
+const { spawn } = require('child_process');
+const http = require('http');
 const mime = require("mime-types");
 const { URL } = require('url');
 const https = require('https');
@@ -66,6 +68,7 @@ const createWindow = () => {
     height: 800,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
+      backgroundThrottling: false,
     },
   });
 
@@ -163,6 +166,97 @@ function openWatcherWindow() {
   });
 }
 
+let scoringWindow = null;
+let scoringProcess = null;
+
+function isScoringRunning(port = 3001) {
+  return new Promise((resolve) => {
+    const req = http.get(`http://localhost:${port}`, (res) => {
+      resolve(true);
+      req.destroy();
+    });
+    req.on('error', () => resolve(false));
+    req.setTimeout(1000, () => {
+      req.destroy();
+      resolve(false);
+    });
+  });
+}
+
+async function ensureScoringServer() {
+  const running = await isScoringRunning(3001);
+  if (running) return true;
+
+  console.log("🚀 Starting Scoring server on port 3001...");
+  
+  const embeddedPath = path.join(__dirname, '..', 'resources', 'scoring-build');
+  const siblingPath = path.join(__dirname, '..', '..', 'Scoring--frontend');
+  
+  let targetPath = null;
+  let cmd = 'node';
+  let args = ['server.js'];
+  
+  if (fs.existsSync(path.join(embeddedPath, 'server.js'))) {
+    targetPath = embeddedPath;
+    cmd = 'node';
+    args = ['server.js'];
+  } else if (fs.existsSync(siblingPath)) {
+    targetPath = siblingPath;
+    cmd = './node_modules/.bin/next';
+    args = ['start', '-p', '3001'];
+  }
+
+  if (targetPath) {
+    scoringProcess = spawn(cmd, args, {
+      cwd: targetPath,
+      shell: true,
+      env: { ...process.env, PORT: '3001' },
+      stdio: 'ignore'
+    });
+
+    for (let i = 0; i < 30; i++) {
+      await new Promise(r => setTimeout(r, 300));
+      if (await isScoringRunning(3001)) return true;
+    }
+  }
+  return false;
+}
+
+async function openScoringWindow() {
+  if (scoringWindow && !scoringWindow.isDestroyed()) {
+    if (scoringWindow.isMinimized()) scoringWindow.restore();
+    scoringWindow.focus();
+    return;
+  }
+
+  scoringWindow = new BrowserWindow({
+    width: 1380,
+    height: 900,
+    title: 'Scoring Dashboard',
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      backgroundThrottling: false,
+    }
+  });
+
+  scoringWindow.loadURL('data:text/html,<html><body style="background:%230F172A;color:%23F95320;display:flex;flex-direction:column;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;margin:0;"><h2>Loading Khel Scoring Dashboard...</h2><p style="color:%2394A3B8;font-size:14px;">Connecting to http://localhost:3001</p></body></html>');
+
+  const ready = await ensureScoringServer();
+
+  if (scoringWindow && !scoringWindow.isDestroyed()) {
+    if (ready) {
+      scoringWindow.loadURL('http://localhost:3001');
+    } else {
+      scoringWindow.loadURL('data:text/html,<html><body style="background:%230F172A;color:%23EF4444;display:flex;flex-direction:column;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;margin:0;"><h2>Could Not Connect to Scoring Server</h2><p style="color:%2394A3B8;font-size:14px;">Please ensure Scoring--frontend is started on port 3001.</p></body></html>');
+    }
+  }
+
+  scoringWindow.on('closed', () => {
+    scoringWindow = null;
+  });
+}
+
 function buildAppMenu() {
   if (!isLoggedIn()) {
     Menu.setApplicationMenu(null);
@@ -170,6 +264,11 @@ function buildAppMenu() {
   }
 
   const items = [
+    {
+      label: 'Use Scoring',
+      accelerator: 'CmdOrCtrl+Shift+S',
+      click: () => openScoringWindow(),
+    },
     {
       label: 'Auto Upload',
       accelerator: 'CmdOrCtrl+Shift+U',
@@ -883,7 +982,7 @@ ipcMain.handle("probe-videos", async (_event, payload) => {
 // H.264 into a cached temp file. H.264 is handed back untouched: transcoding a
 // stream that already plays would be pure latency.
 // ---------------------------------------------------------------------------
-const { spawn } = require("node:child_process");
+// const { spawn } = require("node:child_process");
 const crypto = require("node:crypto");
 
 const PREVIEW_DIR = () => path.join(app.getPath("userData"), "previews");
@@ -1222,6 +1321,7 @@ ipcMain.handle('watcher-start', async (event, options) =>
   startWatcher(options || {}, event.sender));
 ipcMain.handle('watcher-stop', async () => stopWatcher());
 ipcMain.handle('watcher-status', async () => watcherStatus());
+ipcMain.handle('open-scoring', async () => openScoringWindow());
 
 ipcMain.handle('pick-watcher-binary', async () => {
   const result = await dialog.showOpenDialog({ properties: ['openFile'] });
@@ -1230,9 +1330,12 @@ ipcMain.handle('pick-watcher-binary', async () => {
   return watcherStatus();
 });
 
-// A watcher outliving the app would keep posting balls to scoring with no UI
-// anywhere to show it.
-app.on('before-quit', () => stopWatcher());
+app.on('before-quit', () => {
+  stopWatcher();
+  if (scoringProcess) {
+    try { scoringProcess.kill(); } catch (e) {}
+  }
+});
 
 
 

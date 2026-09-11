@@ -112,12 +112,17 @@ body { margin: 0; padding: 0; font-family: "Plus Jakarta Sans", sans-serif; back
 
   <div class="header">
     <h1 class="tournament" id="tournamentTitle">Matches</h1>
-     <button class="create-btn" id="createBtn">
+    <div style="display: flex; gap: 12px;">
+      <button class="create-btn" style="background:#F95320; border:none;" onclick="if(window.electron && window.electron.openScoring) window.electron.openScoring(); else window.open('http://localhost:3001','_blank');">
+        Use Scoring 🏏
+      </button>
+      <button class="create-btn" id="createBtn">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
         </svg>
         Create New Match
       </button>
+    </div>
   </div>
 
   <div id="matchList" class="match-list"></div>
