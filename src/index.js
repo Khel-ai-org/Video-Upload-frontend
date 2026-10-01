@@ -9,6 +9,8 @@ const { URL } = require('url');
 const https = require('https');
 const API_BASE_URL = 'http://localhost:5701';
 const CHUNK_SIZE = 500; // in MB
+// The app's entry point: Association's login screen.
+const ASSOCIATION_PORT = 3000;
 const axios = require('axios');
 let uploadAbortController = null;
 const UploadState = {
@@ -72,13 +74,38 @@ const createWindow = () => {
     },
   });
 
-  // and load the index.html of the app.
-  mainWindow.loadFile(path.join(__dirname, 'index.html'));
+  mainWindow.loadURL('data:text/html,<html><body style="background:%230F172A;color:%23F95320;display:flex;flex-direction:column;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;margin:0;"><h2>Loading Khel Association...</h2></body></html>');
+
+  // The entry point is Association's own login. Scoring is started here too,
+  // not just Association — login's own success handler does a plain
+  // window.location.href to the scoring server directly (no window open call
+  // on this side involved), so it must already be up by the time that happens.
+  (async () => {
+    const [associationReady] = await Promise.all([
+      ensureAssociationServer(),
+      ensureScoringServer(),
+    ]);
+
+    if (!mainWindow || mainWindow.isDestroyed()) return;
+
+    if (associationReady) {
+      mainWindow.loadURL(`http://localhost:${ASSOCIATION_PORT}/login`);
+    } else {
+      mainWindow.loadURL('data:text/html,<html><body style="background:%230F172A;color:%23EF4444;display:flex;flex-direction:column;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;margin:0;"><h2>Could Not Connect to Association Server</h2></body></html>');
+    }
+  })();
 
   mainWindow.webContents.on('did-navigate', () => buildAppMenu());
 
   mainWindow.on('closed', () => {
     mainWindow = null;
+    // These windows have no `parent` (so they can fullscreen/minimize on
+    // their own without macOS tying them into the main window's Space) —
+    // closing them here on the main window's own close event is what keeps
+    // them from silently outliving it instead, since window-all-closed
+    // doesn't quit the app on macOS.
+    if (autoUploadWindow && !autoUploadWindow.isDestroyed()) autoUploadWindow.close();
+    if (watcherWindow && !watcherWindow.isDestroyed()) watcherWindow.close();
   });
   // Open the DevTools.
   // mainWindow.webContents.openDevTools();
@@ -108,9 +135,10 @@ function openAutoUploadWindow() {
     width: 1200,
     height: 820,
     title: 'Auto Upload',
-    // A child of the association window, so closing that one closes this one
-    // too — the watcher must never outlive the app window that opened it.
-    parent: mainWindow && !mainWindow.isDestroyed() ? mainWindow : undefined,
+    // Independent, not a child of mainWindow — a parent/child relationship
+    // ties them into the same macOS Space, so fullscreening this one pulled
+    // the main window along with it. mainWindow's own 'closed' handler
+    // closes this window explicitly instead, to still bound its lifetime.
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
     },
@@ -150,7 +178,8 @@ function openWatcherWindow() {
     width: 1100,
     height: 780,
     title: 'Watcher',
-    parent: mainWindow && !mainWindow.isDestroyed() ? mainWindow : undefined,
+    // Independent, same reason as Auto Upload — see mainWindow's 'closed'
+    // handler for how its lifetime still gets bounded to the main window.
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
     },
@@ -222,6 +251,47 @@ async function ensureScoringServer() {
   return false;
 }
 
+let associationProcess = null;
+
+async function ensureAssociationServer() {
+  const running = await isScoringRunning(ASSOCIATION_PORT);
+  if (running) return true;
+
+  console.log(`🚀 Starting Association server on port ${ASSOCIATION_PORT}...`);
+
+  const embeddedPath = path.join(__dirname, '..', 'resources', 'association-build');
+  const siblingPath = path.join(__dirname, '..', '..', 'Association-Frontend');
+
+  let targetPath = null;
+  let cmd = 'node';
+  let args = ['server.js'];
+
+  if (fs.existsSync(path.join(embeddedPath, 'server.js'))) {
+    targetPath = embeddedPath;
+    cmd = 'node';
+    args = ['server.js'];
+  } else if (fs.existsSync(siblingPath)) {
+    targetPath = siblingPath;
+    cmd = './node_modules/.bin/next';
+    args = ['start', '-p', String(ASSOCIATION_PORT)];
+  }
+
+  if (targetPath) {
+    associationProcess = spawn(cmd, args, {
+      cwd: targetPath,
+      shell: true,
+      env: { ...process.env, PORT: String(ASSOCIATION_PORT) },
+      stdio: 'ignore'
+    });
+
+    for (let i = 0; i < 30; i++) {
+      await new Promise(r => setTimeout(r, 300));
+      if (await isScoringRunning(ASSOCIATION_PORT)) return true;
+    }
+  }
+  return false;
+}
+
 async function openScoringWindow() {
   if (scoringWindow && !scoringWindow.isDestroyed()) {
     if (scoringWindow.isMinimized()) scoringWindow.restore();
@@ -267,7 +337,14 @@ function buildAppMenu() {
     {
       label: 'Use Scoring',
       accelerator: 'CmdOrCtrl+Shift+S',
-      click: () => openScoringWindow(),
+      // mainWindow already runs the Association login -> Scoring dashboard
+      // flow, so this just brings it forward rather than opening a second,
+      // separately-authenticated window straight into Scoring.
+      click: () => {
+        if (!mainWindow || mainWindow.isDestroyed()) return;
+        if (mainWindow.isMinimized()) mainWindow.restore();
+        mainWindow.focus();
+      },
     },
     {
       label: 'Auto Upload',
@@ -1281,11 +1358,13 @@ function startWatcher(options, sender) {
 
   // Both URLs are derived from one host, the way the desktop GUI does it: the
   // scoring frontend takes the ball, the backend takes the same payload.
+  // Scoring (with /api/video_data) runs on 3001 — port 3000 is Association's,
+  // which has no such route.
   const host = opts.host || readSettings().watcherHost || '127.0.0.1';
   const args = [
     '--no-gui',
     root,
-    '--api', `http://${host}:3000/api/video_data`,
+    '--api', `http://${host}:3001/api/video_data`,
     '--secondary-api', `http://${host}:5500/video_data`,
   ];
   if (opts.interval) args.push('--interval', String(opts.interval));

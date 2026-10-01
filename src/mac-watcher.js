@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 const PULLS_DIR = process.argv[2] || path.join(require("os").homedir(), "Desktop/test_pulls");
-const NEXT_API = "http://127.0.0.1:3000/api/video_data";
+const NEXT_API = "http://127.0.0.1:3001/api/video_data";
 const BACKEND_API = "http://127.0.0.1:5500/video_data";
 
 console.log("🚀 Starting macOS Watcher...");

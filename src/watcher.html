@@ -240,7 +240,7 @@
 
         const host = el("host").value.trim() || "127.0.0.1";
         el("k-root").textContent = state.root || "not set";
-        el("k-api").textContent = state.running ? `${host}:3000/api/video_data` : "—";
+        el("k-api").textContent = state.running ? `${host}:3001/api/video_data` : "—";
         el("k-api2").textContent = state.running ? `${host}:5500/video_data` : "—";
       }
 
