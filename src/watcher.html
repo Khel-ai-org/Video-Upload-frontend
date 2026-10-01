@@ -1,0 +1,382 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Watcher</title>
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src *"
+    />
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font: 14px/1.5 -apple-system, "Segoe UI", Roboto, sans-serif;
+        color: #1f2430;
+        background: #f5f6f8;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+      }
+      header {
+        display: flex; align-items: center; gap: 16px;
+        padding: 14px 20px; background: #fff; border-bottom: 1px solid #e3e6ec;
+        flex: none;
+      }
+      header h1 { font-size: 16px; margin: 0; font-weight: 600; }
+      .dot {
+        width: 9px; height: 9px; border-radius: 50%;
+        background: #b6bcc8; flex: none;
+      }
+      .dot.live { background: #22a06b; box-shadow: 0 0 0 3px rgba(34,160,107,.18); }
+      .dot.err  { background: #d24d4d; box-shadow: 0 0 0 3px rgba(210,77,77,.18); }
+      .spacer { flex: 1; }
+      button {
+        font: inherit; padding: 7px 13px; border-radius: 7px;
+        border: 1px solid #cdd2db; background: #fff; cursor: pointer;
+      }
+      button:hover:not(:disabled) { background: #f0f2f6; }
+      button:disabled { opacity: .5; cursor: default; }
+      button.primary { background: #4b70c3; border-color: #4b70c3; color: #fff; }
+      button.primary:hover:not(:disabled) { background: #4162b0; }
+      button.stop { background: #c14b4b; border-color: #c14b4b; color: #fff; }
+      button.stop:hover:not(:disabled) { background: #a94141; }
+      input {
+        font: inherit; padding: 7px 9px; border-radius: 7px;
+        border: 1px solid #cdd2db; background: #fff;
+      }
+      main {
+        padding: 20px; display: flex; flex-direction: column; gap: 14px;
+        flex: 1; min-height: 0;
+      }
+      .card {
+        background: #fff; border: 1px solid #e3e6ec;
+        border-radius: 10px; padding: 16px; flex: none;
+      }
+      .card h2 {
+        font-size: 12px; text-transform: uppercase; letter-spacing: .06em;
+        color: #6b7280; margin: 0 0 12px;
+      }
+      .kv { display: flex; flex-wrap: wrap; gap: 22px; }
+      .kv div span { display: block; font-size: 11px; color: #8a92a1; }
+      .kv div strong { font-weight: 600; }
+      .kv div strong.mono {
+        font-family: ui-monospace, monospace; font-size: 12px; font-weight: 500;
+      }
+      .stats { display: flex; gap: 26px; }
+      .stats div { text-align: center; }
+      .stats b { display: block; font-size: 22px; font-weight: 600; }
+      .stats span { font-size: 11px; color: #8a92a1; }
+      .warn {
+        background: #fdf6e6; border: 1px solid #f0dfb5; color: #7a5c14;
+        border-radius: 8px; padding: 10px 12px;
+      }
+
+      /* The terminal is the point of this window: it is the operator's proof
+         that the watcher is alive and seeing balls, so it gets the space. */
+      .terminal-card {
+        display: flex; flex-direction: column; flex: 1; min-height: 0;
+        background: #fff; border: 1px solid #e3e6ec; border-radius: 10px; padding: 16px;
+      }
+      .terminal-head {
+        display: flex; align-items: center; gap: 12px; margin-bottom: 10px;
+      }
+      .terminal-head h2 {
+        font-size: 12px; text-transform: uppercase; letter-spacing: .06em;
+        color: #6b7280; margin: 0;
+      }
+      .terminal-head label { font-size: 12px; color: #6b7280; }
+      #terminal {
+        flex: 1; min-height: 0; overflow: auto;
+        background: #11141b; border-radius: 8px; padding: 12px 14px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 12px; line-height: 1.55; color: #c9d2e0;
+        white-space: pre-wrap; word-break: break-word;
+      }
+      #terminal .ball  { color: #d9a8ff; font-weight: 600; }
+      #terminal .ok    { color: #6fd39a; }
+      #terminal .bad   { color: #ff8c8c; }
+      #terminal .note  { color: #7f8ba0; }
+      #terminal .app   { color: #7aa7ff; }
+      #terminal .empty { color: #5c6577; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="dot" id="dot"></div>
+      <h1 id="headline">Stopped</h1>
+      <div class="spacer"></div>
+      <button id="folder-btn" title="The pulls folder the cameras write into">Pulls folder…</button>
+      <input id="host" placeholder="Scoring IP" size="14" title="Machine running scoring" />
+      <button id="toggle-btn" class="primary">Start watching</button>
+    </header>
+
+    <main>
+      <div class="warn" id="warn" style="display: none"></div>
+
+      <div class="card">
+        <h2>Watching</h2>
+        <div class="kv">
+          <div><span>Pulls folder</span><strong class="mono" id="k-root">not set</strong></div>
+          <div><span>Scoring API</span><strong class="mono" id="k-api">—</strong></div>
+          <div><span>Backend API</span><strong class="mono" id="k-api2">—</strong></div>
+          <div><span>Process</span><strong id="k-pid">not running</strong></div>
+          <div><span>Running for</span><strong id="k-uptime">—</strong></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Tracking</h2>
+        <div class="stats">
+          <div><b id="s-balls">0</b><span>balls detected</span></div>
+          <div><b id="s-posted">0</b><span>posted to scoring</span></div>
+          <div><b id="s-failed">0</b><span>post failures</span></div>
+          <div><b id="s-last">—</b><span>last ball seen</span></div>
+        </div>
+      </div>
+
+      <div class="terminal-card">
+        <div class="terminal-head">
+          <h2>Watcher output</h2>
+          <div class="spacer"></div>
+          <label><input type="checkbox" id="follow" checked /> Follow</label>
+          <button id="clear-btn">Clear</button>
+        </div>
+        <div id="terminal"><div class="empty">Not started. Press “Start watching”.</div></div>
+      </div>
+    </main>
+
+    <script src="config.js"></script>
+    <script>
+      // =====================================================================
+      // Watcher console.
+      //
+      // The watcher itself is the Python tool spawned by the main process; this
+      // window is its front end. Deliberately separate from Auto Upload: they
+      // are two different jobs on two different sides of scoring — this one
+      // tells scoring what footage exists, the uploader reads scoring's rows
+      // and ships the files. Keeping them apart means an operator can watch
+      // the raw output for "is it seeing my balls?" without the uploader's
+      // traffic scrolling past.
+      // =====================================================================
+
+      const el = (id) => document.getElementById(id);
+
+      const state = {
+        running: false,
+        root: null,
+        startedAt: null,
+        balls: 0,
+        posted: 0,
+        failed: 0,
+        lastBall: null,
+        cleared: true,
+      };
+
+      // The watcher's own vocabulary, used both to colour the terminal and to
+      // count what matters. Matching its text is a coupling, but it is the only
+      // thing the process actually reports.
+      const BALL_LINE = /NEW COMPLETED BALL DETECTED/;
+      const BALL_NO = /Ball No:\s*(\d+)/;
+      const BALL_WHERE = /:\s*(.+?)\s*->\s*Ball No/;
+      const POST_OK = /✓\s*\[/;
+      const POST_BAD = /✕\s*\[/;
+
+      function classify(line, isError) {
+        if (isError || POST_BAD.test(line)) return "bad";
+        if (BALL_LINE.test(line)) return "ball";
+        if (POST_OK.test(line)) return "ok";
+        if (/^\s*└─|^={5,}|^-{5,}/.test(line)) return "note";
+        return "";
+      }
+
+      function write(line, kind) {
+        const box = el("terminal");
+        if (state.cleared) {
+          box.textContent = "";
+          state.cleared = false;
+        }
+
+        // Follow only when already at the bottom, so reading back through a
+        // long session is not yanked away by the next ball.
+        const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 40;
+        const div = document.createElement("div");
+        if (kind) div.className = kind;
+        div.textContent = line;
+        box.appendChild(div);
+
+        while (box.childElementCount > 2000) box.firstElementChild.remove();
+        if (el("follow").checked && atBottom) box.scrollTop = box.scrollHeight;
+      }
+
+      function note(line) {
+        write(line, "app");
+      }
+
+      function warn(message) {
+        const box = el("warn");
+        box.style.display = message ? "block" : "none";
+        if (message) box.textContent = message;
+      }
+
+      function renderStats() {
+        el("s-balls").textContent = state.balls;
+        el("s-posted").textContent = state.posted;
+        el("s-failed").textContent = state.failed;
+        el("s-last").textContent = state.lastBall || "—";
+      }
+
+      function renderStatus() {
+        el("dot").className = "dot" + (state.running ? " live" : "");
+        el("headline").textContent = state.running
+          ? state.balls
+            ? `Tracking — ${state.balls} ball${state.balls === 1 ? "" : "s"} seen`
+            : "Tracking — waiting for the next ball"
+          : "Stopped";
+        el("toggle-btn").textContent = state.running ? "Stop watching" : "Start watching";
+        el("toggle-btn").className = state.running ? "stop" : "primary";
+        el("host").disabled = state.running;
+        el("folder-btn").disabled = state.running;
+
+        const host = el("host").value.trim() || "127.0.0.1";
+        el("k-root").textContent = state.root || "not set";
+        el("k-api").textContent = state.running ? `${host}:3001/api/video_data` : "—";
+        el("k-api2").textContent = state.running ? `${host}:5500/video_data` : "—";
+      }
+
+      function renderUptime() {
+        if (!state.running || !state.startedAt) {
+          el("k-uptime").textContent = "—";
+          return;
+        }
+        const secs = Math.floor((Date.now() - state.startedAt) / 1000);
+        const h = Math.floor(secs / 3600);
+        const m = Math.floor((secs % 3600) / 60);
+        const s = secs % 60;
+        el("k-uptime").textContent = h ? `${h}h ${m}m` : m ? `${m}m ${s}s` : `${s}s`;
+      }
+      setInterval(renderUptime, 1000);
+
+      // ---------------------------------------------------------------------
+      // Watcher output
+      // ---------------------------------------------------------------------
+      window.electron.onWatcherLog(({ line, isError }) => {
+        write(line, classify(line, isError));
+
+        if (BALL_LINE.test(line)) {
+          state.balls += 1;
+          const where = line.match(BALL_WHERE);
+          const number = line.match(BALL_NO);
+          state.lastBall = number
+            ? `#${number[1]}`
+            : where
+              ? where[1]
+              : new Date().toLocaleTimeString();
+          renderStats();
+          renderStatus();
+        } else if (POST_OK.test(line)) {
+          state.posted += 1;
+          renderStats();
+        } else if (POST_BAD.test(line)) {
+          state.failed += 1;
+          renderStats();
+          el("dot").className = "dot err";
+        }
+      });
+
+      window.electron.onWatcherExit(({ code, signal, error }) => {
+        state.running = false;
+        state.startedAt = null;
+        note(
+          `— watcher stopped${code != null ? ` (exit ${code})` : ""}` +
+            `${signal ? ` (${signal})` : ""}${error ? `: ${error}` : ""} —`,
+        );
+        renderStatus();
+        renderUptime();
+      });
+
+      // ---------------------------------------------------------------------
+      // Controls
+      // ---------------------------------------------------------------------
+      el("folder-btn").onclick = async () => {
+        const picked = await window.electron.pickPullsFolder();
+        if (!picked) return;
+        state.root = picked;
+        warn("");
+        renderStatus();
+        note(`— pulls folder set to ${picked} —`);
+      };
+
+      el("clear-btn").onclick = () => {
+        el("terminal").innerHTML = '<div class="empty">Cleared.</div>';
+        state.cleared = true;
+      };
+
+      el("toggle-btn").onclick = async () => {
+        el("toggle-btn").disabled = true;
+        try {
+          if (state.running) {
+            note("— stopping watcher —");
+            await window.electron.stopWatcher();
+            return;
+          }
+
+          if (!state.root) {
+            warn('Pick the folder the cameras write into first, using "Pulls folder…".');
+            return;
+          }
+
+          const status = await window.electron.startWatcher({
+            root: state.root,
+            host: el("host").value.trim() || undefined,
+          });
+
+          if (status.error) {
+            warn(status.error);
+            write(status.error, "bad");
+            // A missing binary is the one failure fixable from here.
+            if (/not found/.test(status.error)) {
+              const picked = await window.electron.pickWatcherBinary();
+              if (picked.binary) {
+                warn("");
+                note(`— watcher binary set to ${picked.binary}, press Start again —`);
+              }
+            }
+            return;
+          }
+
+          warn("");
+          state.running = status.running;
+          state.startedAt = Date.now();
+          el("k-pid").textContent = status.pid ? `pid ${status.pid}` : "running";
+        } finally {
+          el("toggle-btn").disabled = false;
+          renderStatus();
+          renderUptime();
+        }
+      };
+
+      (async function init() {
+        const settings = await window.electron.getSettings();
+        state.root = settings.pullsRoot || null;
+        el("host").value = settings.watcherHost || "127.0.0.1";
+
+        // The process lives in the main process, so it can already be running
+        // from before this window was opened.
+        const status = await window.electron.watcherStatus();
+        state.running = status.running;
+        if (status.running) {
+          el("k-pid").textContent = status.pid ? `pid ${status.pid}` : "running";
+          note("— already watching; output continues below —");
+        }
+
+        if (!state.root) {
+          warn('No pulls folder set yet — pick it with "Pulls folder…".');
+        }
+        renderStats();
+        renderStatus();
+        renderUptime();
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,1019 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Auto Upload</title>
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src *; media-src *"
+    />
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font: 14px/1.5 -apple-system, "Segoe UI", Roboto, sans-serif;
+        color: #1f2430;
+        background: #f5f6f8;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 14px 20px;
+        background: #fff;
+        border-bottom: 1px solid #e3e6ec;
+      }
+      header h1 { font-size: 16px; margin: 0; font-weight: 600; }
+      .dot {
+        width: 9px; height: 9px; border-radius: 50%;
+        background: #b6bcc8; flex: none;
+      }
+      .dot.live { background: #22a06b; box-shadow: 0 0 0 3px rgba(34,160,107,.18); }
+      .dot.err  { background: #d24d4d; box-shadow: 0 0 0 3px rgba(210,77,77,.18); }
+      .spacer { flex: 1; }
+      button {
+        font: inherit; padding: 7px 13px; border-radius: 7px;
+        border: 1px solid #cdd2db; background: #fff; cursor: pointer;
+      }
+      button:hover:not(:disabled) { background: #f0f2f6; }
+      button:disabled { opacity: .5; cursor: default; }
+      select {
+        font: inherit; padding: 7px 9px; border-radius: 7px;
+        border: 1px solid #cdd2db; background: #fff; max-width: 260px;
+      }
+      button.primary { background: #4b70c3; border-color: #4b70c3; color: #fff; }
+      button.primary:hover:not(:disabled) { background: #4162b0; }
+      main { padding: 20px; max-width: 1100px; }
+      .card {
+        background: #fff; border: 1px solid #e3e6ec;
+        border-radius: 10px; padding: 16px; margin-bottom: 16px;
+      }
+      .card h2 {
+        font-size: 12px; text-transform: uppercase; letter-spacing: .06em;
+        color: #6b7280; margin: 0 0 12px;
+      }
+      .kv { display: flex; flex-wrap: wrap; gap: 22px; }
+      .kv div span { display: block; font-size: 11px; color: #8a92a1; }
+      .kv div strong { font-weight: 600; }
+      .stats { display: flex; gap: 22px; }
+      .stats div { text-align: center; }
+      .stats b { display: block; font-size: 22px; font-weight: 600; }
+      .stats span { font-size: 11px; color: #8a92a1; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td {
+        text-align: left; padding: 7px 8px; font-size: 13px;
+        border-bottom: 1px solid #eef0f4; white-space: nowrap;
+      }
+      th { font-size: 11px; color: #8a92a1; font-weight: 600; }
+      td.id {
+        font-family: ui-monospace, monospace; font-size: 11.5px; color: #5a6270;
+        max-width: 150px; overflow: hidden; text-overflow: ellipsis;
+      }
+      .pill {
+        display: inline-block; padding: 1px 8px; border-radius: 20px;
+        font-size: 11px; font-weight: 600;
+      }
+      .pill.uploaded { background: #e4f5ec; color: #1c7a52; }
+      .pill.uploading { background: #e6edfa; color: #3a5da8; }
+      .pill.pending  { background: #f1f2f5; color: #767d8b; }
+      .pill.waiting  { background: #fff4e5; color: #8a5a12; }
+      .pill.failed   { background: #fbe9e9; color: #b33a3a; }
+      .pill.skipped  { background: #fdf3e2; color: #97621a; }
+      .empty { color: #8a92a1; padding: 10px 0; }
+      .scroll { overflow-x: auto; }
+      td.null { color: #b3b9c4; }
+      td.json {
+        font-family: ui-monospace, monospace; font-size: 11px; color: #4a515e;
+        white-space: pre-wrap; min-width: 240px; max-width: 340px;
+        max-height: 88px; overflow: auto;
+      }
+      td.prog { font-variant-numeric: tabular-nums; }
+      #log {
+        font-family: ui-monospace, monospace; font-size: 11.5px;
+        max-height: 190px; overflow: auto; color: #4a515e;
+      }
+      #log div { padding: 1px 0; }
+      #log .e { color: #b33a3a; }
+      .warn {
+        background: #fdf6e6; border: 1px solid #f0dfb5; color: #7a5c14;
+        border-radius: 8px; padding: 10px 12px; margin-bottom: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="dot" id="dot"></div>
+      <h1 id="headline">Starting…</h1>
+      <div class="spacer"></div>
+      <select id="match-select" title="Which live match to upload for">
+        <option value="">Most recently scored</option>
+      </select>
+      <button id="view-btn" title="Browse and play uploaded ball videos">View videos</button>
+      <button id="folder-btn">Pulls folder…</button>
+      <button id="scan-btn">Scan now</button>
+      <button id="toggle-btn" class="primary">Pause</button>
+    </header>
+
+    <main>
+      <div class="warn" id="warn" style="display: none"></div>
+
+      <div class="card">
+        <h2>Active match</h2>
+        <div class="kv" id="match-kv"><div class="empty">Looking for a live match…</div></div>
+      </div>
+
+      <div class="card">
+        <h2>Progress</h2>
+        <div class="stats">
+          <div><b id="s-uploaded">0</b><span>uploaded</span></div>
+          <div><b id="s-pending">0</b><span>not uploaded</span></div>
+          <div><b id="s-uploading">0</b><span>uploading</span></div>
+          <div><b id="s-waiting">0</b><span>waiting on disk</span></div>
+          <div><b id="s-failed">0</b><span>failed</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>ball_videos</h2>
+        <div class="scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>id</th><th>match_id</th><th>ball_id</th><th>innings</th><th>over_number</th>
+              <th>delivery_type</th><th>upload_status</th><th>video_id</th><th>s3_keys</th>
+              <th>tag</th><th>url</th><th>uploaded_at</th><th>cameras_pending</th>
+              <th>Upload</th>
+            </tr>
+          </thead>
+          <tbody id="rows">
+            <tr><td colspan="14" class="empty">Nothing yet.</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Activity</h2>
+        <div id="log"></div>
+      </div>
+    </main>
+
+    <script src="config.js"></script>
+    <script>
+      // =====================================================================
+      // Auto uploader.
+      //
+      // No file picking. The watcher already decided what footage exists and
+      // told scoring about it, so this page's whole job is: find the live
+      // match, read the ball_videos rows the watcher created, resolve each
+      // camera path on disk, upload the file whole, and write the s3 key +
+      // url + tag back onto the row.
+      // =====================================================================
+
+      const token = () => localStorage.getItem("token") || "";
+      const authJson = () => ({
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token()}`,
+      });
+      const scoringHeaders = {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      };
+
+      const POLL_MS =
+        typeof AUTO_POLL_INTERVAL_MS === "number" ? AUTO_POLL_INTERVAL_MS : 15000;
+      const PUBLIC_BASE =
+        typeof VIDEO_PUBLIC_BASE_URL === "string" ? VIDEO_PUBLIC_BASE_URL : "";
+
+      const state = {
+        running: true,
+        scanning: false,
+        pullsRoot: null,
+        // The ball_videos rows exactly as scoring returned them. The table is
+        // a view of these, one row each; state.cameras below is only the
+        // uploader's per-camera bookkeeping behind them.
+        rows: [],
+        pinnedMatchId: null,
+        scoringMatch: null,
+        storageMatchId: null,
+        sessionId: null,
+        // key -> row of the cameras table. Survives polls so a camera that has
+        // already uploaded is never re-uploaded within a session.
+        cameras: new Map(),
+        inFlight: new Set(),
+        timer: null,
+      };
+
+      const el = (id) => document.getElementById(id);
+      const cameraKey = (ballVideoId, camera) => `${ballVideoId}::${camera}`;
+
+      function log(message, isError) {
+        const box = el("log");
+        const line = document.createElement("div");
+        if (isError) line.className = "e";
+        line.textContent = `${new Date().toLocaleTimeString()}  ${message}`;
+        box.prepend(line);
+        while (box.childElementCount > 300) box.lastElementChild.remove();
+        (isError ? console.error : console.log)(message);
+      }
+
+      function setStatus(text, kind) {
+        el("headline").textContent = text;
+        el("dot").className = "dot" + (kind ? " " + kind : "");
+      }
+
+      function warn(message) {
+        const box = el("warn");
+        if (!message) {
+          box.style.display = "none";
+          return;
+        }
+        box.style.display = "block";
+        box.textContent = message;
+      }
+
+      // ---------------------------------------------------------------------
+      // The watcher lays footage out as <match folder>/<ball folder>/... so the
+      // first two segments identify the ball, and every camera of that ball
+      // shares them. That pair is exactly what belongs in ball_videos.tag.
+      // ---------------------------------------------------------------------
+      function tagFromPath(relativePath) {
+        const parts = String(relativePath || "")
+          .replace(/\\/g, "/")
+          .split("/")
+          .filter(Boolean);
+        if (parts.length >= 3) return parts.slice(0, 2).join("/");
+        if (parts.length === 2) return parts[0];
+        return null;
+      }
+
+      // A durable URL only. While VIDEO_PUBLIC_BASE_URL is unset we send none
+      // and let s3_keys stay the source of truth, rather than writing a
+      // presigned URL that expires in the database.
+      function durableUrl(s3Key) {
+        if (!PUBLIC_BASE) return null;
+        return `${PUBLIC_BASE.replace(/\/+$/, "")}/${String(s3Key).replace(/^\/+/, "")}`;
+      }
+
+      // ---------------------------------------------------------------------
+      // Match discovery
+      // ---------------------------------------------------------------------
+      // "Active" cannot mean status alone: matches are left at 'in_progress'
+      // long after they finish, so on this server every match reads as live.
+      // The match being scored right now is the one whose row was touched most
+      // recently, so order by updatedAt and take the head.
+      function rankLiveMatches(matches) {
+        const stamp = (m) =>
+          new Date(m.updatedAt || m.createdAt || 0).getTime() || 0;
+        return matches
+          .filter((m) => m.status === "in_progress")
+          .sort((a, b) => stamp(b) - stamp(a));
+      }
+
+      function renderMatchOptions(live) {
+        const select = el("match-select");
+        const chosen = select.value;
+        select.innerHTML =
+          '<option value="">Most recently scored</option>' +
+          live
+            .map((m) => {
+              const when = new Date(m.updatedAt || m.createdAt).toLocaleString();
+              return `<option value="${m.matchId}">${m.homeTeam} vs ${m.awayTeam} — ${when}</option>`;
+            })
+            .join("");
+        select.value = chosen;
+      }
+
+      async function findActiveScoringMatch() {
+        const res = await fetch(`${SCORING_API_BASE_URL}/api/v1/matches`, {
+          headers: scoringHeaders,
+        });
+        if (!res.ok) throw new Error(`scoring /matches HTTP ${res.status}`);
+
+        const live = rankLiveMatches((await res.json()).matches || []);
+        if (live.length === 0) return null;
+        renderMatchOptions(live);
+
+        // An explicit operator choice always wins — auto-detection is a
+        // convenience, not something that should override a human at the ground.
+        if (state.pinnedMatchId) {
+          const pinned = live.find((m) => m.matchId === state.pinnedMatchId);
+          if (pinned) return pinned;
+          log(`Pinned match ${state.pinnedMatchId} is no longer live`, true);
+        }
+
+        // Stay on the match already being uploaded unless something newer has
+        // clearly taken over, so a mid-over poll can't swap targets on us.
+        if (state.scoringMatch) {
+          const current = live.find((m) => m.matchId === state.scoringMatch.matchId);
+          if (current && live[0].matchId !== current.matchId) {
+            const newer =
+              new Date(live[0].updatedAt || 0).getTime() -
+              new Date(current.updatedAt || 0).getTime();
+            // Only hand over after a clear gap of inactivity on the old match.
+            if (newer < 10 * 60 * 1000) return current;
+            log(`Switching to more recently scored match ${live[0].matchId}`);
+          }
+          if (current && live[0].matchId === current.matchId) return current;
+        }
+
+        return live[0];
+      }
+
+      // The upload side keys objects by its own match id, so the scoring match
+      // has to be mapped across. The fast path is the match already selected in
+      // this app; otherwise walk the tournaments for the linked row.
+      async function resolveStorageMatchId(scoringMatchId) {
+        try {
+          const selected = JSON.parse(localStorage.getItem("selectedMatch") || "null");
+          if (selected && String(selected.scoring_match_id) === String(scoringMatchId)) {
+            return selected.id;
+          }
+        } catch (e) {
+          /* malformed cache is not fatal — fall through to the lookup */
+        }
+
+        const tRes = await fetch(`${API_BASE_URL}/tournaments`, { headers: authJson() });
+        if (!tRes.ok) throw new Error(`/tournaments HTTP ${tRes.status}`);
+        const tournaments = await tRes.json();
+
+        for (const tournament of tournaments || []) {
+          const mRes = await fetch(
+            `${API_BASE_URL}/matches/tournament/${tournament.id}`,
+            { headers: authJson() },
+          );
+          if (!mRes.ok) continue;
+          const matches = await mRes.json();
+          const hit = (matches || []).find(
+            (m) => String(m.scoring_match_id) === String(scoringMatchId),
+          );
+          if (hit) {
+            localStorage.setItem("selectedMatch", JSON.stringify(hit));
+            return hit.id;
+          }
+        }
+        return null;
+      }
+
+      // ---------------------------------------------------------------------
+      // Upload primitives — same storage contract the manual dashboard uses.
+      // ---------------------------------------------------------------------
+      async function ensureSession(totalSize) {
+        if (state.sessionId) return state.sessionId;
+        const res = await fetch(`${API_BASE_URL}/upload/session`, {
+          method: "POST",
+          headers: authJson(),
+          body: JSON.stringify({ totalSize, match_id: state.storageMatchId }),
+        });
+        if (!res.ok) throw new Error(`/upload/session HTTP ${res.status}`);
+        state.sessionId = (await res.json()).id;
+        return state.sessionId;
+      }
+
+      async function registerFile(file, s3Key) {
+        const sessionId = await ensureSession(file.size);
+        const res = await fetch(`${API_BASE_URL}/upload/files`, {
+          method: "POST",
+          headers: authJson(),
+          body: JSON.stringify({
+            files: [
+              { sessionId, relativePath: file.name, size: file.size, s3Key },
+            ],
+          }),
+        });
+        if (!res.ok) throw new Error(`/upload/files HTTP ${res.status}`);
+        return (await res.json()).files[0].fileId;
+      }
+
+      async function savePart(fileId, partNumber, etag, size) {
+        const res = await fetch(`${API_BASE_URL}/upload/part`, {
+          method: "POST",
+          headers: authJson(),
+          body: JSON.stringify({ fileId, partNumber, etag, size }),
+        });
+        if (!res.ok) throw new Error(`/upload/part ${partNumber} HTTP ${res.status}`);
+      }
+
+      async function completeUpload(fileId) {
+        const res = await fetch(`${API_BASE_URL}/upload/complete`, {
+          method: "POST",
+          headers: authJson(),
+          body: JSON.stringify({ fileId }),
+        });
+        if (!res.ok) throw new Error(`/upload/complete HTTP ${res.status}`);
+      }
+
+      // Uploads the file whole: one object per camera file, chunked only
+      // because S3 requires it above the part limit.
+      async function uploadWholeFile(fileId, file) {
+        const initRes = await fetch(`${API_BASE_URL}/upload/init`, {
+          method: "POST",
+          headers: authJson(),
+          body: JSON.stringify({ fileId, type: file.type }),
+        });
+        if (!initRes.ok) throw new Error(`/upload/init HTTP ${initRes.status}`);
+        const { totalParts } = await initRes.json();
+
+        if (totalParts == 1) {
+          const signRes = await fetch(`${API_BASE_URL}/upload/sign`, {
+            method: "POST",
+            headers: authJson(),
+            body: JSON.stringify({ fileId, partNumber: "1" }),
+          });
+          if (!signRes.ok) throw new Error(`/upload/sign HTTP ${signRes.status}`);
+          const { url } = await signRes.json();
+
+          const etag = await window.electron.uploadChunk({
+            presignedUrl: url,
+            filePath: file.path,
+            start: 0,
+            end: file.size,
+            partNumber: 1,
+            type: file.type,
+          });
+          await savePart(fileId, 1, etag, file.size);
+          await completeUpload(fileId);
+          return;
+        }
+
+        const partNumbers = Array.from({ length: totalParts }, (_, i) => i + 1);
+        const batchRes = await fetch(`${API_BASE_URL}/upload/batch-sign`, {
+          method: "POST",
+          headers: authJson(),
+          body: JSON.stringify({ fileId, partNumbers }),
+        });
+        if (!batchRes.ok) throw new Error(`/upload/batch-sign HTTP ${batchRes.status}`);
+        const signed = await batchRes.json();
+
+        const chunk = CHUNK_SIZE * 1024 * 1024;
+        const parts = [];
+        // Sequential per file: the parts of one recording are large, and
+        // several files are already uploading side by side.
+        for (const partNumber of partNumbers) {
+          const start = (partNumber - 1) * chunk;
+          const end = Math.min(start + chunk, file.size);
+          const etag = await window.electron.uploadChunk({
+            presignedUrl: signed[partNumber - 1].url,
+            filePath: file.path,
+            start,
+            end,
+            partNumber,
+            type: file.type,
+          });
+          parts.push({ partNumber, etag, size: end - start });
+        }
+
+        for (const part of parts) {
+          await savePart(fileId, part.partNumber, part.etag, part.size);
+        }
+        await completeUpload(fileId);
+      }
+
+      // ---------------------------------------------------------------------
+      // Write-back: s3 key, durable url and tag onto the ball_videos row.
+      // ---------------------------------------------------------------------
+      async function writeBack(entry, s3Key) {
+        const body = {
+          ball_video_id: entry.ballVideoId,
+          camera: entry.camera,
+          relative_path: entry.relativePath,
+          s3_key: s3Key,
+          tag: entry.tag,
+        };
+        const url = durableUrl(s3Key);
+        if (url) body.url = url;
+
+        const res = await fetch(
+          `${SCORING_API_BASE_URL}/api/v1/matches/${state.scoringMatch.matchId}/video-upload`,
+          { method: "POST", headers: scoringHeaders, body: JSON.stringify(body) },
+        );
+        if (!res.ok) {
+          const detail = await res.text().catch(() => "");
+          throw new Error(`write-back HTTP ${res.status}${detail ? `: ${detail}` : ""}`);
+        }
+        return res.json().catch(() => ({}));
+      }
+
+      // ---------------------------------------------------------------------
+      // Roster
+      // ---------------------------------------------------------------------
+      async function fetchUploadStatus(matchId) {
+        const res = await fetch(
+          `${SCORING_API_BASE_URL}/api/v1/matches/${matchId}/video-upload/status`,
+          { headers: scoringHeaders },
+        );
+        if (!res.ok) throw new Error(`status HTTP ${res.status}`);
+        return res.json();
+      }
+
+      const isPlainObject = (v) =>
+        v && typeof v === "object" && !Array.isArray(v);
+
+      // ---------------------------------------------------------------------
+      // Scoring nests video_id one level deeper than a plain camera map:
+      //
+      //   {"ball1": {"camera1": "2112E/ball_041/.../cam_1.mp4", ...}}
+      //
+      // The outer key groups the cameras of one pull. Older rows are written
+      // flat ({"camera1": "..."}), so both shapes are flattened here into one
+      // list of {group, camera, relativePath}; group is "" for the flat form.
+      // ---------------------------------------------------------------------
+      function flattenCameras(videoId) {
+        const out = [];
+        if (!isPlainObject(videoId)) return out;
+
+        for (const [outerKey, value] of Object.entries(videoId)) {
+          if (typeof value === "string") {
+            if (value.trim()) out.push({ group: "", camera: outerKey, relativePath: value });
+            continue;
+          }
+          if (!isPlainObject(value)) continue;
+          for (const [camera, relativePath] of Object.entries(value)) {
+            if (typeof relativePath === "string" && relativePath.trim()) {
+              out.push({ group: outerKey, camera, relativePath });
+            }
+          }
+        }
+        return out;
+      }
+
+      // s3_keys mirrors whichever shape video_id used, so it is read the same
+      // way rather than assumed flat.
+      function uploadedKeyFor(s3Keys, group, camera) {
+        if (!isPlainObject(s3Keys)) return null;
+        if (group) {
+          const inner = s3Keys[group];
+          if (isPlainObject(inner) && inner[camera]) return inner[camera];
+        }
+        return typeof s3Keys[camera] === "string" ? s3Keys[camera] : null;
+      }
+
+      // Every ball_videos row scoring holds for this match, every camera on
+      // it, with the tag scoring stored. A camera whose s3 key is present is
+      // uploaded; everything else rests at "pending" — shown as "not
+      // uploaded". So picking a match lists the whole ball list straight away
+      // instead of only the files that happened to be found on disk.
+      // Returns the cameras that still need uploading.
+      function buildRoster(payload) {
+        state.rows = payload.data || [];
+        const pending = [];
+        const seen = new Set();
+        // The upload match is the local side of the link and is the same for
+        // every row; the scoring match is preferred off the row itself, in
+        // case the endpoint ever returns rows from more than one match.
+        const storageMatchId = state.storageMatchId;
+        const fallbackMatchId = state.scoringMatch ? state.scoringMatch.matchId : null;
+
+        for (const row of payload.data || []) {
+          const scoringMatchId = row.match_id || row.matchId || fallbackMatchId;
+          const cameras = flattenCameras(row.video_id);
+          const keys = row.s3_keys;
+          // The columns are the ball_videos row itself, so every field travels
+          // with the entry rather than being re-derived at render time.
+          const dbFields = {
+            scoringMatchId,
+            storageMatchId,
+            innings: row.innings,
+            overNumber: row.over_number,
+            deliveryType: row.delivery_type,
+            dbStatus: row.upload_status,
+            dbTag: row.tag,
+            url: row.url,
+            uploadedAt: row.uploaded_at,
+          };
+
+          // A ball the watcher has registered but not yet attached footage to
+          // still belongs on the list — it is the clearest "not uploaded".
+          if (cameras.length === 0) {
+            const key = cameraKey(row.id, "—");
+            seen.add(key);
+            state.cameras.set(key, {
+              ballVideoId: row.id,
+              ballId: row.ball_id,
+              ...dbFields,
+              camera: "—",
+              relativePath: "",
+              tag: row.tag || null,
+              s3Key: null,
+              status: "pending",
+              detail: "no camera recorded yet",
+            });
+            continue;
+          }
+
+          for (const { group, camera, relativePath } of cameras) {
+            // Camera names repeat across groups, so the group joins the key.
+            const key = cameraKey(row.id, group ? `${group}/${camera}` : camera);
+            seen.add(key);
+            const entry = {
+              ballVideoId: row.id,
+              ballId: row.ball_id,
+              ...dbFields,
+              group,
+              camera,
+              relativePath,
+              tag: row.tag || tagFromPath(relativePath),
+              s3Key: uploadedKeyFor(keys, group, camera),
+              key,
+            };
+
+            if (entry.s3Key) {
+              state.cameras.set(key, {
+                ...entry,
+                status: "uploaded",
+                detail: "recorded in scoring",
+              });
+              continue;
+            }
+            // An upload in progress owns its own row until it settles.
+            if (state.inFlight.has(key)) continue;
+
+            const previous = state.cameras.get(key);
+            const failed = previous && previous.status === "failed";
+            state.cameras.set(key, {
+              ...entry,
+              // Keep a failure visible until its retry actually starts, rather
+              // than quietly folding it back into the pending crowd.
+              status: failed ? "failed" : "pending",
+              detail: failed ? previous.detail : "not uploaded",
+            });
+            pending.push(entry);
+          }
+        }
+
+        // Forget rows scoring no longer reports, so a switched match or a
+        // deleted ball does not linger in the table.
+        for (const key of [...state.cameras.keys()]) {
+          if (!seen.has(key) && !state.inFlight.has(key)) state.cameras.delete(key);
+        }
+        return pending;
+      }
+
+      // ---------------------------------------------------------------------
+      // Rendering
+      // ---------------------------------------------------------------------
+      // NULL in the database renders as a dimmed NULL rather than a blank, so
+      // an empty column is visibly empty in scoring and not just unread.
+      const nullCell = () => '<td class="null">NULL</td>';
+
+      const cell = (value, cls) =>
+        value === null || value === undefined || value === ""
+          ? nullCell()
+          : `<td class="${cls || ""}" title="${escapeHtml(String(value))}">${escapeHtml(String(value))}</td>`;
+
+      function formatStamp(value) {
+        if (!value) return null;
+        const at = new Date(value);
+        return Number.isNaN(at.getTime()) ? String(value) : at.toLocaleString();
+      }
+
+      // Values go in as scoring sent them: objects as JSON, null as NULL.
+      function jsonCell(value) {
+        if (value === null || value === undefined) return nullCell();
+        const text = typeof value === "object" ? JSON.stringify(value, null, 1) : String(value);
+        return `<td class="json">${escapeHtml(text)}</td>`;
+      }
+
+      function escapeHtml(text) {
+        return String(text)
+          .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      }
+
+      // What this uploader is doing to the cameras of one ball_videos row,
+      // summarised — the row stays one row, so the per-camera detail is folded
+      // into a count plus whichever state is most worth seeing.
+      function uploadSummary(rowId) {
+        const mine = [...state.cameras.values()].filter((e) => e.ballVideoId === rowId);
+        if (mine.length === 0) return { label: "—", cls: "pending", title: "" };
+
+        const count = (status) => mine.filter((e) => e.status === status).length;
+        const done = count("uploaded");
+        const parts = [`${done}/${mine.length}`];
+        // Worst-first: a failure matters more than the many rows behind it.
+        const cls = count("failed")
+          ? "failed"
+          : count("uploading")
+            ? "uploading"
+            : count("waiting")
+              ? "waiting"
+              : done === mine.length
+                ? "uploaded"
+                : "pending";
+        if (count("uploading")) parts.push(`${count("uploading")} uploading`);
+        if (count("waiting")) parts.push(`${count("waiting")} waiting`);
+        if (count("failed")) parts.push(`${count("failed")} failed`);
+        if (count("skipped")) parts.push(`${count("skipped")} skipped`);
+
+        return {
+          label: parts.join(" · "),
+          cls,
+          title: mine
+            .map((e) => `${e.group ? e.group + "/" : ""}${e.camera}: ${e.status}${e.detail ? " — " + e.detail : ""}`)
+            .join("\n"),
+        };
+      }
+
+      function render() {
+        const entries = [...state.cameras.values()];
+        const count = (status) => entries.filter((e) => e.status === status).length;
+
+        el("s-uploaded").textContent = count("uploaded");
+        el("s-pending").textContent = count("pending");
+        el("s-uploading").textContent = count("uploading");
+        el("s-waiting").textContent = count("waiting");
+        el("s-failed").textContent = count("failed");
+
+        const body = el("rows");
+        if (state.rows.length === 0) {
+          body.innerHTML = '<tr><td colspan="14" class="empty">Nothing yet.</td></tr>';
+          return;
+        }
+
+        // Newest ball first: during a live match the tail is what matters.
+        const rows = [...state.rows].sort((a, b) => Number(b.id) - Number(a.id));
+
+        body.innerHTML = rows
+          .map((r) => {
+            const up = uploadSummary(r.id);
+            return `<tr>
+              <td>${r.id}</td>
+              <td class="id" title="${r.match_id || state.scoringMatch?.matchId || ""}">${
+                r.match_id || state.scoringMatch?.matchId || "—"
+              }</td>
+              ${cell(r.ball_id)}
+              ${cell(r.innings)}
+              ${cell(r.over_number)}
+              ${cell(r.delivery_type)}
+              ${cell(r.upload_status)}
+              ${jsonCell(r.video_id)}
+              ${jsonCell(r.s3_keys)}
+              ${cell(r.tag)}
+              ${jsonCell(r.url)}
+              ${cell(formatStamp(r.uploaded_at))}
+              ${jsonCell(r.cameras_pending)}
+              <td class="prog" title="${escapeHtml(up.title)}"><span class="pill ${up.cls}">${up.label}</span></td>
+            </tr>`;
+          })
+          .join("");
+      }
+
+      function renderMatch() {
+        const m = state.scoringMatch;
+        if (!m) {
+          el("match-kv").innerHTML =
+            '<div class="empty">No match with status "in_progress" in scoring.</div>';
+          return;
+        }
+        el("match-kv").innerHTML = `
+          <div><span>Teams</span><strong>${m.homeTeam} vs ${m.awayTeam}</strong></div>
+          <div><span>Ground</span><strong>${m.groundName || "—"}</strong></div>
+          <div><span>Score</span><strong>${m.currentScore || "—"}</strong></div>
+          <div><span>Scoring match</span><strong>${m.matchId}</strong></div>
+          <div><span>Upload match</span><strong>${state.storageMatchId || "unlinked"}</strong></div>
+          <div><span>Pulls folder</span><strong>${state.pullsRoot || "not set"}</strong></div>`;
+      }
+
+      // ---------------------------------------------------------------------
+      // One pass: read pending rows, resolve on disk, upload what is ready.
+      // ---------------------------------------------------------------------
+      async function scan() {
+        if (state.scanning) return;
+        state.scanning = true;
+
+        try {
+          const match = await findActiveScoringMatch();
+          if (!match) {
+            state.scoringMatch = null;
+            setStatus("No live match", "err");
+            renderMatch();
+            return;
+          }
+
+          // A new match means a new upload session and a clean slate.
+          if (!state.scoringMatch || state.scoringMatch.matchId !== match.matchId) {
+            state.cameras.clear();
+            state.rows = [];
+            state.sessionId = null;
+            state.storageMatchId = null;
+            log(`Live match: ${match.homeTeam} vs ${match.awayTeam} (${match.matchId})`);
+          }
+          state.scoringMatch = match;
+
+          if (!state.storageMatchId) {
+            state.storageMatchId = await resolveStorageMatchId(match.matchId);
+          }
+          renderMatch();
+
+          // The ball list comes from scoring, not from disk, so it is read
+          // and shown before any of the local preconditions can bail out:
+          // selecting a match must list its balls even when the pulls folder
+          // is unset or the match is not linked yet.
+          const payload = await fetchUploadStatus(match.matchId);
+          const pending = buildRoster(payload);
+          render();
+
+          setStatus(
+            `${match.homeTeam} vs ${match.awayTeam} — ${payload.uploaded}/${payload.count} balls uploaded`,
+            "live",
+          );
+
+          // Not linked is no longer a blocker: the S3 key is built from
+          // scoring's match uuid, so the footage has a home either way. The
+          // link only decides which upload-system match the session is booked
+          // against, so say so and carry on uploading.
+          if (!state.storageMatchId) {
+            warn(
+              "This scoring match is not linked to a match in the upload system. " +
+                "Uploading anyway — the files are stored under the scoring match id. " +
+                "Link it on the Matches screen to book them against an upload match.",
+            );
+          }
+          if (!state.pullsRoot) {
+            setStatus("Pulls folder not set", "err");
+            warn('Pick the folder the watcher writes into, using "Pulls folder…" above.');
+            return;
+          }
+          warn(null);
+
+          if (pending.length === 0) return;
+
+          // ball_videos is the work list: only the paths scoring names are
+          // looked for on disk, and only those are uploaded. Footage the
+          // watcher wrote that scoring has no row for is left alone.
+          const probes = await window.electron.probeVideos(
+            state.pullsRoot,
+            pending.map((p) => p.relativePath),
+          );
+
+          const ready = [];
+          pending.forEach((entry, i) => {
+            const probe = probes[i] || { status: "error" };
+            if (probe.status === "ready") {
+              state.cameras.set(entry.key, { ...entry, status: "waiting", detail: "queued" });
+              ready.push({ entry, file: probe });
+            } else {
+              // Not an error: the camera may still be writing this file, and
+              // the next poll will pick it up.
+              state.cameras.set(entry.key, {
+                ...entry,
+                status: probe.status === "empty" ? "waiting" : "skipped",
+                detail: probe.status === "empty" ? "still writing" : probe.status,
+              });
+            }
+          });
+          render();
+
+          if (ready.length === 0) return;
+
+          // A ball folder is the unit of work — "2112E/ball_041", the first
+          // two segments of the watcher's path, which is also what ends up in
+          // ball_videos.tag. Batching on the folder rather than on the
+          // ball_videos row means a ball's cameras still go up together when
+          // scoring has no row for them at all.
+          const byBall = new Map();
+          for (const item of ready) {
+            const batch = item.entry.tag || tagFromPath(item.entry.relativePath) || "(loose files)";
+            const list = byBall.get(batch) || [];
+            list.push(item);
+            byBall.set(batch, list);
+          }
+          // Oldest folder first, so the backlog drains in the order it was played.
+          const balls = [...byBall.entries()].sort((a, b) => String(a[0]).localeCompare(String(b[0])));
+          log(`${ready.length} file(s) ready across ${balls.length} ball folder(s)`);
+
+          for (const [ballFolder, items] of balls) {
+            if (!state.running) break;
+            log(`Uploading ${ballFolder}: ${items.length} file(s)`);
+
+            // Its cameras in parallel, but a bounded few at a time so a
+            // six-camera ball doesn't thrash the disk.
+            const CONCURRENCY = 3;
+            let cursor = 0;
+            const workers = Array.from(
+              { length: Math.min(CONCURRENCY, items.length) },
+              async () => {
+                while (cursor < items.length && state.running) {
+                  const item = items[cursor++];
+                  await uploadOne(item.entry, item.file);
+                }
+              },
+            );
+            await Promise.all(workers);
+          }
+        } catch (err) {
+          setStatus("Scan failed — retrying", "err");
+          log(err.message || String(err), true);
+        } finally {
+          state.scanning = false;
+        }
+      }
+
+      // One folder per match, the watcher's path kept intact inside it:
+      //
+      //   video_id  2112E/ball_041/pull_20260818_160737/cam_1.mp4
+      //   S3 key    matches/<scoring match uuid>/2112E/ball_041/pull_.../cam_1.mp4
+      //
+      // The prefix is scoring's match uuid — the id ball_videos.match_id is a
+      // FK to — not the upload system's, so a key names the match its row
+      // actually belongs to and is readable straight off the key without
+      // walking /tournaments to resolve it. Match folder names are never
+      // reused, so this is about grouping a match's footage in one place to
+      // browse, lifecycle and delete as a unit, not about uniqueness.
+      function s3KeyFor(matchId, relativePath) {
+        const tail = String(relativePath)
+          .replace(/\\/g, "/")
+          .replace(/^\.?\/+/, "")
+          .trim();
+        return matchId ? `matches/${matchId}/${tail}` : tail;
+      }
+
+      async function uploadOne(entry, file) {
+        const key = entry.key;
+        state.inFlight.add(key);
+        const mark = (status, detail) => {
+          state.cameras.set(key, { ...entry, status, detail });
+          render();
+        };
+
+        try {
+          mark("uploading", "uploading…");
+          const s3Key = s3KeyFor(entry.scoringMatchId, entry.relativePath);
+
+          const fileId = await registerFile(file, s3Key);
+          await uploadWholeFile(fileId, file);
+          await writeBack(entry, s3Key);
+
+          mark("uploaded", entry.tag ? `tag ${entry.tag}` : "done");
+          log(`Uploaded ${entry.relativePath} -> ball_video ${entry.ballVideoId}/${entry.camera}`);
+        } catch (err) {
+          // Left as failed, not retried here: the next poll sees the row still
+          // has no s3 key for this camera and tries again.
+          mark("failed", err.message || String(err));
+          log(`Failed ${entry.relativePath}: ${err.message || err}`, true);
+        } finally {
+          state.inFlight.delete(key);
+        }
+      }
+
+      // ---------------------------------------------------------------------
+      // Wiring
+      // ---------------------------------------------------------------------
+      function schedule() {
+        clearInterval(state.timer);
+        state.timer = setInterval(() => {
+          if (state.running) scan();
+        }, POLL_MS);
+      }
+
+      el("folder-btn").onclick = async () => {
+        const picked = await window.electron.pickPullsFolder();
+        if (!picked) return;
+        state.pullsRoot = picked;
+        log(`Pulls folder: ${picked}`);
+        renderMatch();
+        scan();
+      };
+
+      el("match-select").onchange = (e) => {
+        state.pinnedMatchId = e.target.value || null;
+        window.electron.setSettings({ pinnedMatchId: state.pinnedMatchId });
+        // Drop the previous match's balls at once; the scan below refills the
+        // table from scoring rather than leaving a stale list on screen.
+        state.cameras.clear();
+        state.rows = [];
+        render();
+        log(state.pinnedMatchId ? `Pinned match ${state.pinnedMatchId}` : "Match auto-detect");
+        scan();
+      };
+
+      el("view-btn").onclick = () => {
+        window.location.href = "view-videos.html";
+      };
+
+      el("scan-btn").onclick = () => scan();
+
+      el("toggle-btn").onclick = () => {
+        state.running = !state.running;
+        el("toggle-btn").textContent = state.running ? "Pause" : "Resume";
+        log(state.running ? "Resumed" : "Paused");
+        if (state.running) scan();
+        else setStatus("Paused");
+      };
+
+      (async function init() {
+        if (!token()) {
+          setStatus("Not signed in", "err");
+          warn("No auth token found — sign in first.");
+          return;
+        }
+        const settings = await window.electron.getSettings();
+        state.pullsRoot = settings.pullsRoot || null;
+        state.pinnedMatchId = settings.pinnedMatchId || null;
+        if (state.pinnedMatchId) el("match-select").value = state.pinnedMatchId;
+        renderMatch();
+        await scan();
+        schedule();
+      })();
+    </script>
+  </body>
+</html>
